@@ -32,4 +32,13 @@ test('cadastra um hóspede e permite incluir o perfil de proprietário', async (
 
   await page.getByRole('button', { name: 'Adicionar perfil de proprietário' }).click();
   await expect(page.getByText('Ativos: GUEST, OWNER.')).toBeVisible();
+
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Confirmo — tenho 18 anos ou mais' }).click();
+  await expect(page.getByRole('button', { name: 'Abrir menu do perfil' })).toBeVisible();
+  await expect(page.getByText('Entrar', { exact: true })).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Abrir menu do perfil' }).click();
+  await expect(page.getByRole('menuitem', { name: 'Perfil' })).toBeVisible();
+  await expect(page.getByRole('menuitem', { name: 'Sair' })).toBeVisible();
 });

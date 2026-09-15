@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { IconType } from "react-icons";
 import { LuCalendarDays, LuChevronDown, LuClock3, LuHeadphones, LuHeart, LuHistory, LuLockKeyhole, LuMapPin, LuSearch, LuShieldCheck, LuStar, LuUserRound } from "react-icons/lu";
 
@@ -24,10 +25,18 @@ const searchFields = [
   { label: "Duração", placeholder: "Por período", options: ["1 diária", "2 diárias", "Por período"] },
 ];
 
-export function LandingPage() {
+export function LandingPage({ user }: { user?: { name: string } }) {
   const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [openField, setOpenField] = useState<string>();
   const [searchValues, setSearchValues] = useState<Record<string, string>>({});
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const router = useRouter();
+
+  async function logout() {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000"}/auth/logout`, { method: "POST", credentials: "include" });
+    setProfileMenuOpen(false);
+    router.refresh();
+  }
 
   if (!ageConfirmed) {
     return <AgeGate onConfirm={() => setAgeConfirmed(true)} />;
@@ -48,7 +57,7 @@ export function LandingPage() {
             <span>Reservas</span>
             <span>Mensagens</span>
           </nav>
-          <div className="flex items-center gap-3"><span className="hidden rounded-xl border border-[rgba(11,99,227,.4)] bg-[rgba(11,99,227,.14)] px-[18px] py-2.5 text-[13px] font-semibold text-[var(--blue-light)] lg:block">Anunciar espaço</span><Link href="/login" className="hidden rounded-xl border border-[var(--line-strong)] px-[18px] py-2.5 text-[13px] font-semibold text-white lg:block">Entrar</Link><Link href="/cadastro" aria-label="Perfil" className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--line-strong)] bg-[var(--surface-raised)] text-white"><Icon name="user" size={20} /></Link></div>
+          <div className="flex items-center gap-3"><span className="hidden rounded-xl border border-[rgba(11,99,227,.4)] bg-[rgba(11,99,227,.14)] px-[18px] py-2.5 text-[13px] font-semibold text-[var(--blue-light)] lg:block">Anunciar espaço</span>{user ? <div className="relative"><button type="button" aria-label="Abrir menu do perfil" onClick={() => setProfileMenuOpen((open) => !open)} className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--line-strong)] bg-[var(--surface-raised)] text-white"><span className="text-sm font-bold">{user.name.slice(0, 1).toUpperCase()}</span></button>{profileMenuOpen ? <div role="menu" className="absolute right-0 top-12 w-40 rounded-xl border border-[var(--line)] bg-[var(--surface)] p-1.5 shadow-[0_16px_40px_rgba(0,0,0,.35)]"><Link role="menuitem" href="/perfil" className="block rounded-lg px-3 py-2 text-sm font-semibold text-white hover:bg-white/5">Perfil</Link><button role="menuitem" type="button" onClick={() => void logout()} className="w-full rounded-lg px-3 py-2 text-left text-sm font-semibold text-[var(--danger)] hover:bg-white/5">Sair</button></div> : null}</div> : <Link href="/login" className="hidden rounded-xl border border-[var(--line-strong)] px-[18px] py-2.5 text-[13px] font-semibold text-white lg:block">Entrar</Link>}</div>
         </div>
       </header>
 
