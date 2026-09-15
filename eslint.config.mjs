@@ -13,6 +13,19 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    files: ["**/*.{js,jsx,ts,tsx}"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "JSXAttribute[name.name='style']",
+          message:
+            "Inline styles são proibidos. Use o sistema de estilização oficial do projeto.",
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;
