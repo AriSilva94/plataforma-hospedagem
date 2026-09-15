@@ -3,13 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import type { IconType } from "react-icons";
+import { LuCalendarDays, LuChevronDown, LuClock3, LuHeadphones, LuHeart, LuHistory, LuLockKeyhole, LuMapPin, LuSearch, LuShieldCheck, LuStar, LuUserRound } from "react-icons/lu";
 
 type IconName = "calendar" | "chevronDown" | "clock" | "headset" | "heart" | "history" | "lock" | "pin" | "search" | "shield" | "star" | "starFill" | "user";
 
-const iconPaths: Record<IconName, string> = {
-  calendar: "M4 5h16v16H4zM4 10h16M8 3v4M16 3v4", chevronDown: "M6 9l6 6 6-6", clock: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7.5V12l3 2", headset: "M4 13v-1a8 8 0 0 1 16 0v1M4 13h2.5a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM20 13h-2.5a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1H19a1 1 0 0 0 1-1zM20 18v.5a3 3 0 0 1-3 2.5h-3",
-  heart: "M12 20s-7-4.6-9.3-8.3C1.3 9 2.6 5.3 6.2 5.3c2 0 3.3 1.4 5.8 4 2.5-2.6 3.8-4 5.8-4 3.6 0 4.9 3.7 3.5 6.4C19 15.4 12 20 12 20z", history: "M12 12a9 9 0 1 0-9-9M3 3v6h6M12 7.5V12l3 2", lock: "M5 11h14v9H5zM8 11V8a4 4 0 0 1 8 0v3", pin: "M12 21s-6-5.4-6-11a6 6 0 1 1 12 0c0 5.6-6 11-6 11zM12 12.2a2.2 2.2 0 1 0 0-4.4z", search: "M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM16.5 16.5L21 21", shield: "M12 3l7 3v6c0 4.4-3 7-7 9-4-2-7-4.6-7-9V6zM9 12l2 2 4-4", star: "M12 3.2l2.5 5.3 5.5.7-4 3.9 1 5.6-5-2.8-5 2.8 1-5.6-4-3.9 5.5-.7z", starFill: "M12 3.2l2.5 5.3 5.5.7-4 3.9 1 5.6-5-2.8-5 2.8 1-5.6-4-3.9 5.5-.7z", user: "M12 12a3.6 3.6 0 1 0 0-7.2A3.6 3.6 0 0 0 12 12zM5 20c0-3.6 3.1-5.6 7-5.6s7 2 7 5.6",
-};
+const icons: Record<IconName, IconType> = { calendar: LuCalendarDays, chevronDown: LuChevronDown, clock: LuClock3, headset: LuHeadphones, heart: LuHeart, history: LuHistory, lock: LuLockKeyhole, pin: LuMapPin, search: LuSearch, shield: LuShieldCheck, star: LuStar, starFill: LuStar, user: LuUserRound };
 
 const featuredSpaces = [
   { title: "Suíte Premium Asa Norte", region: "Asa Norte · DF", price: "R$ 150", rating: "4.9", image: "/rooms/room1.png" },
@@ -37,11 +36,12 @@ export function LandingPage() {
   return (
     <main>
       <header className="sticky top-0 z-20 border-b border-[var(--line)] bg-[rgba(3,17,40,.85)] backdrop-blur">
-        <div className="mx-auto flex h-[72px] w-full max-w-[1440px] items-center justify-between px-6 md:px-10 lg:px-12">
+        <div className="mx-auto flex h-[72px] w-full max-w-[1440px] items-center gap-[22px] px-6 md:px-10 lg:px-12">
           <Link href="/" className="inline-flex items-center gap-2 text-base font-extrabold text-white">
             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--blue)] text-sm">D</span>
             DOMUS X
           </Link>
+          <div className="flex-1" />
           <nav aria-label="Navegação principal" className="hidden items-center gap-[22px] text-sm font-semibold text-[var(--gray)] md:flex">
             <a href="#inicio" className="text-white">Início</a>
             <span>Favoritos</span>
@@ -132,5 +132,6 @@ function SpaceCard({ title, region, price, rating, image }: { title: string; reg
 }
 
 function Icon({ name, size, className }: { name: IconName; size: number; className?: string }) {
-  return <svg aria-hidden="true" className={className} width={size} height={size} viewBox="0 0 24 24" fill={name === "starFill" ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d={iconPaths[name]} /></svg>;
+  const Component = icons[name];
+  return <Component aria-hidden="true" className={className} size={size} fill={name === "starFill" ? "currentColor" : "none"} />;
 }
