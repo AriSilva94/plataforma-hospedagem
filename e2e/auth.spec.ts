@@ -1,5 +1,15 @@
 import { expect, test } from '@playwright/test';
 
+test('solicita confirmação de maioridade antes de exibir a página inicial', async ({ page }) => {
+  await page.goto('/');
+
+  await expect(page.getByRole('heading', { name: 'Você tem 18 anos ou mais?' })).toBeVisible();
+  await page.getByRole('button', { name: 'Confirmo — tenho 18 anos ou mais' }).click();
+
+  await expect(page.getByRole('heading', { name: /Encontre seu lugar com segurança e discrição/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Locais em destaque' })).toBeVisible();
+});
+
 test('cadastra um hóspede e permite incluir o perfil de proprietário', async ({ page }) => {
   const email = `guest-${Date.now()}@example.com`;
 
