@@ -12,6 +12,7 @@ test('cadastra um hóspede e permite incluir o perfil de proprietário', async (
 
   await expect(page).toHaveURL(/\/perfil$/);
   await expect(page.getByRole('heading', { name: 'Seu perfil' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Dados pessoais' })).toBeVisible();
   await expect(page.getByText('Ativos: GUEST.')).toBeVisible();
 
   await page.getByRole('button', { name: 'Adicionar perfil de proprietário' }).click();
