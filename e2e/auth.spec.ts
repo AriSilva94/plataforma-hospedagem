@@ -6,7 +6,12 @@ test('solicita confirmação de maioridade antes de exibir a página inicial', a
   await expect(page.getByRole('heading', { name: 'Você tem 18 anos ou mais?' })).toBeVisible();
   await page.getByRole('button', { name: 'Confirmo — tenho 18 anos ou mais' }).click();
 
-  await expect(page.getByRole('heading', { name: /Encontre seu lugar com segurança e discrição/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Encontre o local ideal de forma rápida, segura e discreta/i })).toBeVisible();
+  await expect(page.getByRole('navigation').getByText('Favoritos')).toBeVisible();
+  await expect(page.getByText('Anunciar espaço')).toBeVisible();
+  await expect(page.getByRole('button', { name: /Cidade Selecione a cidade/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Horário Qual horário/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Duração Por período/ })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Locais em destaque' })).toBeVisible();
 });
 
