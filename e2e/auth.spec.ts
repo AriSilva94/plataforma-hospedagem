@@ -13,6 +13,11 @@ test('solicita confirmação de maioridade antes de exibir a página inicial', a
   await expect(page.getByRole('button', { name: /Horário Qual horário/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /Duração Por período/ })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Locais em destaque' })).toBeVisible();
+
+  const featuredTop = (await page.getByRole('heading', { name: 'Locais em destaque' }).boundingBox())?.y;
+  await page.getByRole('button', { name: /Cidade Selecione a cidade/ }).click();
+  await expect(page.getByRole('button', { name: 'Brasília, DF' })).toBeVisible();
+  expect((await page.getByRole('heading', { name: 'Locais em destaque' }).boundingBox())?.y).toBe(featuredTop);
 });
 
 test('cadastra um hóspede e permite incluir o perfil de proprietário', async ({ page }) => {
