@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { BrandMark } from "@/components/brand-mark";
+import { FormFeedback } from "@/components/form-feedback";
 import { apiFetch, getErrorMessage } from "@/lib/api";
 
 type Field = {
@@ -58,6 +60,9 @@ export function AuthForm({
 
       if (successPath) {
         router.push(successPath);
+        // O destino é renderizado no servidor a partir dos cookies de sessão,
+        // que só existem depois desta resposta.
+        router.refresh();
         return;
       }
       setSuccess("Solicitação recebida. Verifique sua caixa de e-mail.");
@@ -69,20 +74,19 @@ export function AuthForm({
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-stone-100 px-4 py-10">
-      <section className="w-full max-w-md rounded-2xl bg-white p-7 shadow-sm sm:p-9">
-        <Link href="/" className="text-sm font-semibold text-emerald-700">
-          Plataforma de Hospedagem
-        </Link>
-        <h1 className="mt-5 text-3xl font-semibold tracking-tight text-stone-900">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
+      <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_72%_10%,#0b2a5e,transparent_55%)]" />
+      <section className="relative w-full max-w-md rounded-3xl border border-(--line) bg-(--surface) p-7 shadow-[0_24px_60px_rgba(0,0,0,.35)] sm:p-9">
+        <BrandMark href="/" />
+        <h1 className="mt-7 text-3xl font-extrabold tracking-tight text-white">
           {title}
         </h1>
-        <p className="mt-2 text-stone-600">{description}</p>
+        <p className="mt-2 leading-relaxed text-(--gray)">{description}</p>
         <form className="mt-7 space-y-4" onSubmit={handleSubmit}>
           {fields.map((field) => (
             <label
               key={field.name}
-              className="block text-sm font-medium text-stone-800"
+              className="block text-sm font-semibold text-(--gray)"
             >
               {field.label}
               <input
@@ -91,47 +95,35 @@ export function AuthForm({
                 type={field.type}
                 autoComplete={field.autoComplete}
                 defaultValue={field.defaultValue}
-                className="mt-1.5 w-full rounded-lg border border-stone-300 px-3 py-2.5 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                className="mt-1.5 w-full rounded-xl border border-(--line-strong) bg-(--navy) px-3.5 py-3 text-white outline-none transition placeholder:text-(--gray) focus:border-(--blue-light) focus:ring-2 focus:ring-[rgba(11,99,227,.25)]"
               />
             </label>
           ))}
           {includeRole ? (
-            <label className="block text-sm font-medium text-stone-800">
+            <label className="block text-sm font-semibold text-(--gray)">
               Quero começar como
               <select
                 name="role"
-                className="mt-1.5 w-full rounded-lg border border-stone-300 px-3 py-2.5"
+                className="mt-1.5 w-full rounded-xl border border-(--line-strong) bg-(--navy) px-3.5 py-3 text-white outline-none focus:border-(--blue-light)"
               >
                 <option value="GUEST">Hóspede</option>
                 <option value="OWNER">Proprietário</option>
               </select>
             </label>
           ) : null}
-          {error ? (
-            <p
-              role="alert"
-              className="rounded-lg bg-red-50 p-3 text-sm text-red-700"
-            >
-              {error}
-            </p>
-          ) : null}
+          {error ? <FormFeedback tone="error">{error}</FormFeedback> : null}
           {success ? (
-            <p
-              role="status"
-              className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800"
-            >
-              {success}
-            </p>
+            <FormFeedback tone="success">{success}</FormFeedback>
           ) : null}
           <button
             disabled={isPending}
-            className="w-full rounded-lg bg-emerald-700 px-4 py-2.5 font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-xl bg-(--blue) px-4 py-3.5 font-bold text-white transition hover:bg-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60"
             type="submit"
           >
             {isPending ? "Enviando..." : submitLabel}
           </button>
         </form>
-        <nav className="mt-6 flex flex-col gap-2 text-sm text-emerald-700">
+        <nav className="mt-6 flex flex-col gap-2 text-sm font-semibold text-(--blue-light)">
           {links.map((link) => (
             <Link key={link.href} href={link.href}>
               {link.label}

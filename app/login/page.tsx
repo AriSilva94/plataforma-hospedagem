@@ -7,7 +7,7 @@ export default function LoginPage() {
       description="Acesse sua conta para gerenciar seu perfil."
       endpoint="/auth/login"
       submitLabel="Entrar"
-      successPath="/perfil"
+      successPath="/"
       fields={[
         {
           name: "email",
