@@ -1,0 +1,156 @@
+name: Build and deploy Docker image
+
+on:
+  pull_request:
+    branches: [develop, release/separate-steps, main]
+  push:
+    branches: [develop, release/separate-steps, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm audit --audit-level=high
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run build
+
+  verify-image:
+    if: github.event_name == 'pull_request'
+    needs: checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - run: docker build --tag local/frontend:${{ github.sha }} .
+
+  build-and-push:
+    if: github.event_name == 'push'
+    needs: checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Normalize image name
+        id: image
+        run: echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051
+        id: metadata
+        with:
+          images: ${{ steps.image.outputs.image }}
+          tags: |
+            type=sha,format=long,prefix=sha-
+            type=raw,value=dev,enable=${{ github.ref_name == 'develop' }}
+            type=raw,value=staging,enable=${{ github.ref_name == 'release/separate-steps' }}
+            type=raw,value=latest,enable=${{ github.ref_name == 'main' }}
+      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
+        id: build
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  scan-image:
+    if: github.event_name == 'push'
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: aquasecurity/trivy-action@d2a0b60797ff03db6132bd4e2b293f9b37081297
+        with:
+          image-ref: ${{ needs.build-and-push.outputs.image }}@${{ needs.build-and-push.outputs.digest }}
+          format: table
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: HIGH,CRITICAL
+
+  deploy:
+    if: github.event_name == 'push'
+    needs: [build-and-push, scan-image]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    environment:
+      name: ${{ github.ref_name == 'develop' && 'development' || github.ref_name == 'release/separate-steps' && 'staging' || 'production' }}
+    env:
+      IMAGE: ${{ needs.build-and-push.outputs.image }}
+      IMAGE_DIGEST: ${{ needs.build-and-push.outputs.digest }}
+      WEBHOOK_URL: ${{ secrets.DOKPLOY_WEBHOOK_URL }}
+      HEALTHCHECK_URL: ${{ vars.HEALTHCHECK_URL }}
+    steps:
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify environment image and trigger Dokploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$GITHUB_REF_NAME" in
+            develop) tag=dev ;;
+            release/separate-steps) tag=staging ;;
+            main) tag=latest ;;
+            *) exit 1 ;;
+          esac
+          test -n "$WEBHOOK_URL"
+          test -n "$HEALTHCHECK_URL"
+          test -n "$IMAGE_DIGEST"
+          sha_digest="$(docker buildx imagetools inspect "$IMAGE:sha-$GITHUB_SHA" --format '{{.Manifest.Digest}}')"
+          tag_digest="$(docker buildx imagetools inspect "$IMAGE:$tag" --format '{{.Manifest.Digest}}')"
+          if [[ "$sha_digest" != "$IMAGE_DIGEST" || "$tag_digest" != "$IMAGE_DIGEST" ]]; then
+            echo "A tag do ambiente não aponta para a imagem aprovada desta execução."
+            exit 1
+          fi
+          curl --fail-with-body --retry 3 --retry-all-errors --connect-timeout 10 --max-time 30 --silent --show-error "$WEBHOOK_URL"
+      - name: Verify deployed frontend
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="${HEALTHCHECK_URL%/}/"
+          for attempt in $(seq 1 40); do
+            status="$(curl --location --silent --output /dev/null --write-out '%{http_code}' --connect-timeout 10 --max-time 15 "$url")" || status=000
+            if [[ "$status" =~ ^2[0-9][0-9]$ ]]; then
+              exit 0
+            fi
+            if [[ "$attempt" -lt 40 ]]; then
+              sleep 5
+            fi
+          done
+          echo "O frontend não respondeu com HTTP 2xx após 40 tentativas."
+          exit 1
