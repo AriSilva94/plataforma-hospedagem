@@ -50,5 +50,5 @@ function parseCookie(header: string): { name: string; value: string } | null {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|rooms).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|health|rooms).*)"],
 };
