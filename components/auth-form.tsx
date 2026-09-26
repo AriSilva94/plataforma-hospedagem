@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { BrandMark } from "@/components/brand-mark";
+import { FormFeedback } from "@/components/form-feedback";
 import { apiFetch, getErrorMessage } from "@/lib/api";
 
 type Field = {
@@ -58,6 +60,9 @@ export function AuthForm({
 
       if (successPath) {
         router.push(successPath);
+        // O destino é renderizado no servidor a partir dos cookies de sessão,
+        // que só existem depois desta resposta.
+        router.refresh();
         return;
       }
       setSuccess("Solicitação recebida. Verifique sua caixa de e-mail.");
@@ -71,20 +76,17 @@ export function AuthForm({
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
       <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_72%_10%,#0b2a5e,transparent_55%)]" />
-      <section className="relative w-full max-w-md rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-7 shadow-[0_24px_60px_rgba(0,0,0,.35)] sm:p-9">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm font-extrabold text-white">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--blue)] text-xs">D</span>
-          DOMUS X
-        </Link>
+      <section className="relative w-full max-w-md rounded-3xl border border-(--line) bg-(--surface) p-7 shadow-[0_24px_60px_rgba(0,0,0,.35)] sm:p-9">
+        <BrandMark href="/" />
         <h1 className="mt-7 text-3xl font-extrabold tracking-tight text-white">
           {title}
         </h1>
-        <p className="mt-2 leading-relaxed text-[var(--gray)]">{description}</p>
+        <p className="mt-2 leading-relaxed text-(--gray)">{description}</p>
         <form className="mt-7 space-y-4" onSubmit={handleSubmit}>
           {fields.map((field) => (
             <label
               key={field.name}
-              className="block text-sm font-semibold text-[var(--gray)]"
+              className="block text-sm font-semibold text-(--gray)"
             >
               {field.label}
               <input
@@ -93,47 +95,35 @@ export function AuthForm({
                 type={field.type}
                 autoComplete={field.autoComplete}
                 defaultValue={field.defaultValue}
-                className="mt-1.5 w-full rounded-xl border border-[var(--line-strong)] bg-[var(--navy)] px-3.5 py-3 text-white outline-none transition placeholder:text-[var(--gray)] focus:border-[var(--blue-light)] focus:ring-2 focus:ring-[rgba(11,99,227,.25)]"
+                className="mt-1.5 w-full rounded-xl border border-(--line-strong) bg-(--navy) px-3.5 py-3 text-white outline-none transition placeholder:text-(--gray) focus:border-(--blue-light) focus:ring-2 focus:ring-[rgba(11,99,227,.25)]"
               />
             </label>
           ))}
           {includeRole ? (
-            <label className="block text-sm font-semibold text-[var(--gray)]">
+            <label className="block text-sm font-semibold text-(--gray)">
               Quero começar como
               <select
                 name="role"
-                className="mt-1.5 w-full rounded-xl border border-[var(--line-strong)] bg-[var(--navy)] px-3.5 py-3 text-white outline-none focus:border-[var(--blue-light)]"
+                className="mt-1.5 w-full rounded-xl border border-(--line-strong) bg-(--navy) px-3.5 py-3 text-white outline-none focus:border-(--blue-light)"
               >
                 <option value="GUEST">Hóspede</option>
                 <option value="OWNER">Proprietário</option>
               </select>
             </label>
           ) : null}
-          {error ? (
-            <p
-              role="alert"
-              className="rounded-xl border border-[rgba(229,98,75,.35)] bg-[rgba(229,98,75,.12)] p-3 text-sm text-[#ff9b8a]"
-            >
-              {error}
-            </p>
-          ) : null}
+          {error ? <FormFeedback tone="error">{error}</FormFeedback> : null}
           {success ? (
-            <p
-              role="status"
-              className="rounded-xl border border-[rgba(47,191,135,.35)] bg-[rgba(47,191,135,.12)] p-3 text-sm text-[#7be0b6]"
-            >
-              {success}
-            </p>
+            <FormFeedback tone="success">{success}</FormFeedback>
           ) : null}
           <button
             disabled={isPending}
-            className="w-full rounded-xl bg-[var(--blue)] px-4 py-3.5 font-bold text-white transition hover:bg-[var(--blue-light)] disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-xl bg-(--blue) px-4 py-3.5 font-bold text-white transition hover:bg-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60"
             type="submit"
           >
             {isPending ? "Enviando..." : submitLabel}
           </button>
         </form>
-        <nav className="mt-6 flex flex-col gap-2 text-sm font-semibold text-[var(--blue-light)]">
+        <nav className="mt-6 flex flex-col gap-2 text-sm font-semibold text-(--blue-light)">
           {links.map((link) => (
             <Link key={link.href} href={link.href}>
               {link.label}

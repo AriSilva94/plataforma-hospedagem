@@ -24,3 +24,7 @@ body {
   color: var(--white);
   font-family: var(--font-jakarta), system-ui, sans-serif;
 }
+
+body.scroll-locked {
+  overflow: hidden;
+}
