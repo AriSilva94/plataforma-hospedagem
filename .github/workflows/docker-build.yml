@@ -1,6 +1,7 @@
 name: Build and deploy Docker image
 
 on:
+  workflow_dispatch:
   pull_request:
     branches: [develop, release/separate-steps, main]
   push:
@@ -25,6 +26,7 @@ jobs:
         with:
           node-version: '24'
           cache: npm
+      - run: node --test test/manual-deploy-workflow.test.mjs
       - name: Require public API URL for this branch
         run: |
           if [[ -z "$NEXT_PUBLIC_API_URL" ]]; then
@@ -46,7 +48,7 @@ jobs:
       - run: docker build --build-arg NEXT_PUBLIC_API_URL="$NEXT_PUBLIC_API_URL" --build-arg APP_REVISION="$GITHUB_SHA" --tag local/frontend:${{ github.sha }} .
 
   build-and-push:
-    if: github.event_name == 'push'
+    if: github.event_name != 'pull_request'
     needs: checks
     runs-on: ubuntu-latest
     permissions:
@@ -89,7 +91,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   scan-image:
-    if: github.event_name == 'push'
+    if: github.event_name != 'pull_request'
     needs: build-and-push
     runs-on: ubuntu-latest
     permissions:
@@ -110,7 +112,7 @@ jobs:
           severity: HIGH,CRITICAL
 
   deploy:
-    if: github.event_name == 'push'
+    if: github.event_name != 'pull_request'
     needs: [build-and-push, scan-image]
     runs-on: ubuntu-latest
     permissions:
