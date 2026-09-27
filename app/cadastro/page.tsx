@@ -4,11 +4,10 @@ export default function RegisterPage() {
   return (
     <AuthForm
       title="Criar conta"
-      description="Comece como hóspede ou proprietário. Você poderá adicionar o outro perfil depois."
+      description="Crie sua conta e escolha depois como deseja usar a plataforma."
       endpoint="/auth/register"
       submitLabel="Criar conta"
       successPath="/perfil"
-      includeRole
       fields={[
         {
           name: "name",

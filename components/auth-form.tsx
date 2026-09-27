@@ -23,7 +23,6 @@ type AuthFormProps = {
   submitLabel: string;
   successPath?: string;
   links: { href: string; label: string }[];
-  includeRole?: boolean;
 };
 
 export function AuthForm({
@@ -34,7 +33,6 @@ export function AuthForm({
   submitLabel,
   successPath,
   links,
-  includeRole = false,
 }: AuthFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string>();
@@ -99,18 +97,6 @@ export function AuthForm({
               />
             </label>
           ))}
-          {includeRole ? (
-            <label className="block text-sm font-semibold text-(--gray)">
-              Quero começar como
-              <select
-                name="role"
-                className="mt-1.5 w-full rounded-xl border border-(--line-strong) bg-(--navy) px-3.5 py-3 text-white outline-none focus:border-(--blue-light)"
-              >
-                <option value="GUEST">Hóspede</option>
-                <option value="OWNER">Proprietário</option>
-              </select>
-            </label>
-          ) : null}
           {error ? <FormFeedback tone="error">{error}</FormFeedback> : null}
           {success ? (
             <FormFeedback tone="success">{success}</FormFeedback>
@@ -123,6 +109,12 @@ export function AuthForm({
             {isPending ? "Enviando..." : submitLabel}
           </button>
         </form>
+        <a
+          href={`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3030"}/auth/google`}
+          className="mt-4 flex w-full items-center justify-center rounded-xl border border-(--line-strong) px-4 py-3.5 text-sm font-bold text-white transition hover:border-(--blue-light) hover:text-(--blue-light)"
+        >
+          Continuar com Google
+        </a>
         <nav className="mt-6 flex flex-col gap-2 text-sm font-semibold text-(--blue-light)">
           {links.map((link) => (
             <Link key={link.href} href={link.href}>

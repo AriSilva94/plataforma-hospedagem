@@ -91,7 +91,9 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
         <section className="mt-8 border-t border-(--line) pt-6">
           <h2 className="text-lg font-bold text-white">Perfis</h2>
           <p className="mt-1 text-sm text-(--gray)">
-            Ativos: {user.roles.join(", ")}.
+            {user.roles.length === 0
+              ? "Escolha como deseja usar a plataforma."
+              : `Ativos: ${user.roles.join(", ")}.`}
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             {!user.roles.includes("GUEST") ? (
