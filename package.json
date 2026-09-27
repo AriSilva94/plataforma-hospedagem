@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --port 3000",
     "build": "next build",
+    "typecheck": "next typegen && tsc --noEmit",
     "start": "next start",
     "lint": "eslint"
   },
