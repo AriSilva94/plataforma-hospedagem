@@ -16,6 +16,7 @@ ARG APP_REVISION
 ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0
 ENV APP_REVISION=$APP_REVISION
 RUN test -n "$APP_REVISION"
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 COPY --from=build --chown=node:node /app/.next/standalone ./
 COPY --from=build --chown=node:node /app/.next/static ./.next/static
 COPY --from=build --chown=node:node /app/public ./public
