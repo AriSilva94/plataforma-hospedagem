@@ -165,13 +165,17 @@ jobs:
           set -euo pipefail
           url="${HEALTHCHECK_URL%/}/health"
           for attempt in $(seq 1 40); do
-            response="$(curl --fail-with-body --silent --show-error --connect-timeout 10 --max-time 15 "$url")" || response=""
-            if jq --exit-status --arg revision "$GITHUB_SHA" '.status == "ok" and .revision == $revision' <<< "$response" > /dev/null 2>&1; then
+            http_response="$(curl --silent --show-error --connect-timeout 10 --max-time 15 --write-out '\n%{http_code}' "$url")" || http_response=$'\n000'
+            http_status="${http_response##*$'\n'}"
+            response="${http_response%$'\n'*}"
+            if [[ "$http_status" == 200 ]] && jq --exit-status --arg revision "$GITHUB_SHA" '.status == "ok" and .revision == $revision' <<< "$response" > /dev/null 2>&1; then
+              echo "Frontend disponível com a revisão $GITHUB_SHA (tentativa $attempt/40)."
               exit 0
             fi
+            echo "Tentativa $attempt/40: HTTP $http_status; revisão esperada ainda não confirmada."
             if [[ "$attempt" -lt 40 ]]; then
               sleep 5
             fi
           done
-          echo "O frontend não respondeu com a revisão $GITHUB_SHA após 40 tentativas."
+          echo "::error::O frontend não respondeu com a revisão $GITHUB_SHA após 40 tentativas (último HTTP $http_status)."
           exit 1
