@@ -5,7 +5,7 @@ import Image from "next/image";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
-import { LuLockKeyhole, LuMail } from "react-icons/lu";
+import { LuLockKeyhole, LuMail, LuShieldCheck } from "react-icons/lu";
 import { BrandMark } from "@/components/brand-mark";
 import { FormFeedback } from "@/components/form-feedback";
 import { apiFetch, getErrorMessage } from "@/lib/api";
@@ -149,7 +149,10 @@ export function AuthForm({
                 </Link>
               ))}
             </nav>
-            <p className="auth-reassurance">Seus dados estão seguros com a gente</p>
+            <p className="auth-reassurance">
+              <LuShieldCheck aria-hidden="true" data-testid="auth-reassurance-icon" size={15} />
+              <span>Seus dados estão seguros com a gente</span>
+            </p>
           </div>
         </section>
       </section>

@@ -36,6 +36,7 @@ for (const path of [
     await expect(
       page.getByText("Seus dados estão seguros com a gente"),
     ).toBeVisible();
+    await expect(page.getByTestId("auth-reassurance-icon")).toBeVisible();
   });
 }
 
