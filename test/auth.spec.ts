@@ -43,8 +43,8 @@ test("login tablet mantém o formulário na primeira tela", async ({ page }) => 
 
 for (const viewport of [
   { width: 1440, height: 720 },
-  { width: 768, height: 700 },
-  { width: 390, height: 667 },
+  { width: 1440, height: 844 },
+  { width: 1024, height: 844 },
 ]) {
   test(`login cabe integralmente em ${viewport.width}x${viewport.height}`, async ({ page }) => {
     await page.setViewportSize(viewport);
@@ -53,6 +53,24 @@ for (const viewport of [
     expect(
       await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight),
     ).toBe(true);
+    await expect(page.getByText("Seus dados estão seguros com a gente")).toBeInViewport();
+    await expect(page.getByText("© 2026 DOMUS X. Todos os direitos reservados.")).toBeInViewport();
+  });
+}
+
+for (const viewport of [
+  { width: 768, height: 700 },
+  { width: 390, height: 667 },
+]) {
+  test(`login compacto cabe integralmente em ${viewport.width}x${viewport.height}`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await page.goto("/login");
+
+    expect(
+      await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight),
+    ).toBe(true);
+    await expect(page.getByRole("button", { name: "Entrar" })).toBeInViewport();
+    await expect(page.getByText("Seus dados estão seguros com a gente")).toBeInViewport();
   });
 }
 

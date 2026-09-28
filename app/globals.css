@@ -399,7 +399,7 @@ body.scroll-locked {
   }
 }
 
-@media (max-height: 760px) {
+@media (max-height: 900px) {
   .auth-shell {
     gap: 0.5rem;
     padding: 1rem;
