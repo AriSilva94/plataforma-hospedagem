@@ -146,6 +146,24 @@ body.scroll-locked {
   color: #c8ddff;
 }
 
+.auth-input-wrap:has(input[aria-invalid="true"]) {
+  box-shadow: inset 0 0 0 1px var(--danger);
+  color: #ffb5a7;
+}
+
+.auth-input-wrap:has(input[aria-invalid="true"]):focus-within {
+  box-shadow: inset 0 0 0 1px var(--danger), 0 0 0 0.2rem rgba(229, 98, 75, 0.24);
+}
+
+.auth-field-error {
+  margin-top: 0.4rem;
+  color: #ffb5a7;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
 .auth-input {
   width: 100%;
   padding: 0.72rem 0;

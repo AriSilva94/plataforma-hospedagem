@@ -31,7 +31,7 @@ test("login exibe a cena visual com a imagem room3", async ({ page }) => {
 
   await expect(page.getByTestId("auth-room-image")).toHaveAttribute(
     "src",
-    /\/rooms\/room3\.png/,
+    /(?:%2F|\/)rooms(?:%2F|\/)room3\.png/i,
   );
 });
 
@@ -127,14 +127,14 @@ test("cadastro envia dados sem perfil e abre a página de perfil", async ({ page
   await page.goto("/cadastro");
   await page.getByRole("textbox", { name: "Nome completo" }).fill("Ana Silva");
   await page.getByRole("textbox", { name: "E-mail" }).fill("ana@example.com");
-  await page.getByLabel("Senha").fill("senha-segura");
+  await page.getByLabel("Senha").fill("senha-segura1");
   await page.getByRole("button", { name: "Criar conta" }).click();
 
   await expect(page).toHaveURL(/\/perfil$/);
   expect(submittedBody).toEqual({
     name: "Ana Silva",
     email: "ana@example.com",
-    password: "senha-segura",
+    password: "senha-segura1",
   });
 });
 
