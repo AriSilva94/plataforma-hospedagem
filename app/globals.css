@@ -399,6 +399,12 @@ body.scroll-locked {
   }
 }
 
+@media (min-width: 640px) and (max-width: 1023px) {
+  .auth-panel {
+    align-items: center;
+  }
+}
+
 @media (max-height: 900px) {
   .auth-shell {
     gap: 0.5rem;
