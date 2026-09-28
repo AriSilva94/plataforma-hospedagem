@@ -12,6 +12,15 @@ test("cadastro não solicita perfil inicial e oferece Google Auth", async ({ pag
   );
 });
 
+test("login exibe a cena visual com a imagem room3", async ({ page }) => {
+  await page.goto("/login");
+
+  await expect(page.getByTestId("auth-room-image")).toHaveAttribute(
+    "src",
+    /\/rooms\/room3\.png/,
+  );
+});
+
 for (const path of [
   "/login",
   "/cadastro",
