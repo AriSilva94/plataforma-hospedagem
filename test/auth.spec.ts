@@ -26,6 +26,11 @@ test("login mobile mantém o formulário na primeira tela", async ({ page }) => 
   await page.goto("/login");
 
   await expect(page.getByRole("button", { name: "Entrar" })).toBeInViewport();
+  const cardBox = await page.locator(".auth-card").boundingBox();
+
+  expect(cardBox).not.toBeNull();
+  expect(cardBox!.y).toBeGreaterThan(100);
+  expect(cardBox!.y + cardBox!.height).toBeLessThan(744);
   expect(
     await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight),
   ).toBe(true);
