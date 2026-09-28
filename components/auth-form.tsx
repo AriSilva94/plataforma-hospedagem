@@ -91,11 +91,11 @@ export function AuthForm({
       <section className="auth-panel">
         <div className="auth-card">
           <div className="auth-emblem" aria-hidden="true">D</div>
-          <h2 className="mt-6 font-serif text-4xl tracking-[-0.04em] text-(--white)">
+          <h2 className="mt-5 font-serif text-3xl tracking-[-0.04em] text-(--white)">
             {title}
           </h2>
           <p className="mt-2 leading-relaxed text-(--gray)">{description}</p>
-          <form className="mt-7 space-y-4" onSubmit={handleSubmit}>
+          <form className="mt-5 space-y-3.5" onSubmit={handleSubmit}>
             {fields.map((field) => {
               const Icon = field.type === "email" ? LuMail : field.type === "password" ? LuLockKeyhole : null;
 
@@ -133,7 +133,7 @@ export function AuthForm({
               <FcGoogle aria-hidden="true" size={24} />
             </a>
           </div>
-          <nav className="mt-6 flex flex-col items-center gap-2 text-center text-sm font-semibold text-(--blue-light)">
+          <nav className="mt-5 flex flex-col items-center gap-2 text-center text-sm font-semibold text-(--blue-light)">
             {links.map((link) => (
               <Link key={link.href} href={link.href} className="auth-link">
                 {link.label}
