@@ -21,6 +21,16 @@ test("login exibe a cena visual com a imagem room3", async ({ page }) => {
   );
 });
 
+test("login mobile mantém o formulário na primeira tela", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/login");
+
+  await expect(page.getByRole("button", { name: "Entrar" })).toBeInViewport();
+  expect(
+    await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight),
+  ).toBe(true);
+});
+
 for (const path of [
   "/login",
   "/cadastro",

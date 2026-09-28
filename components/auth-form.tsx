@@ -89,7 +89,7 @@ export function AuthForm({
           />
           <div className="auth-scene-content">
             <BrandMark href="/" size="md" />
-            <div className="max-w-sm">
+            <div className="auth-scene-copy max-w-sm">
               <h1 className="auth-scene-title">Seu próximo lugar começa aqui.</h1>
               <p className="mt-4 max-w-72 text-sm leading-6 text-[#d4deeb] sm:text-base">
                 Encontre estadias ou cuide dos seus espaços com segurança e discrição.
