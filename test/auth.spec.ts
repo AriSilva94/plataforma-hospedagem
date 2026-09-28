@@ -12,14 +12,23 @@ test("cadastro não solicita perfil inicial e oferece Google Auth", async ({ pag
   );
 });
 
-test("login também oferece Google Auth", async ({ page }) => {
-  await page.goto("/login");
+for (const path of [
+  "/login",
+  "/cadastro",
+  "/recuperar-senha",
+  "/redefinir-senha?token=token-de-teste",
+]) {
+  test(`${path} oferece acesso Google e mensagem de segurança`, async ({ page }) => {
+    await page.goto(path);
 
-  await expect(page.getByRole("link", { name: "Continuar com Google" })).toHaveAttribute(
-    "href",
-    `${apiUrl}/auth/google`,
-  );
-});
+    await expect(
+      page.getByRole("link", { name: "Continuar com Google" }),
+    ).toHaveAttribute("href", `${apiUrl}/auth/google`);
+    await expect(
+      page.getByText("Seus dados estão seguros com a gente"),
+    ).toBeVisible();
+  });
+}
 
 test("cadastro envia dados sem perfil e abre a página de perfil", async ({ page }) => {
   let submittedBody: unknown;

@@ -29,3 +29,289 @@ body {
 body.scroll-locked {
   overflow: hidden;
 }
+
+::selection {
+  background: var(--blue);
+  color: var(--white);
+}
+
+.auth-shell {
+  display: grid;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 78% 12%, rgba(200, 182, 255, 0.13), transparent 24%),
+    linear-gradient(135deg, #020c1d, var(--navy) 58%, #0d254b);
+}
+
+.auth-scene {
+  position: relative;
+  min-height: 20rem;
+  overflow: hidden;
+  padding: 2rem;
+  background:
+    radial-gradient(ellipse at 22% 13%, rgba(58, 131, 240, 0.38), transparent 29%),
+    linear-gradient(138deg, #020916, #082045 58%, #0d2d5b);
+}
+
+.auth-scene::before,
+.auth-scene::after {
+  position: absolute;
+  content: "";
+  pointer-events: none;
+}
+
+.auth-scene::before {
+  right: -10%;
+  bottom: -18%;
+  width: 88%;
+  height: 78%;
+  transform: skewY(-10deg);
+  background: linear-gradient(90deg, rgba(1, 7, 18, 0.78), rgba(9, 38, 78, 0.12));
+  box-shadow: inset 0 0 7rem rgba(0, 0, 0, 0.65);
+}
+
+.auth-scene::after {
+  inset: 0;
+  background: linear-gradient(0deg, rgba(2, 9, 21, 0.84), transparent 58%);
+}
+
+.auth-architectural-light,
+.auth-architectural-beam {
+  position: absolute;
+  z-index: 1;
+  height: 0.4rem;
+  transform: rotate(-10deg);
+  pointer-events: none;
+}
+
+.auth-architectural-light {
+  top: 35%;
+  left: -6%;
+  width: 82%;
+  background: linear-gradient(90deg, #0750b9, var(--blue-light), #9ac2ff);
+  box-shadow: 0 0 0.8rem var(--blue-light), 0 0 2.4rem rgba(58, 131, 240, 0.58);
+}
+
+.auth-architectural-beam {
+  top: 56%;
+  right: -14%;
+  width: 56%;
+  background: linear-gradient(90deg, transparent, rgba(200, 182, 255, 0.9), transparent);
+  box-shadow: 0 0 1.8rem rgba(200, 182, 255, 0.55);
+}
+
+.auth-scene-title {
+  color: var(--white);
+  font-family: Georgia, serif;
+  font-size: clamp(2.5rem, 7vw, 4.5rem);
+  font-weight: 400;
+  line-height: 0.94;
+  letter-spacing: -0.04em;
+}
+
+.auth-panel {
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background:
+    radial-gradient(circle at 70% 14%, rgba(58, 131, 240, 0.24), transparent 28%),
+    linear-gradient(150deg, #12284c, #0b1b35);
+}
+
+.auth-card {
+  width: min(100%, 25rem);
+  padding: 2rem;
+  border-radius: 1rem;
+  background: linear-gradient(148deg, rgba(24, 50, 89, 0.96), rgba(12, 30, 58, 0.94));
+  box-shadow: inset 0 1px 0 rgba(202, 223, 255, 0.1), 0 1.9rem 4.4rem rgba(0, 0, 0, 0.32);
+}
+
+.auth-emblem {
+  display: grid;
+  width: 3.5rem;
+  height: 3.5rem;
+  place-items: center;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 38% 31%, #417dd2, #102b54);
+  box-shadow: inset 0 0 0 1px rgba(151, 193, 255, 0.24), 0 0.6rem 1.5rem rgba(0, 0, 0, 0.2);
+  color: #d9e8ff;
+  font-family: Georgia, serif;
+  font-size: 1.35rem;
+}
+
+.auth-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.45rem;
+  padding: 0 0.9rem;
+  border-radius: 0.8rem;
+  background: rgba(3, 17, 40, 0.58);
+  box-shadow: inset 0 0 0 1px rgba(160, 193, 241, 0.14), inset 0 0.5rem 1.25rem rgba(0, 0, 0, 0.12);
+  color: #8faddb;
+  transition: box-shadow 180ms ease, color 180ms ease;
+}
+
+.auth-input-wrap:focus-within {
+  box-shadow: inset 0 0 0 1px var(--blue-light), 0 0 0 0.2rem rgba(58, 131, 240, 0.22);
+  color: #c8ddff;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 0.85rem 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--white);
+  caret-color: var(--blue-light);
+}
+
+.auth-submit {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  overflow: hidden;
+  padding: 0.9rem 1rem;
+  border: 0;
+  border-radius: 0.8rem;
+  background: linear-gradient(102deg, #0752be, var(--blue) 48%, #4c91f2);
+  box-shadow: 0 0.8rem 1.7rem rgba(11, 99, 227, 0.32);
+  color: var(--white);
+  font-weight: 800;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.auth-submit::before {
+  position: absolute;
+  top: -130%;
+  left: -35%;
+  width: 24%;
+  height: 360%;
+  content: "";
+  transform: rotate(27deg);
+  background: rgba(255, 255, 255, 0.32);
+  animation: auth-shimmer 4s ease-in-out infinite;
+}
+
+.auth-submit > * {
+  position: relative;
+}
+
+.auth-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 1.1rem 2.1rem rgba(11, 99, 227, 0.4);
+}
+
+.auth-submit:focus-visible,
+.auth-provider:focus-visible,
+.auth-link:focus-visible {
+  outline: 3px solid #a9ceff;
+  outline-offset: 4px;
+}
+
+.auth-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 1.7rem 0 1.25rem;
+  color: #aebbd0;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  height: 1px;
+  flex: 1;
+  content: "";
+  background: linear-gradient(90deg, transparent, rgba(170, 197, 239, 0.26));
+}
+
+.auth-divider::after {
+  transform: scaleX(-1);
+}
+
+.auth-provider {
+  display: grid;
+  width: 3.5rem;
+  height: 3.5rem;
+  place-items: center;
+  border-radius: 9999px;
+  background: linear-gradient(145deg, #274b80, #12315e);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 0.7rem 1.5rem rgba(0, 0, 0, 0.24);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.auth-provider:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 1.1rem 2rem rgba(0, 0, 0, 0.32);
+}
+
+.auth-link {
+  text-underline-offset: 0.22rem;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.auth-reassurance {
+  margin: 1.5rem 0 0;
+  color: #b7c5d8;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.auth-reassurance::before {
+  margin-right: 0.45rem;
+  content: "◇";
+  color: #8fbcff;
+}
+
+@keyframes auth-shimmer {
+  0%,
+  45% {
+    transform: translateX(-210%) rotate(27deg);
+  }
+
+  68%,
+  100% {
+    transform: translateX(680%) rotate(27deg);
+  }
+}
+
+@media (min-width: 1024px) {
+  .auth-shell {
+    grid-template-columns: minmax(0, 1.03fr) minmax(26rem, 0.97fr);
+  }
+
+  .auth-scene {
+    min-height: 100vh;
+    padding: clamp(2.5rem, 5vw, 4.5rem);
+  }
+
+  .auth-panel {
+    padding: 2.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-input-wrap,
+  .auth-submit,
+  .auth-provider {
+    transition: none;
+  }
+
+  .auth-submit::before {
+    animation: none;
+  }
+}
