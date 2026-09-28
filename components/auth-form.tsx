@@ -2,16 +2,41 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { FcGoogle } from "react-icons/fc";
 import { LuLockKeyhole, LuMail, LuShieldCheck } from "react-icons/lu";
+import { useForm, type FieldPath } from "react-hook-form";
 import { BrandMark } from "@/components/brand-mark";
 import { FormFeedback } from "@/components/form-feedback";
 import { apiFetch, getErrorMessage } from "@/lib/api";
+import {
+  forgotPasswordSchema,
+  loginSchema,
+  registerSchema,
+  resetPasswordSchema,
+  type ForgotPasswordFormValues,
+  type LoginFormValues,
+  type RegisterFormValues,
+  type ResetPasswordFormValues,
+} from "@/lib/auth-form-schema";
+
+const authSchemas = {
+  "/auth/login": loginSchema,
+  "/auth/register": registerSchema,
+  "/auth/forgot-password": forgotPasswordSchema,
+  "/auth/reset-password": resetPasswordSchema,
+};
+
+type AuthFormValues =
+  | LoginFormValues
+  | RegisterFormValues
+  | ForgotPasswordFormValues
+  | ResetPasswordFormValues;
 
 type Field = {
-  name: string;
+  name: FieldPath<AuthFormValues>;
   label: string;
   type: "email" | "password" | "text";
   autoComplete?: string;
@@ -21,7 +46,7 @@ type Field = {
 type AuthFormProps = {
   title: string;
   description: string;
-  endpoint: string;
+  endpoint: keyof typeof authSchemas;
   fields: Field[];
   submitLabel: string;
   successPath?: string;
@@ -40,15 +65,23 @@ export function AuthForm({
   const router = useRouter();
   const [error, setError] = useState<string>();
   const [success, setSuccess] = useState<string>();
-  const [isPending, setIsPending] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    getFieldState,
+    formState,
+  } = useForm<AuthFormValues>({
+    resolver: zodResolver(authSchemas[endpoint]),
+    mode: "onBlur",
+    reValidateMode: "onChange",
+    shouldFocusError: true,
+  });
+  const isPending = formState.isSubmitting;
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function onSubmit(data: AuthFormValues) {
     setError(undefined);
     setSuccess(undefined);
-    setIsPending(true);
     try {
-      const data = Object.fromEntries(new FormData(event.currentTarget));
       const response = await apiFetch(endpoint, {
         method: "POST",
         body: JSON.stringify(data),
@@ -69,8 +102,6 @@ export function AuthForm({
       setSuccess("Solicitação recebida. Verifique sua caixa de e-mail.");
     } catch {
       setError("Não foi possível conectar ao servidor. Tente novamente.");
-    } finally {
-      setIsPending(false);
     }
   }
 
@@ -104,25 +135,37 @@ export function AuthForm({
               {title}
             </h2>
             <p className="mt-2 leading-relaxed text-(--gray)">{description}</p>
-            <form className="mt-5 space-y-3.5" onSubmit={handleSubmit}>
+            <form className="mt-5 space-y-3.5" noValidate onSubmit={handleSubmit(onSubmit)}>
               {fields.map((field) => {
                 const Icon = field.type === "email" ? LuMail : field.type === "password" ? LuLockKeyhole : null;
+                const fieldError = getFieldState(field.name, formState).error;
+                const inputId = `auth-${field.name}`;
+                const errorId = `${inputId}-error`;
 
                 return (
-                  <label key={field.name} className="block text-sm font-semibold text-[#d5dfed]">
-                    {field.label}
-                    <span className="auth-input-wrap">
-                      {Icon ? <Icon aria-hidden="true" size={17} /> : null}
-                      <input
-                        required
-                        name={field.name}
-                        type={field.type}
-                        autoComplete={field.autoComplete}
-                        defaultValue={field.defaultValue}
-                        className="auth-input"
-                      />
-                    </span>
-                  </label>
+                  <div key={field.name} className="auth-field">
+                    <label htmlFor={inputId} className="block text-sm font-semibold text-[#d5dfed]">
+                      {field.label}
+                      <span className="auth-input-wrap">
+                        {Icon ? <Icon aria-hidden="true" size={17} /> : null}
+                        <input
+                          {...register(field.name)}
+                          id={inputId}
+                          type={field.type}
+                          autoComplete={field.autoComplete}
+                          defaultValue={field.defaultValue}
+                          aria-invalid={fieldError ? "true" : undefined}
+                          aria-describedby={fieldError ? errorId : undefined}
+                          className="auth-input"
+                        />
+                      </span>
+                    </label>
+                    {fieldError?.message ? (
+                      <p id={errorId} className="auth-field-error" role="alert">
+                        {fieldError.message}
+                      </p>
+                    ) : null}
+                  </div>
                 );
               })}
               {error ? <FormFeedback tone="error">{error}</FormFeedback> : null}
