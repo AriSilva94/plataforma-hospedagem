@@ -123,3 +123,103 @@ test("cadastro envia dados sem perfil e abre a página de perfil", async ({ page
     password: "senha-segura",
   });
 });
+
+test("login mostra erro de e-mail inválido ao sair do campo", async ({ page }) => {
+  await page.goto("/login");
+
+  const email = page.getByRole("textbox", { name: "E-mail" });
+  await email.fill("email-invalido");
+  await email.blur();
+
+  await expect(page.getByText("Informe um e-mail válido.")).toBeVisible();
+  await expect(email).toHaveAttribute("aria-invalid", "true");
+});
+
+test("login não envia POST quando o e-mail é obrigatório", async ({ page }) => {
+  let postCount = 0;
+  await page.route(`${apiUrl}/auth/login`, async (route) => {
+    postCount += 1;
+    await route.fulfill({ status: 200, body: "{}" });
+  });
+
+  await page.goto("/login");
+  await page.getByLabel("Senha").fill("senha-valida");
+  await page.getByRole("button", { name: "Entrar" }).click();
+
+  await expect(page.getByText("O e-mail é obrigatório.")).toBeVisible();
+  expect(postCount).toBe(0);
+});
+
+test("recuperação mostra erro de e-mail inválido e não envia POST", async ({ page }) => {
+  let postCount = 0;
+  await page.route(`${apiUrl}/auth/forgot-password`, async (route) => {
+    postCount += 1;
+    await route.fulfill({ status: 200, body: "{}" });
+  });
+
+  await page.goto("/recuperar-senha");
+  const email = page.getByRole("textbox", { name: "E-mail" });
+  await email.fill("email-invalido");
+  await email.blur();
+
+  await expect(page.getByText("Informe um e-mail válido.")).toBeVisible();
+  await page.getByRole("button", { name: "Enviar instruções" }).click();
+  expect(postCount).toBe(0);
+});
+
+test("cadastro mostra nome curto inválido e não envia POST", async ({ page }) => {
+  let postCount = 0;
+  await page.route(`${apiUrl}/auth/register`, async (route) => {
+    postCount += 1;
+    await route.fulfill({ status: 201, body: "{}" });
+  });
+
+  await page.goto("/cadastro");
+  const name = page.getByRole("textbox", { name: "Nome completo" });
+  await name.fill("A");
+  await name.blur();
+
+  await expect(page.getByText("O nome deve ter pelo menos 2 caracteres.")).toBeVisible();
+  await page.getByRole("textbox", { name: "E-mail" }).fill("ana@example.com");
+  await page.getByLabel("Senha").fill("senha-com-12-caracteres");
+  await page.getByRole("button", { name: "Criar conta" }).click();
+  expect(postCount).toBe(0);
+});
+
+test("cadastro mostra senha curta inválida e não envia POST", async ({ page }) => {
+  let postCount = 0;
+  await page.route(`${apiUrl}/auth/register`, async (route) => {
+    postCount += 1;
+    await route.fulfill({ status: 201, body: "{}" });
+  });
+
+  await page.goto("/cadastro");
+  await page.getByRole("textbox", { name: "Nome completo" }).fill("Ana Silva");
+  await page.getByRole("textbox", { name: "E-mail" }).fill("ana@example.com");
+  const password = page.getByLabel("Senha");
+  await password.fill("curta");
+  await password.blur();
+
+  await expect(page.getByText("A senha deve ter ao menos 12 caracteres.")).toBeVisible();
+  await page.getByRole("button", { name: "Criar conta" }).click();
+  expect(postCount).toBe(0);
+});
+
+test("redefinição rejeita token inválido e senha curta sem enviar POST", async ({ page }) => {
+  let postCount = 0;
+  await page.route(`${apiUrl}/auth/reset-password`, async (route) => {
+    postCount += 1;
+    await route.fulfill({ status: 200, body: "{}" });
+  });
+
+  await page.goto("/redefinir-senha?token=invalido");
+  const token = page.getByRole("textbox", { name: "Token" });
+  await token.blur();
+  await expect(page.getByText("Token inválido.")).toBeVisible();
+
+  await page.getByLabel("Nova senha").fill("curta");
+  await page.getByLabel("Nova senha").blur();
+  await expect(page.getByText("A senha deve ter ao menos 12 caracteres.")).toBeVisible();
+  await page.getByRole("button", { name: "Redefinir senha" }).click();
+  expect(postCount).toBe(0);
+});
