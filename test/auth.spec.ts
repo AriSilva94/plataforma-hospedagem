@@ -41,6 +41,21 @@ test("login tablet mantém o formulário na primeira tela", async ({ page }) => 
   ).toBe(true);
 });
 
+for (const viewport of [
+  { width: 1440, height: 720 },
+  { width: 768, height: 700 },
+  { width: 390, height: 667 },
+]) {
+  test(`login cabe integralmente em ${viewport.width}x${viewport.height}`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await page.goto("/login");
+
+    expect(
+      await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight),
+    ).toBe(true);
+  });
+}
+
 for (const path of [
   "/login",
   "/cadastro",
