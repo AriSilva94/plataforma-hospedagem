@@ -138,15 +138,22 @@ test("cadastro envia dados sem perfil e abre a página de perfil", async ({ page
   });
 });
 
-test("login mostra erro de e-mail inválido ao sair do campo", async ({ page }) => {
+test("login mostra erro de e-mail inválido e não envia POST", async ({ page }) => {
   await page.goto("/login");
 
   const email = page.getByRole("textbox", { name: "E-mail" });
   await email.fill("email-invalido");
   await email.blur();
+  await page.getByLabel("Senha").fill("senha-valida");
 
-  await expect(page.getByText("Informe um e-mail válido.")).toBeVisible();
+  const fieldError = page.locator(".auth-field-error").filter({ hasText: "Informe um e-mail válido." });
+  await expect(fieldError).toBeVisible();
+  await expect(fieldError.locator("svg")).toHaveAttribute("aria-hidden", "true");
   await expect(email).toHaveAttribute("aria-invalid", "true");
+  const expectNoPost = trackPostRequests(page, "/auth/login");
+  await page.getByRole("button", { name: "Entrar" }).click();
+  await expect(fieldError).toBeVisible();
+  await expectNoPost();
 });
 
 test("login não envia POST quando o e-mail é obrigatório", async ({ page }) => {

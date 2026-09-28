@@ -156,12 +156,20 @@ body.scroll-locked {
 }
 
 .auth-field-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
   margin-top: 0.4rem;
   color: #ffb5a7;
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.4;
   overflow-wrap: anywhere;
+}
+
+.auth-field-error svg {
+  flex: none;
+  margin-top: 0.125rem;
 }
 
 .auth-input {

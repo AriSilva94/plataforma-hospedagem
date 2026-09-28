@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FcGoogle } from "react-icons/fc";
-import { LuLockKeyhole, LuMail, LuShieldCheck } from "react-icons/lu";
+import { LuCircleAlert, LuLockKeyhole, LuMail, LuShieldCheck } from "react-icons/lu";
 import { useForm, type FieldPath } from "react-hook-form";
 import { BrandMark } from "@/components/brand-mark";
 import { FormFeedback } from "@/components/form-feedback";
@@ -162,6 +162,7 @@ export function AuthForm({
                     </label>
                     {fieldError?.message ? (
                       <p id={errorId} className="auth-field-error" role="alert">
+                        <LuCircleAlert aria-hidden="true" size={15} />
                         {fieldError.message}
                       </p>
                     ) : null}
