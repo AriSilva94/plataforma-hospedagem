@@ -10,30 +10,31 @@ import { CurrentUser, parseCurrentUser } from "@/lib/user";
 const fieldClassName =
   "mt-2 w-full rounded-xl border border-(--line-strong) bg-(--navy) px-4 py-3 text-white outline-none transition-colors focus:border-(--blue-light) focus-visible:ring-2 focus-visible:ring-(--blue-light) disabled:cursor-not-allowed disabled:border-(--line) disabled:bg-(--surface) disabled:text-(--gray)";
 
-function VerificationStatus({ label, detail, available }: { label: string; detail: string; available: boolean }) {
+function VerificationStatus({ label, detail, registered }: { label: string; detail: string; registered: boolean }) {
   return (
     <div className="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0">
       <div className="flex min-w-0 items-center gap-3">
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--surface-raised) text-(--blue-light)">
-          {available ? <LuMail aria-hidden="true" size={17} /> : <LuShieldCheck aria-hidden="true" size={17} />}
+          {registered ? <LuMail aria-hidden="true" size={17} /> : <LuShieldCheck aria-hidden="true" size={17} />}
         </span>
         <div className="min-w-0">
           <p className="font-semibold text-white">{label}</p>
           <p className="break-all text-sm text-(--gray)">{detail}</p>
         </div>
       </div>
-      <span className={`shrink-0 text-right text-xs font-semibold ${available ? "text-(--success)" : "text-(--warning)"}`}>
-        {available ? "Cadastrado" : "Disponível em breve"}
+      <span className={`max-w-32 shrink-0 text-right text-xs font-semibold ${registered ? "text-(--gray)" : "text-(--warning)"}`}>
+        {registered ? "Cadastrado, não verificado" : "Disponível em breve"}
       </span>
     </div>
   );
 }
 
-function AccessProfileCard({ title, description, active, pending, icon: Icon, onAdd }: {
+function AccessProfileCard({ title, description, active, pending, isAdding, icon: Icon, onAdd }: {
   title: string;
   description: string;
   active: boolean;
   pending: boolean;
+  isAdding: boolean;
   icon: IconType;
   onAdd: () => void;
 }) {
@@ -61,7 +62,7 @@ function AccessProfileCard({ title, description, active, pending, icon: Icon, on
           </button>
         ) : (
           <button type="button" disabled={pending} onClick={onAdd} className="w-full rounded-xl bg-(--blue) px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60">
-            Adicionar perfil de {title.toLowerCase()}
+            {isAdding ? "Adicionando perfil..." : `Adicionar perfil de ${title.toLowerCase()}`}
           </button>
         )}
       </div>
@@ -71,44 +72,82 @@ function AccessProfileCard({ title, description, active, pending, icon: Icon, on
 
 export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
   const [user, setUser] = useState(initialUser);
-  const [error, setError] = useState<string>();
-  const [message, setMessage] = useState<string>();
-  const [isPending, setIsPending] = useState(false);
+  const [saveError, setSaveError] = useState<string>();
+  const [saveMessage, setSaveMessage] = useState<string>();
+  const [isSaving, setIsSaving] = useState(false);
+  const [profileError, setProfileError] = useState<string>();
+  const [profileMessage, setProfileMessage] = useState<string>();
+  const [profilePendingRole, setProfilePendingRole] = useState<"guest" | "owner">();
+  const prioritizeProfiles = initialUser.roles.length === 0;
 
-  async function submit(run: () => Promise<Response>, successMessage: string): Promise<void> {
-    if (isPending) return;
-    setError(undefined);
-    setMessage(undefined);
-    setIsPending(true);
+  async function requestUser(run: () => Promise<Response>): Promise<CurrentUser> {
+    let response: Response;
     try {
-      const response = await run();
-      if (!response.ok) {
-        setError(await getErrorMessage(response));
-        return;
-      }
-      const updatedUser = parseCurrentUser(await response.json());
-      if (!updatedUser) {
-        setError("O servidor retornou dados inválidos. Tente novamente.");
-        return;
-      }
-      setUser(updatedUser);
-      setMessage(successMessage);
+      response = await run();
     } catch {
-      setError("Não foi possível conectar ao servidor. Tente novamente.");
+      throw new Error("Não foi possível conectar ao servidor. Tente novamente.");
+    }
+
+    if (!response.ok) throw new Error(await getErrorMessage(response));
+    const updatedUser = parseCurrentUser(await response.json().catch(() => null));
+    if (!updatedUser) throw new Error("O servidor retornou dados inválidos. Tente novamente.");
+    return updatedUser;
+  }
+
+  async function updateProfile(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (isSaving || profilePendingRole) return;
+    const body = JSON.stringify(Object.fromEntries(new FormData(event.currentTarget)));
+    setSaveError(undefined);
+    setSaveMessage(undefined);
+    setIsSaving(true);
+    try {
+      const updatedUser = await requestUser(() => apiFetch("/users/me", { method: "PATCH", body }));
+      setUser(updatedUser);
+      setSaveMessage("Dados atualizados.");
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Não foi possível salvar seus dados. Tente novamente.");
     } finally {
-      setIsPending(false);
+      setIsSaving(false);
     }
   }
 
-  function updateProfile(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const body = JSON.stringify(Object.fromEntries(new FormData(event.currentTarget)));
-    void submit(() => apiFetch("/users/me", { method: "PATCH", body }), "Dados atualizados.");
+  async function addProfile(role: "guest" | "owner") {
+    if (isSaving || profilePendingRole) return;
+    setProfileError(undefined);
+    setProfileMessage(undefined);
+    setProfilePendingRole(role);
+    try {
+      const updatedUser = await requestUser(() => apiFetch(`/users/me/profiles/${role}`, { method: "POST" }));
+      setUser(updatedUser);
+      setProfileMessage(`Perfil de ${role === "guest" ? "hóspede" : "proprietário"} adicionado.`);
+    } catch (error) {
+      setProfileError(error instanceof Error ? error.message : "Não foi possível adicionar o perfil. Tente novamente.");
+    } finally {
+      setProfilePendingRole(undefined);
+    }
   }
 
-  function addProfile(role: "guest" | "owner") {
-    void submit(() => apiFetch(`/users/me/profiles/${role}`, { method: "POST" }), "Perfil adicionado.");
-  }
+  const accessSection = (
+    <section aria-labelledby="access-heading" className="border-t border-(--line) py-8 sm:py-10">
+      <h2 id="access-heading" className="text-xl font-bold text-white">Perfis de acesso</h2>
+      <p className="mt-1 text-sm text-(--gray)">Use a plataforma como hóspede, proprietário ou nos dois perfis.</p>
+      {user.roles.length === 0 ? (
+        <div className="mt-6 rounded-2xl border border-(--blue-light) bg-(--surface-raised) p-5 sm:p-6">
+          <h3 className="text-lg font-bold text-white">Escolha como quer usar a plataforma</h3>
+          <p className="mt-2 max-w-prose text-sm leading-relaxed text-(--gray)">
+            Adicione um perfil para começar. Você também pode atualizar seus dados pessoais e escolher depois.
+          </p>
+        </div>
+      ) : null}
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <AccessProfileCard title="Hóspede" description="Encontre espaços e acompanhe suas futuras estadias." active={user.roles.includes("GUEST")} pending={Boolean(profilePendingRole) || isSaving} isAdding={profilePendingRole === "guest"} icon={LuUserRound} onAdd={() => void addProfile("guest")} />
+        <AccessProfileCard title="Proprietário" description="Prepare seus espaços para receber hóspedes." active={user.roles.includes("OWNER")} pending={Boolean(profilePendingRole) || isSaving} isAdding={profilePendingRole === "owner"} icon={LuHouse} onAdd={() => void addProfile("owner")} />
+      </div>
+      {profileError ? <div className="mt-5"><FormFeedback tone="error">{profileError}</FormFeedback></div> : null}
+      {profileMessage ? <div className="mt-5"><FormFeedback tone="success">{profileMessage}</FormFeedback></div> : null}
+    </section>
+  );
 
   return (
     <main className="min-h-[calc(100vh-72px)] px-4 pt-8 pb-[112px] sm:px-6 md:pt-12 md:pb-16">
@@ -127,56 +166,40 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
           </span>
         </header>
 
+        {prioritizeProfiles ? accessSection : null}
+
         <section aria-labelledby="personal-data-heading" className="py-8 sm:py-10">
           <h2 id="personal-data-heading" className="text-xl font-bold text-white">Dados pessoais</h2>
           <p className="mt-1 text-sm text-(--gray)">Mantenha as informações da sua conta atualizadas.</p>
-          <form className="mt-6" onSubmit={updateProfile}>
+          <form className="mt-6" onSubmit={(event) => void updateProfile(event)} onChange={() => setSaveMessage(undefined)}>
             <div className="grid gap-5 sm:grid-cols-2">
               <label className="block text-sm font-semibold text-(--gray)">Nome
-                <input required disabled={isPending} name="name" autoComplete="name" defaultValue={user.name} className={fieldClassName} />
+                <input required disabled={isSaving} name="name" autoComplete="name" defaultValue={user.name} className={fieldClassName} />
               </label>
               <label className="block text-sm font-semibold text-(--gray)">E-mail
-                <input required disabled={isPending} type="email" name="email" autoComplete="email" defaultValue={user.email} className={fieldClassName} />
-              </label>
-              <label className="block text-sm font-semibold text-(--gray)">Telefone <span className="font-normal text-(--warning)">· Disponível em breve</span>
-                <input disabled type="tel" placeholder="Disponível em breve" className={fieldClassName} />
-              </label>
-              <label className="block text-sm font-semibold text-(--gray)">Data de nascimento <span className="font-normal text-(--warning)">· Disponível em breve</span>
-                <input disabled placeholder="Disponível em breve" className={fieldClassName} />
-              </label>
-              <label className="block text-sm font-semibold text-(--gray)">Cidade <span className="font-normal text-(--warning)">· Disponível em breve</span>
-                <input disabled placeholder="Disponível em breve" className={fieldClassName} />
-              </label>
-              <label className="block text-sm font-semibold text-(--gray)">Estado <span className="font-normal text-(--warning)">· Disponível em breve</span>
-                <input disabled placeholder="Disponível em breve" className={fieldClassName} />
+                <input required disabled={isSaving} type="email" name="email" autoComplete="email" defaultValue={user.email} className={fieldClassName} />
               </label>
             </div>
-            {error ? <div className="mt-5"><FormFeedback tone="error">{error}</FormFeedback></div> : null}
-            {message ? <div className="mt-5"><FormFeedback tone="success">{message}</FormFeedback></div> : null}
-            <button disabled={isPending} className="mt-6 rounded-xl bg-(--blue) px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60" type="submit">
-              {isPending ? "Salvando..." : "Salvar dados"}
+            <p className="mt-5 text-xs leading-relaxed text-(--gray)">Telefone, data de nascimento, cidade e estado estarão disponíveis em breve.</p>
+            {saveError ? <div className="mt-5"><FormFeedback tone="error">{saveError}</FormFeedback></div> : null}
+            {saveMessage ? <div className="mt-5"><FormFeedback tone="success">{saveMessage}</FormFeedback></div> : null}
+            <button disabled={isSaving || Boolean(profilePendingRole)} className="mt-6 rounded-xl bg-(--blue) px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60" type="submit">
+              {isSaving ? "Salvando..." : "Salvar dados"}
             </button>
           </form>
         </section>
 
         <section aria-labelledby="verification-heading" className="border-t border-(--line) py-8 sm:py-10">
           <h2 id="verification-heading" className="text-xl font-bold text-white">Verificação</h2>
-          <p className="mt-1 text-sm text-(--gray)">Acompanhe as informações associadas à sua conta.</p>
+          <p className="mt-1 text-sm text-(--gray)">O e-mail está cadastrado, mas ainda não foi verificado.</p>
           <div className="mt-6 divide-y divide-(--line)">
-            <VerificationStatus label="E-mail" detail={user.email} available />
-            <VerificationStatus label="Telefone" detail="Verificação ainda não disponível" available={false} />
-            <VerificationStatus label="Identidade" detail="Verificação ainda não disponível" available={false} />
+            <VerificationStatus label="E-mail" detail={user.email} registered />
+            <VerificationStatus label="Telefone" detail="Verificação ainda não disponível" registered={false} />
+            <VerificationStatus label="Identidade" detail="Verificação ainda não disponível" registered={false} />
           </div>
         </section>
 
-        <section aria-labelledby="access-heading" className="border-t border-(--line) py-8 sm:py-10">
-          <h2 id="access-heading" className="text-xl font-bold text-white">Perfis de acesso</h2>
-          <p className="mt-1 text-sm text-(--gray)">Use a plataforma como hóspede, proprietário ou nos dois perfis.</p>
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <AccessProfileCard title="Hóspede" description="Encontre espaços e acompanhe suas futuras estadias." active={user.roles.includes("GUEST")} pending={isPending} icon={LuUserRound} onAdd={() => addProfile("guest")} />
-            <AccessProfileCard title="Proprietário" description="Prepare seus espaços para receber hóspedes." active={user.roles.includes("OWNER")} pending={isPending} icon={LuHouse} onAdd={() => addProfile("owner")} />
-          </div>
-        </section>
+        {!prioritizeProfiles ? accessSection : null}
 
         <section aria-labelledby="security-heading" className="border-t border-(--line) py-8 sm:py-10">
           <div className="flex items-start gap-3">
