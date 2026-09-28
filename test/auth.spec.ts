@@ -31,6 +31,16 @@ test("login mobile mantém o formulário na primeira tela", async ({ page }) => 
   ).toBe(true);
 });
 
+test("login tablet mantém o formulário na primeira tela", async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 844 });
+  await page.goto("/login");
+
+  await expect(page.getByRole("button", { name: "Entrar" })).toBeInViewport();
+  expect(
+    await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight),
+  ).toBe(true);
+});
+
 for (const path of [
   "/login",
   "/cadastro",

@@ -306,7 +306,7 @@ body.scroll-locked {
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 1023px) {
   .auth-shell {
     display: block;
     min-height: 100svh;
