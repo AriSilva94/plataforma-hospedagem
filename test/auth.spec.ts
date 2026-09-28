@@ -214,6 +214,7 @@ test("redefinição rejeita token inválido e senha curta sem enviar POST", asyn
 
   await page.goto("/redefinir-senha?token=invalido");
   const token = page.getByRole("textbox", { name: "Token" });
+  await token.focus();
   await token.blur();
   await expect(page.getByText("Token inválido.")).toBeVisible();
 
