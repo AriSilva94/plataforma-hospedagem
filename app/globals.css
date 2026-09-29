@@ -573,3 +573,28 @@ body.scroll-locked {
     animation: none;
   }
 }
+
+.public-home-room {
+  animation: public-home-room-in 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.public-home-room-2 {
+  animation-delay: 120ms;
+}
+
+.public-home-room-3 {
+  animation-delay: 240ms;
+}
+
+@keyframes public-home-room-in {
+  from {
+    opacity: 0.35;
+    transform: translateY(0.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-home-room {
+    animation: none;
+  }
+}
