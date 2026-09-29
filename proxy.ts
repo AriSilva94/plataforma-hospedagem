@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3030";
 
-// O access token expira antes do refresh token. Renovar aqui mantém a sessão
-// viva nos Server Components, que não podem gravar cookies durante o render.
 export async function proxy(request: NextRequest) {
   const refreshToken = request.cookies.get("refresh_token")?.value;
 
