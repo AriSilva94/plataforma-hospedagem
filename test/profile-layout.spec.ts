@@ -176,3 +176,19 @@ test("mostra espera e falha do perfil no contexto da ação", async ({ page }) =
   await expect(page.getByRole("button", { name: "Adicionar perfil de proprietário" })).toBeEnabled();
   await expect(page.getByRole("heading", { name: "Dados pessoais" }).locator("..").getByRole("alert")).toHaveCount(0);
 });
+
+test("perfil na navegação inferior abre e fecha o menu ao clicar novamente", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/perfil");
+
+  const profileButton = page.getByRole("navigation", { name: "Navegação inferior" }).getByRole("button", { name: "Perfil" });
+  const profileMenu = page.locator("#mobile-profile-menu");
+
+  await profileButton.click();
+  await expect(profileMenu).toBeVisible();
+  await expect(profileButton).toHaveAttribute("aria-expanded", "true");
+
+  await profileButton.click();
+  await expect(profileMenu).toHaveCount(0);
+  await expect(profileButton).toHaveAttribute("aria-expanded", "false");
+});
