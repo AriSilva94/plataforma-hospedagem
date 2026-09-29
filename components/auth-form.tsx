@@ -94,8 +94,6 @@ export function AuthForm({
 
       if (successPath) {
         router.push(successPath);
-        // O destino é renderizado no servidor a partir dos cookies de sessão,
-        // que só existem depois desta resposta.
         router.refresh();
         return;
       }

@@ -41,8 +41,6 @@ function request(path: string, init: RequestInit = {}): Promise<Response> {
   });
 }
 
-// Requisições simultâneas compartilham a mesma renovação: o backend rotaciona o
-// refresh token, então duas chamadas concorrentes invalidariam uma à outra.
 let pendingRefresh: Promise<boolean> | null = null;
 
 function refreshSession(): Promise<boolean> {
