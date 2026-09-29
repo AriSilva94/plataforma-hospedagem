@@ -133,6 +133,38 @@ test("salva os dados atuais e adiciona somente o perfil ausente", async ({ page 
   await expect(page.getByText("Perfil de hóspede adicionado.")).toBeVisible();
 });
 
+test("valida nome curto no formulário e não envia PATCH", async ({ page }) => {
+  await page.goto("/perfil");
+  const name = page.getByRole("textbox", { name: "Nome" });
+  await name.fill(" A ");
+  await page.getByRole("button", { name: "Salvar dados" }).click();
+
+  await expect(page.getByText("O nome deve ter pelo menos 2 caracteres.")).toBeVisible();
+  await expect(name).toHaveAttribute("aria-invalid", "true");
+  expect(submittedProfile).toBeUndefined();
+});
+
+test("valida e-mail inválido no formulário e não envia PATCH", async ({ page }) => {
+  await page.goto("/perfil");
+  const email = page.getByRole("textbox", { name: "E-mail" });
+  await email.fill("invalido");
+  await page.getByRole("button", { name: "Salvar dados" }).click();
+
+  await expect(page.getByText("Informe um e-mail válido.")).toBeVisible();
+  await expect(email).toHaveAttribute("aria-invalid", "true");
+  expect(submittedProfile).toBeUndefined();
+});
+
+test("normaliza nome e e-mail antes de enviar PATCH", async ({ page }) => {
+  await page.goto("/perfil");
+  await page.getByRole("textbox", { name: "Nome" }).fill(" Ana Souza ");
+  await page.getByRole("textbox", { name: "E-mail" }).fill(" ANA@EXAMPLE.COM ");
+  await page.getByRole("button", { name: "Salvar dados" }).click();
+
+  await expect(page.getByText("Dados atualizados.")).toBeVisible();
+  expect(submittedProfile).toEqual({ name: "Ana Souza", email: "ana@example.com" });
+});
+
 test("mostra espera e falha do perfil no contexto da ação", async ({ page }) => {
   profileDelayMs = 200;
   profileError = true;
