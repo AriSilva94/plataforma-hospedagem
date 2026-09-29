@@ -164,7 +164,6 @@ function MobileMenu({ open, onClose, showLogin }: { open: boolean; onClose: () =
   );
 }
 
-// aria-modal não impede o Tab de alcançar o conteúdo atrás do painel.
 function trapFocus(event: KeyboardEvent, dialog: HTMLElement | null): void {
   const focusable = dialog?.querySelectorAll<HTMLElement>(focusableSelector);
   if (!focusable?.length) return;
