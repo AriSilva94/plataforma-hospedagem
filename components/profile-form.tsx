@@ -1,8 +1,11 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import {
   LuBadgeCheck,
+  LuCircleAlert,
   LuHouse,
   LuIdCard,
   LuLockKeyhole,
@@ -14,6 +17,7 @@ import {
 import type { IconType } from "react-icons";
 import { FormFeedback } from "@/components/form-feedback";
 import { apiFetch, getErrorMessage } from "@/lib/api";
+import { profileSchema, type ProfileFormValues } from "@/lib/auth-form-schema";
 import { CurrentUser, parseCurrentUser } from "@/lib/user";
 
 const fieldClassName =
@@ -120,6 +124,18 @@ function AccessProfileCard({
 
 export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
   const [user, setUser] = useState(initialUser);
+  const {
+    register,
+    handleSubmit,
+    formState,
+    reset,
+  } = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: { name: initialUser.name, email: initialUser.email },
+    mode: "onBlur",
+    reValidateMode: "onChange",
+    shouldFocusError: true,
+  });
   const [saveError, setSaveError] = useState<string>();
   const [saveMessage, setSaveMessage] = useState<string>();
   const [isSaving, setIsSaving] = useState(false);
@@ -128,6 +144,8 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
   const [profilePendingRole, setProfilePendingRole] = useState<
     "guest" | "owner"
   >();
+  const nameError = formState.errors.name;
+  const emailError = formState.errors.email;
   const prioritizeProfiles = initialUser.roles.length === 0;
 
   async function requestUser(
@@ -151,20 +169,17 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
     return updatedUser;
   }
 
-  async function updateProfile(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function updateProfile(data: ProfileFormValues) {
     if (isSaving || profilePendingRole) return;
-    const body = JSON.stringify(
-      Object.fromEntries(new FormData(event.currentTarget)),
-    );
     setSaveError(undefined);
     setSaveMessage(undefined);
     setIsSaving(true);
     try {
       const updatedUser = await requestUser(() =>
-        apiFetch("/users/me", { method: "PATCH", body }),
+        apiFetch("/users/me", { method: "PATCH", body: JSON.stringify(data) }),
       );
       setUser(updatedUser);
+      reset({ name: updatedUser.name, email: updatedUser.email });
       setSaveMessage("Dados atualizados.");
     } catch (error) {
       setSaveError(
@@ -294,33 +309,48 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
           </p>
           <form
             className="mt-6"
-            onSubmit={(event) => void updateProfile(event)}
+            noValidate
+            onSubmit={handleSubmit(updateProfile)}
             onChange={() => setSaveMessage(undefined)}
           >
             <div className="grid gap-5 sm:grid-cols-2">
-              <label className="block text-sm font-semibold text-(--gray)">
-                Nome
+              <div>
+                <label htmlFor="profile-name" className="block text-sm font-semibold text-(--gray)">Nome</label>
                 <input
-                  required
+                  {...register("name")}
+                  id="profile-name"
                   disabled={isSaving}
-                  name="name"
                   autoComplete="name"
-                  defaultValue={user.name}
-                  className={fieldClassName}
+                  defaultValue={initialUser.name}
+                  aria-invalid={nameError ? "true" : undefined}
+                  aria-describedby={nameError ? "profile-name-error" : undefined}
+                  className={`${fieldClassName} aria-invalid:border-(--danger) aria-invalid:focus:border-(--danger) aria-invalid:focus-visible:ring-(--danger)`}
                 />
-              </label>
-              <label className="block text-sm font-semibold text-(--gray)">
-                E-mail
+                {nameError?.message ? (
+                  <p id="profile-name-error" className="auth-field-error" role="alert">
+                    <LuCircleAlert aria-hidden="true" size={15} />{nameError.message}
+                  </p>
+                ) : null}
+              </div>
+              <div>
+                <label htmlFor="profile-email" className="block text-sm font-semibold text-(--gray)">E-mail</label>
                 <input
-                  required
+                  {...register("email")}
+                  id="profile-email"
                   disabled={isSaving}
                   type="email"
-                  name="email"
                   autoComplete="email"
-                  defaultValue={user.email}
-                  className={fieldClassName}
+                  defaultValue={initialUser.email}
+                  aria-invalid={emailError ? "true" : undefined}
+                  aria-describedby={emailError ? "profile-email-error" : undefined}
+                  className={`${fieldClassName} aria-invalid:border-(--danger) aria-invalid:focus:border-(--danger) aria-invalid:focus-visible:ring-(--danger)`}
                 />
-              </label>
+                {emailError?.message ? (
+                  <p id="profile-email-error" className="auth-field-error" role="alert">
+                    <LuCircleAlert aria-hidden="true" size={15} />{emailError.message}
+                  </p>
+                ) : null}
+              </div>
             </div>
             <p className="mt-5 text-xs leading-relaxed text-(--gray)">
               Telefone, data de nascimento, cidade e estado estarão disponíveis

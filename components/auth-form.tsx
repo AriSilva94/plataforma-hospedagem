@@ -1,14 +1,42 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import Image from "next/image";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { FcGoogle } from "react-icons/fc";
+import { LuCircleAlert, LuLockKeyhole, LuMail, LuShieldCheck } from "react-icons/lu";
+import { useForm, type FieldPath } from "react-hook-form";
 import { BrandMark } from "@/components/brand-mark";
 import { FormFeedback } from "@/components/form-feedback";
 import { apiFetch, getErrorMessage } from "@/lib/api";
+import {
+  forgotPasswordSchema,
+  loginSchema,
+  registerSchema,
+  resetPasswordSchema,
+  type ForgotPasswordFormValues,
+  type LoginFormValues,
+  type RegisterFormValues,
+  type ResetPasswordFormValues,
+} from "@/lib/auth-form-schema";
+
+const authSchemas = {
+  "/auth/login": loginSchema,
+  "/auth/register": registerSchema,
+  "/auth/forgot-password": forgotPasswordSchema,
+  "/auth/reset-password": resetPasswordSchema,
+};
+
+type AuthFormValues =
+  | LoginFormValues
+  | RegisterFormValues
+  | ForgotPasswordFormValues
+  | ResetPasswordFormValues;
 
 type Field = {
-  name: string;
+  name: FieldPath<AuthFormValues>;
   label: string;
   type: "email" | "password" | "text";
   autoComplete?: string;
@@ -18,7 +46,7 @@ type Field = {
 type AuthFormProps = {
   title: string;
   description: string;
-  endpoint: string;
+  endpoint: keyof typeof authSchemas;
   fields: Field[];
   submitLabel: string;
   successPath?: string;
@@ -37,15 +65,23 @@ export function AuthForm({
   const router = useRouter();
   const [error, setError] = useState<string>();
   const [success, setSuccess] = useState<string>();
-  const [isPending, setIsPending] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    getFieldState,
+    formState,
+  } = useForm<AuthFormValues>({
+    resolver: zodResolver(authSchemas[endpoint]),
+    mode: "onBlur",
+    reValidateMode: "onChange",
+    shouldFocusError: true,
+  });
+  const isPending = formState.isSubmitting;
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function onSubmit(data: AuthFormValues) {
     setError(undefined);
     setSuccess(undefined);
-    setIsPending(true);
     try {
-      const data = Object.fromEntries(new FormData(event.currentTarget));
       const response = await apiFetch(endpoint, {
         method: "POST",
         body: JSON.stringify(data),
@@ -66,63 +102,108 @@ export function AuthForm({
       setSuccess("Solicitação recebida. Verifique sua caixa de e-mail.");
     } catch {
       setError("Não foi possível conectar ao servidor. Tente novamente.");
-    } finally {
-      setIsPending(false);
     }
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
-      <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_72%_10%,#0b2a5e,transparent_55%)]" />
-      <section className="relative w-full max-w-md rounded-3xl border border-(--line) bg-(--surface) p-7 shadow-[0_24px_60px_rgba(0,0,0,.35)] sm:p-9">
-        <BrandMark href="/" />
-        <h1 className="mt-7 text-3xl font-extrabold tracking-tight text-white">
-          {title}
-        </h1>
-        <p className="mt-2 leading-relaxed text-(--gray)">{description}</p>
-        <form className="mt-7 space-y-4" onSubmit={handleSubmit}>
-          {fields.map((field) => (
-            <label
-              key={field.name}
-              className="block text-sm font-semibold text-(--gray)"
-            >
-              {field.label}
-              <input
-                required
-                name={field.name}
-                type={field.type}
-                autoComplete={field.autoComplete}
-                defaultValue={field.defaultValue}
-                className="mt-1.5 w-full rounded-xl border border-(--line-strong) bg-(--navy) px-3.5 py-3 text-white outline-none transition placeholder:text-(--gray) focus:border-(--blue-light) focus:ring-2 focus:ring-[rgba(11,99,227,.25)]"
-              />
-            </label>
-          ))}
-          {error ? <FormFeedback tone="error">{error}</FormFeedback> : null}
-          {success ? (
-            <FormFeedback tone="success">{success}</FormFeedback>
-          ) : null}
-          <button
-            disabled={isPending}
-            className="w-full rounded-xl bg-(--blue) px-4 py-3.5 font-bold text-white transition hover:bg-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60"
-            type="submit"
-          >
-            {isPending ? "Enviando..." : submitLabel}
-          </button>
-        </form>
-        <a
-          href={`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3030"}/auth/google`}
-          className="mt-4 flex w-full items-center justify-center rounded-xl border border-(--line-strong) px-4 py-3.5 text-sm font-bold text-white transition hover:border-(--blue-light) hover:text-(--blue-light)"
-        >
-          Continuar com Google
-        </a>
-        <nav className="mt-6 flex flex-col gap-2 text-sm font-semibold text-(--blue-light)">
-          {links.map((link) => (
-            <Link key={link.href} href={link.href}>
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+    <main className="auth-shell">
+      <section className="auth-frame">
+        <section className="auth-scene">
+          <Image
+            alt=""
+            className="auth-room-image"
+            data-testid="auth-room-image"
+            fill
+            priority
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            src="/rooms/room3.png"
+          />
+          <div className="auth-scene-content">
+            <BrandMark href="/" size="md" />
+            <div className="auth-scene-copy max-w-sm">
+              <h1 className="auth-scene-title">Seu próximo lugar começa aqui.</h1>
+              <p className="mt-4 max-w-72 text-sm leading-6 text-[#d4deeb] sm:text-base">
+                Encontre estadias ou cuide dos seus espaços com segurança e discrição.
+              </p>
+            </div>
+          </div>
+        </section>
+        <section className="auth-panel">
+          <div className="auth-card">
+            <div className="auth-emblem" aria-hidden="true">D</div>
+            <h2 className="mt-5 font-serif text-3xl tracking-[-0.04em] text-(--white)">
+              {title}
+            </h2>
+            <p className="mt-2 leading-relaxed text-(--gray)">{description}</p>
+            <form className="mt-5 space-y-3.5" noValidate onSubmit={handleSubmit(onSubmit)}>
+              {fields.map((field) => {
+                const Icon = field.type === "email" ? LuMail : field.type === "password" ? LuLockKeyhole : null;
+                const fieldError = getFieldState(field.name, formState).error;
+                const inputId = `auth-${field.name}`;
+                const errorId = `${inputId}-error`;
+
+                return (
+                  <div key={field.name} className="auth-field">
+                    <label htmlFor={inputId} className="block text-sm font-semibold text-[#d5dfed]">
+                      {field.label}
+                      <span className="auth-input-wrap">
+                        {Icon ? <Icon aria-hidden="true" size={17} /> : null}
+                        <input
+                          {...register(field.name)}
+                          id={inputId}
+                          type={field.type}
+                          autoComplete={field.autoComplete}
+                          defaultValue={field.defaultValue}
+                          aria-invalid={fieldError ? "true" : undefined}
+                          aria-describedby={fieldError ? errorId : undefined}
+                          className="auth-input"
+                        />
+                      </span>
+                    </label>
+                    {fieldError?.message ? (
+                      <p id={errorId} className="auth-field-error" role="alert">
+                        <LuCircleAlert aria-hidden="true" size={15} />
+                        {fieldError.message}
+                      </p>
+                    ) : null}
+                  </div>
+                );
+              })}
+              {error ? <FormFeedback tone="error">{error}</FormFeedback> : null}
+              {success ? <FormFeedback tone="success">{success}</FormFeedback> : null}
+              <button disabled={isPending} className="auth-submit" type="submit">
+                <span>{isPending ? "Enviando..." : submitLabel}</span>
+                <span aria-hidden="true">→</span>
+              </button>
+            </form>
+            <div className="auth-divider">ou continue com</div>
+            <div className="flex justify-center">
+              <a
+                aria-label="Continuar com Google"
+                href={`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3030"}/auth/google`}
+                className="auth-provider"
+              >
+                <FcGoogle aria-hidden="true" size={24} />
+              </a>
+            </div>
+            <nav className="mt-5 flex flex-col items-center gap-2 text-center text-sm font-semibold text-(--blue-light)">
+              {links.map((link) => (
+                <Link key={link.href} href={link.href} className="auth-link">
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+            <p className="auth-reassurance">
+              <LuShieldCheck aria-hidden="true" data-testid="auth-reassurance-icon" size={15} />
+              <span>Seus dados estão seguros com a gente</span>
+            </p>
+          </div>
+        </section>
       </section>
+      <footer className="auth-footer">
+        <span>© 2026 DOMUS X. Todos os direitos reservados.</span>
+        <span>Seu espaço, do seu jeito.</span>
+      </footer>
     </main>
   );
 }
