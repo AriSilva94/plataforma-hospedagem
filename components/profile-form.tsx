@@ -39,7 +39,7 @@ function VerificationStatus({
   return (
     <div className="flex flex-col gap-2 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:gap-4">
       <div className="flex min-w-0 items-center gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--surface-raised) text-(--blue-light)">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-(--surface-raised) text-(--blue-light)">
           <Icon aria-hidden="true" size={17} />
         </span>
         <div className="min-w-0">
@@ -76,7 +76,7 @@ function AccessProfileCard({
   return (
     <article className="flex h-full flex-col rounded-2xl border border-(--line-strong) bg-(--surface) p-5 sm:p-6">
       <div className="flex items-start justify-between gap-3">
-        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-(--surface-raised) text-(--blue-light)">
+        <span className="flex size-11 items-center justify-center rounded-xl bg-(--surface-raised) text-(--blue-light)">
           <Icon aria-hidden="true" size={22} />
         </span>
         {active ? (
@@ -275,7 +275,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
     <main className="min-h-[calc(100vh-72px)] px-4 pt-8 pb-28 sm:px-6 md:pt-12 md:pb-16">
       <div className="mx-auto max-w-4xl">
         <header className="grid grid-cols-[4rem_minmax(0,1fr)] items-center gap-4 border-b border-(--line) pb-8 sm:flex sm:flex-wrap sm:gap-5">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-(--blue) text-2xl font-extrabold text-white sm:h-18 sm:w-18">
+          <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-(--blue) text-2xl font-extrabold text-white sm:h-18 sm:w-18">
             {user.name.slice(0, 1).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">

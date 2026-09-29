@@ -24,7 +24,7 @@ const searchFields: { label: string; placeholder: string; icon: IconName; option
   { label: "Duração", placeholder: "Por período", icon: "history", options: ["1 diária", "2 diárias", "Por período"] },
 ];
 
-const sectionShell = "mx-auto w-full max-w-[1440px] px-6 md:px-10 lg:px-12";
+const sectionShell = "mx-auto w-full max-w-360 px-6 md:px-10 lg:px-12";
 
 export function UserHome({ user }: { user: { name: string } }) {
   const [openField, setOpenField] = useState<string>();
@@ -35,7 +35,7 @@ export function UserHome({ user }: { user: { name: string } }) {
     <>
       <SiteHeader user={user} />
 
-      <main className="pb-[72px] md:pb-0">
+      <main className="pb-18 md:pb-0">
         <section id="inicio" className="relative overflow-hidden">
           <Image src="/rooms/room1.png" alt="" fill priority className="object-cover" sizes="100vw" />
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,17,40,.45),rgba(3,17,40,.9)_78%)]" />
@@ -60,7 +60,7 @@ export function UserHome({ user }: { user: { name: string } }) {
                 }}
               />
             ))}
-            <button type="button" className="mt-1.5 flex items-center justify-center gap-2 rounded-[13px] bg-(--blue) px-6 py-[15px] text-sm font-bold text-white transition hover:bg-(--blue-light) md:mt-0 md:h-full"><Icon name="search" size={18} /> Buscar locais</button>
+            <button type="button" className="mt-1.5 flex items-center justify-center gap-2 rounded-[13px] bg-(--blue) px-6 py-3.75 text-sm font-bold text-white transition hover:bg-(--blue-light) md:mt-0 md:h-full"><Icon name="search" size={18} /> Buscar locais</button>
           </div>
         </section>
 
@@ -76,12 +76,12 @@ export function UserHome({ user }: { user: { name: string } }) {
 
         <section aria-labelledby="proprietarios-titulo" className={`${sectionShell} pb-12 pt-14 md:pb-16 md:pt-16`}>
           <div className="relative overflow-hidden rounded-[18px] bg-[linear-gradient(120deg,#0b3a8f,#0B63E3)] p-6 md:flex md:items-center md:justify-between md:gap-8 md:p-8">
-            <div className="absolute -bottom-10 -right-7 h-[180px] w-[180px] rounded-full bg-white/[.08]" />
-            <div className="relative max-w-[440px]">
+            <div className="absolute -bottom-10 -right-7 size-45 rounded-full bg-white/8" />
+            <div className="relative max-w-110">
               <h2 id="proprietarios-titulo" className="text-[22px] font-extrabold leading-tight text-white">Rentabilize seu espaço com segurança</h2>
               <p className="mt-2 text-[13.5px] leading-relaxed text-white/85">Anuncie quartos e suítes. Você controla agenda, preços e privacidade.</p>
             </div>
-            <span className="relative mt-5 inline-flex shrink-0 rounded-xl bg-white px-[22px] py-[13px] text-sm font-bold text-(--blue) md:mt-0">Anunciar meu espaço</span>
+            <span className="relative mt-5 inline-flex shrink-0 rounded-xl bg-white px-5.5 py-3.25 text-sm font-bold text-(--blue) md:mt-0">Anunciar meu espaço</span>
           </div>
         </section>
       </main>
@@ -90,12 +90,12 @@ export function UserHome({ user }: { user: { name: string } }) {
 }
 
 function SearchField({ label, placeholder, icon, options, value, open, onToggle, onPick }: { label: string; placeholder: string; icon: IconName; options: string[]; value?: string; open: boolean; onToggle: () => void; onPick: (value: string) => void }) {
-  return <div className="relative border-b border-[rgba(3,17,40,.08)] md:border-b-0 md:border-r md:last-of-type:border-r-0"><button type="button" onClick={onToggle} aria-expanded={open} className="flex w-full items-center gap-3 px-3.5 py-[15px] text-left md:flex-wrap md:gap-x-2 md:gap-y-0.5 md:py-3"><span className="text-(--blue)"><Icon name={icon} size={18} /></span><span className="w-[74px] text-[13px] font-semibold text-[#3a4a63] md:w-auto">{label}</span><span className={`flex-1 truncate text-sm font-semibold md:order-last md:basis-full ${value ? "text-[#0f1f39]" : "text-[#8695ab]"}`}>{value ?? placeholder}</span><span className={open ? "rotate-180 text-[#8695ab] transition-transform md:ml-auto" : "text-[#8695ab] transition-transform md:ml-auto"}><Icon name="chevronDown" size={18} /></span></button>{open ? <div className="absolute inset-x-2.5 top-[calc(100%-4px)] z-20 flex flex-col gap-1 rounded-xl border border-slate-200 bg-white p-2.5 shadow-[0_16px_32px_rgba(3,17,40,.2)] md:min-w-[200px]">{options.map((option) => <button key={option} type="button" onClick={() => onPick(option)} className="rounded-lg px-3 py-[11px] text-left text-[13.5px] font-semibold text-[#0f1f39] hover:bg-[rgba(11,99,227,.1)]">{option}</button>)}</div> : null}</div>;
+  return <div className="relative border-b border-[rgba(3,17,40,.08)] md:border-b-0 md:border-r md:last-of-type:border-r-0"><button type="button" onClick={onToggle} aria-expanded={open} className="flex w-full items-center gap-3 px-3.5 py-3.75 text-left md:flex-wrap md:gap-x-2 md:gap-y-0.5 md:py-3"><span className="text-(--blue)"><Icon name={icon} size={18} /></span><span className="w-18.5 text-[13px] font-semibold text-[#3a4a63] md:w-auto">{label}</span><span className={`flex-1 truncate text-sm font-semibold md:order-last md:basis-full ${value ? "text-[#0f1f39]" : "text-[#8695ab]"}`}>{value ?? placeholder}</span><span className={open ? "rotate-180 text-[#8695ab] transition-transform md:ml-auto" : "text-[#8695ab] transition-transform md:ml-auto"}><Icon name="chevronDown" size={18} /></span></button>{open ? <div className="absolute inset-x-2.5 top-[calc(100%-4px)] z-20 flex flex-col gap-1 rounded-xl border border-slate-200 bg-white p-2.5 shadow-[0_16px_32px_rgba(3,17,40,.2)] md:min-w-50">{options.map((option) => <button key={option} type="button" onClick={() => onPick(option)} className="rounded-lg px-3 py-2.75 text-left text-[13.5px] font-semibold text-[#0f1f39] hover:bg-[rgba(11,99,227,.1)]">{option}</button>)}</div> : null}</div>;
 }
 
 function SpaceCard({ title, region, price, rating, image }: { title: string; region: string; price: string; rating: string; image: string }) {
   return <article className="overflow-hidden rounded-2xl border border-(--line) bg-(--surface)">
-    <div className="relative aspect-[4/3]"><Image src={image} alt="" fill className="object-cover" sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" /><span className="absolute left-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(3,17,40,.6)] text-white"><Icon name="heart" size={18} /></span><span className="absolute right-2.5 top-2.5 flex items-center gap-1 rounded-full bg-[rgba(3,17,40,.7)] px-2.5 py-1 text-[11px] font-bold text-white"><Icon name="starFill" size={12} className="text-(--warning)" /> {rating}</span></div>
+    <div className="relative aspect-4/3"><Image src={image} alt="" fill className="object-cover" sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" /><span className="absolute left-2.5 top-2.5 flex size-8 items-center justify-center rounded-full bg-[rgba(3,17,40,.6)] text-white"><Icon name="heart" size={18} /></span><span className="absolute right-2.5 top-2.5 flex items-center gap-1 rounded-full bg-[rgba(3,17,40,.7)] px-2.5 py-1 text-[11px] font-bold text-white"><Icon name="starFill" size={12} className="text-(--warning)" /> {rating}</span></div>
     <div className="p-4"><h3 className="text-sm font-bold text-white">{title}</h3><p className="mt-1 text-xs text-(--gray)">{region}</p><p className="mt-3 text-xs text-(--gray)">A partir de <strong className="text-sm text-(--blue-light)">{price}</strong> / 2h</p></div>
   </article>;
 }

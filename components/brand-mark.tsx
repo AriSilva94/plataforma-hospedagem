@@ -3,9 +3,9 @@ import Link from "next/link";
 type BrandSize = "sm" | "md" | "lg";
 
 const sizes: Record<BrandSize, { label: string; badge: string }> = {
-  sm: { label: "text-sm", badge: "h-7 w-7 rounded-lg text-xs" },
-  md: { label: "text-base", badge: "h-8 w-8 rounded-xl text-sm" },
-  lg: { label: "text-xl", badge: "h-8 w-8 rounded-xl text-sm" },
+  sm: { label: "text-sm", badge: "size-7 rounded-lg text-xs" },
+  md: { label: "text-base", badge: "size-8 rounded-xl text-sm" },
+  lg: { label: "text-xl", badge: "size-8 rounded-xl text-sm" },
 };
 
 export function BrandMark({

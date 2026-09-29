@@ -12,7 +12,7 @@ export default async function ProfilePage() {
       {user ? (
         <ProfileForm user={user} />
       ) : (
-        <main className="flex min-h-[calc(100vh-72px)] items-center justify-center px-6 pb-[72px] md:pb-0">
+        <main className="flex min-h-[calc(100vh-72px)] items-center justify-center px-6 pb-18 md:pb-0">
           <section className="w-full max-w-md rounded-3xl border border-(--line) bg-(--surface) p-8 shadow-[0_24px_60px_rgba(0,0,0,.25)]">
             <h1 className="text-3xl font-extrabold">Seu perfil</h1>
             {unavailable ? (
