@@ -44,8 +44,8 @@ function Photo({ media, alt, sizes, className, eager }: { media?: Media; alt: st
   );
 }
 
-export default async function PublicPropertyPage({ params }: PageProps<"/imoveis/[propertyId]">) {
-  const { propertyId } = await params;
+export default async function PublicPropertyPage({ params, searchParams }: PageProps<"/imoveis/[propertyId]">) {
+  const [{ propertyId }, { previa }] = await Promise.all([params, searchParams]);
   const [{ user }, result] = await Promise.all([
     getCurrentUser(),
     getApiData(`/properties/${propertyId}`, publicPropertyDetailSchema),
@@ -72,6 +72,16 @@ export default async function PublicPropertyPage({ params }: PageProps<"/imoveis
   return (
     <>
       <SiteHeader user={user} />
+      {previa === "1" ? (
+        <div className="border-b border-(--line-strong) bg-(--surface-raised) px-4 py-3 sm:px-6">
+          <p className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 text-sm text-(--gray)">
+            <span>Prévia: é assim que os hóspedes veem este anúncio.</span>
+            <Link href={`/meus-imoveis/${property.id}`} className="font-semibold text-(--blue-light) underline-offset-4 hover:underline">
+              Voltar ao gerenciamento
+            </Link>
+          </p>
+        </div>
+      ) : null}
       <main className="px-4 pt-6 pb-28 sm:px-6 md:pt-10 md:pb-16">
         <div className="mx-auto max-w-5xl">
           <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-(--gray) transition-colors hover:text-white">
@@ -192,7 +202,7 @@ export default async function PublicPropertyPage({ params }: PageProps<"/imoveis
           ) : null}
 
           {property.generalInfo ? (
-            <Section title="Informações gerais">
+            <Section title="Informações úteis">
               <p className="whitespace-pre-line">{property.generalInfo}</p>
             </Section>
           ) : null}

@@ -1,6 +1,6 @@
 import type { UseFormRegisterReturn } from "react-hook-form";
 import { FieldError } from "@/components/owner/field-error";
-import { checkboxClassName, choiceClassName } from "@/components/owner/styles";
+import { checkboxClassName, choiceClassName, radioClassName } from "@/components/owner/styles";
 
 export function ChoiceGroup({
   id,
@@ -30,7 +30,7 @@ export function ChoiceGroup({
       <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {options.map((option) => (
           <label key={option.value} className={choiceClassName}>
-            <input type={type} value={option.value} className={checkboxClassName} {...registration} />
+            <input type={type} value={option.value} className={type === "radio" ? radioClassName : checkboxClassName} {...registration} />
             {option.label}
           </label>
         ))}

@@ -15,6 +15,11 @@ export const dangerButtonClassName =
 export const choiceClassName =
   "flex cursor-pointer items-center gap-3 rounded-xl border border-(--line-strong) bg-(--navy) px-4 py-3 text-sm font-semibold text-white transition-colors hover:border-(--blue-light) has-checked:border-(--blue-light) has-checked:bg-[rgba(11,99,227,.14)] has-focus-visible:ring-2 has-focus-visible:ring-(--blue-light)";
 
-export const checkboxClassName = "size-4 shrink-0 accent-(--blue)";
+const choiceControlClassName =
+  "size-5 shrink-0 appearance-none border border-(--line-strong) bg-(--surface) bg-center bg-no-repeat transition-colors checked:border-(--blue) checked:bg-(--blue)";
+
+export const checkboxClassName = `${choiceControlClassName} rounded-md checked:bg-[url("data:image/svg+xml,%3Csvg_xmlns='http://www.w3.org/2000/svg'_viewBox='0_0_16_16'_fill='none'%3E%3Cpath_d='M3.5_8.5l3_3_6-7'_stroke='white'_stroke-width='2'_stroke-linecap='round'_stroke-linejoin='round'/%3E%3C/svg%3E")]`;
+
+export const radioClassName = `${choiceControlClassName} rounded-full checked:bg-[radial-gradient(circle,white_0_32%,transparent_36%)]`;
 
 export const cardClassName = "rounded-2xl border border-(--line-strong) bg-(--surface) p-5 sm:p-6";

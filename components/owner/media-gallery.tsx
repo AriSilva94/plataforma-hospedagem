@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { z } from "zod";
 import { LuArrowLeft, LuArrowRight, LuImagePlus, LuStar, LuTrash2 } from "react-icons/lu";
 import { FormFeedback } from "@/components/form-feedback";
+import { ConfirmDialog } from "@/components/owner/confirm-dialog";
 import { secondaryButtonClassName } from "@/components/owner/styles";
 import { sendApiRequest, toErrorMessage } from "@/lib/api";
 import { mediaSchema, type Media } from "@/lib/properties";
@@ -15,7 +16,7 @@ const videoTypes = ["video/mp4", "video/quicktime", "video/webm"];
 const galleryResponseSchema = z.object({ media: z.array(mediaSchema) });
 
 const iconButtonClassName =
-  "flex size-9 items-center justify-center rounded-lg border border-(--line-strong) bg-(--navy) text-white transition-colors hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-40";
+  "flex size-11 items-center justify-center rounded-lg sm:size-9 border border-(--line-strong) bg-(--navy) text-white transition-colors hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-40";
 
 export function MediaGallery({
   basePath,
@@ -36,6 +37,7 @@ export function MediaGallery({
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [message, setMessage] = useState<string>();
+  const [removing, setRemoving] = useState<Media>();
   const accept = [...imageTypes, ...(allowVideo ? videoTypes : [])].join(",");
   const coverId = media.find((item) => item.type === "IMAGE")?.id;
   const disabled = busy || Boolean(progress);
@@ -109,7 +111,6 @@ export function MediaGallery({
   }
 
   async function remove(item: Media) {
-    if (!window.confirm(item.type === "IMAGE" ? "Remover esta foto?" : "Remover este vídeo?")) return;
     setBusy(true);
     setErrors([]);
     setMessage(undefined);
@@ -120,8 +121,11 @@ export function MediaGallery({
       setErrors([toErrorMessage(error)]);
     } finally {
       setBusy(false);
+      setRemoving(undefined);
     }
   }
+
+  const removingTitle = removing?.type === "VIDEO" ? "Remover este vídeo?" : "Remover esta foto?";
 
   return (
     <section aria-label="Galeria" className="flex flex-col gap-6 py-8">
@@ -187,7 +191,7 @@ export function MediaGallery({
                       Definir como capa
                     </button>
                   ) : null}
-                  <button type="button" aria-label={`Remover ${label}`} disabled={disabled} onClick={() => void remove(item)} className={`${iconButtonClassName} ml-auto text-(--danger)`}>
+                  <button type="button" aria-label={`Remover ${label}`} disabled={disabled} onClick={() => setRemoving(item)} className={`${iconButtonClassName} ml-auto text-(--danger)`}>
                     <LuTrash2 aria-hidden="true" size={16} />
                   </button>
                 </div>
@@ -196,6 +200,17 @@ export function MediaGallery({
           })}
         </ol>
       )}
+
+      <ConfirmDialog
+        open={Boolean(removing)}
+        title={removingTitle}
+        description="O arquivo será apagado do anúncio. Essa ação não pode ser desfeita."
+        confirmLabel="Remover"
+        pendingLabel="Removendo..."
+        pending={busy}
+        onConfirm={() => removing && void remove(removing)}
+        onCancel={() => setRemoving(undefined)}
+      />
     </section>
   );
 }

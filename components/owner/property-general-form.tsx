@@ -3,25 +3,48 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { FormFeedback } from "@/components/form-feedback";
+import { FormActions } from "@/components/owner/form-actions";
+import { SavedNotice } from "@/components/owner/saved-notice";
+import { UnsavedChangesGuard } from "@/components/owner/unsaved-changes-guard";
 import { ChoiceGroup, optionsFrom } from "@/components/owner/choice-group";
 import { FieldError } from "@/components/owner/field-error";
+import { CharacterCount, FieldHint } from "@/components/owner/field-hint";
+import { OptionalDetails } from "@/components/owner/optional-details";
 import { fieldClassName, labelClassName, primaryButtonClassName } from "@/components/owner/styles";
 import {
   propertyGeneralSchema,
+  propertyGuidedGeneralSchema,
   type PropertyGeneralInput,
   type PropertyGeneralValues,
 } from "@/lib/owner-forms";
 import { sendApiRequest, toErrorMessage } from "@/lib/api";
-import { propertyFeatureLabels, propertyTypeLabels, type PropertyDetail } from "@/lib/properties";
+import {
+  propertyFeatureGroups,
+  propertyFeatureLabels,
+  propertyTypeLabels,
+  type PropertyDetail,
+} from "@/lib/properties";
+import { setupStepHref } from "@/lib/setup-steps";
 
-export function PropertyGeneralForm({ property }: { property?: PropertyDetail }) {
+function detailsSummary(property?: PropertyDetail): string {
+  if (!property) return "Regras da casa, informações úteis e características.";
+  const parts = [
+    property.houseRules ? "regras da casa" : null,
+    property.generalInfo ? "informações úteis" : null,
+    property.features.length > 0 ? `${property.features.length} ${property.features.length === 1 ? "característica" : "características"}` : null,
+  ].filter(Boolean);
+  return parts.length > 0 ? `Preenchido: ${parts.join(", ")}.` : "Regras da casa, informações úteis e características.";
+}
+
+export function PropertyGeneralForm({ property, guided }: { property?: PropertyDetail; guided?: { nextHref: string } }) {
   const router = useRouter();
+  const isGuided = !property || Boolean(guided);
   const [error, setError] = useState<string>();
   const [message, setMessage] = useState<string>();
-  const { register, handleSubmit, formState } = useForm<PropertyGeneralInput, unknown, PropertyGeneralValues>({
-    resolver: zodResolver(propertyGeneralSchema),
+  const { register, handleSubmit, control, getValues, reset, formState } = useForm<PropertyGeneralInput, unknown, PropertyGeneralValues>({
+    resolver: zodResolver(isGuided ? propertyGuidedGeneralSchema : propertyGeneralSchema),
     defaultValues: {
       title: property?.title ?? "",
       type: property?.type,
@@ -29,11 +52,14 @@ export function PropertyGeneralForm({ property }: { property?: PropertyDetail })
       houseRules: property?.houseRules ?? "",
       generalInfo: property?.generalInfo ?? "",
       features: property?.features ?? [],
-      featured: property?.featured ?? false,
     },
     mode: "onBlur",
   });
-  const { errors, isSubmitting } = formState;
+  const { errors, isSubmitting, isDirty } = formState;
+  const editing = Boolean(property) && !guided;
+  const published = Boolean(property) && property?.status !== "DRAFT";
+  const description = useWatch({ control, name: "description" });
+  const detailsHaveErrors = Boolean(errors.houseRules || errors.generalInfo);
 
   async function save(values: PropertyGeneralValues) {
     setError(undefined);
@@ -44,12 +70,17 @@ export function PropertyGeneralForm({ property }: { property?: PropertyDetail })
         body: JSON.stringify(values),
       });
       if (property) {
-        setMessage("Informações gerais salvas.");
+        if (guided) {
+          router.push(guided.nextHref);
+          return;
+        }
+        setMessage("Informações salvas.");
+        reset(getValues());
         router.refresh();
         return;
       }
       const id = typeof saved === "object" && saved !== null && "id" in saved ? String(saved.id) : undefined;
-      router.push(id ? `/meus-imoveis/${id}/editar?secao=localizacao` : "/meus-imoveis");
+      router.push(id ? setupStepHref(id, "endereco") : "/meus-imoveis");
     } catch (requestError) {
       setError(toErrorMessage(requestError));
     }
@@ -63,11 +94,13 @@ export function PropertyGeneralForm({ property }: { property?: PropertyDetail })
           <input
             id="property-title"
             {...register("title")}
-            placeholder="Ex.: Casa ampla na Asa Norte"
+            placeholder="Ex.: Casa com 4 quartos perto do metrô"
+            maxLength={120}
             aria-invalid={errors.title ? "true" : undefined}
-            aria-describedby={errors.title ? "property-title-error" : undefined}
+            aria-describedby={`property-title-hint${errors.title ? " property-title-error" : ""}`}
             className={fieldClassName}
           />
+          <FieldHint id="property-title-hint">É o que o hóspede lê primeiro. Mencione o tipo de imóvel e a região.</FieldHint>
           <FieldError id="property-title-error" message={errors.title?.message} />
         </div>
         <div>
@@ -89,78 +122,87 @@ export function PropertyGeneralForm({ property }: { property?: PropertyDetail })
       </div>
 
       <div>
-        <label htmlFor="property-description" className={labelClassName}>Descrição</label>
+        <label htmlFor="property-description" className={labelClassName}>
+          Descrição do imóvel
+        </label>
         <textarea
           id="property-description"
           rows={5}
           {...register("description")}
           placeholder="Apresente o imóvel, o ambiente e o que torna a estadia confortável."
           aria-invalid={errors.description ? "true" : undefined}
-          aria-describedby={errors.description ? "property-description-error" : undefined}
+          aria-describedby={`property-description-hint property-description-count${errors.description ? " property-description-error" : ""}`}
           className={fieldClassName}
         />
+        <FieldHint id="property-description-hint">
+          {published
+            ? "Obrigatória: um imóvel publicado precisa manter a descrição."
+            : "Obrigatória para publicar. Fale do ambiente, da vizinhança e do que está incluso."}
+        </FieldHint>
+        <CharacterCount id="property-description-count" length={description.length} max={5000} />
         <FieldError id="property-description-error" message={errors.description?.message} />
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2">
-        <div>
-          <label htmlFor="property-rules" className={labelClassName}>Regras da casa</label>
-          <textarea
-            id="property-rules"
-            rows={4}
-            {...register("houseRules")}
-            placeholder="Ex.: silêncio após 22h, visitas com aviso prévio."
-            aria-invalid={errors.houseRules ? "true" : undefined}
-            aria-describedby={errors.houseRules ? "property-rules-error" : undefined}
-            className={fieldClassName}
-          />
-          <FieldError id="property-rules-error" message={errors.houseRules?.message} />
+      <OptionalDetails
+        title="Mais detalhes"
+        description={detailsSummary(property)}
+        forceOpen={detailsHaveErrors}
+      >
+        <div className="grid gap-5 md:grid-cols-2">
+          <div>
+            <label htmlFor="property-rules" className={labelClassName}>Regras da casa</label>
+            <textarea
+              id="property-rules"
+              rows={4}
+              {...register("houseRules")}
+              placeholder="Ex.: silêncio após 22h, visitas com aviso prévio."
+              aria-invalid={errors.houseRules ? "true" : undefined}
+              aria-describedby={errors.houseRules ? "property-rules-error" : undefined}
+              className={fieldClassName}
+            />
+            <FieldError id="property-rules-error" message={errors.houseRules?.message} />
+          </div>
+          <div>
+            <label htmlFor="property-info" className={labelClassName}>Informações úteis ao hóspede</label>
+            <textarea
+              id="property-info"
+              rows={4}
+              {...register("generalInfo")}
+              placeholder="Ex.: check-in a partir das 14h, ponto de ônibus a 5 min."
+              aria-invalid={errors.generalInfo ? "true" : undefined}
+              aria-describedby={errors.generalInfo ? "property-info-error" : undefined}
+              className={fieldClassName}
+            />
+            <FieldError id="property-info-error" message={errors.generalInfo?.message} />
+          </div>
         </div>
-        <div>
-          <label htmlFor="property-info" className={labelClassName}>Informações gerais</label>
-          <textarea
-            id="property-info"
-            rows={4}
-            {...register("generalInfo")}
-            placeholder="Ex.: transporte próximo, comércio no entorno, horários de entrada."
-            aria-invalid={errors.generalInfo ? "true" : undefined}
-            aria-describedby={errors.generalInfo ? "property-info-error" : undefined}
-            className={fieldClassName}
-          />
-          <FieldError id="property-info-error" message={errors.generalInfo?.message} />
+
+        <div className="flex flex-col gap-5">
+          <p className="text-xs leading-relaxed text-(--gray)">Marque o que o imóvel oferece. Os hóspedes veem isso no anúncio.</p>
+          {propertyFeatureGroups.map((group) => (
+            <ChoiceGroup
+              key={group.id}
+              id={`property-features-${group.id}`}
+              legend={group.legend}
+              type="checkbox"
+              options={group.features.map((feature) => ({ value: feature, label: propertyFeatureLabels[feature] }))}
+              registration={register("features")}
+            />
+          ))}
         </div>
-      </div>
-
-      <ChoiceGroup
-        id="property-features"
-        legend="Características do imóvel"
-        type="checkbox"
-        options={optionsFrom(propertyFeatureLabels)}
-        registration={register("features")}
-      />
-
-      <label className="flex cursor-pointer items-start justify-between gap-4 rounded-2xl border border-(--line-strong) bg-(--surface) p-5 has-focus-visible:ring-2 has-focus-visible:ring-(--blue-light)">
-        <span>
-          <span className="block font-bold text-white">Destacar na home</span>
-          <span className="mt-1 block text-sm leading-relaxed text-(--gray)">
-            Exibe o imóvel em &quot;Locais em destaque&quot; quando estiver ativo e com quarto disponível.
-          </span>
-        </span>
-        <input type="checkbox" role="switch" {...register("featured")} className="peer sr-only" />
-        <span
-          aria-hidden="true"
-          className="relative mt-1 h-6 w-11 shrink-0 rounded-full bg-(--surface-raised) ring-1 ring-(--line-strong) transition-colors peer-checked:bg-(--blue) after:absolute after:left-0.5 after:top-0.5 after:size-5 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-5"
-        />
-      </label>
+      </OptionalDetails>
 
       {error ? <FormFeedback tone="error">{error}</FormFeedback> : null}
-      {message ? <FormFeedback tone="success">{message}</FormFeedback> : null}
+      {message && property ? <SavedNotice message={message} propertyId={property.id} showPublicLink={property.status === "ACTIVE"} /> : null}
 
-      <div>
-        <button type="submit" disabled={isSubmitting} className={primaryButtonClassName}>
-          {isSubmitting ? "Salvando..." : property ? "Salvar informações" : "Criar rascunho"}
+      <FormActions>
+        <button type="submit" disabled={isSubmitting || (editing && !isDirty)} className={primaryButtonClassName}>
+          {isSubmitting ? "Salvando..." : isGuided ? "Salvar e continuar" : "Salvar informações"}
         </button>
-      </div>
+        {editing && isDirty ? <span className="text-sm text-(--warning)">Alterações não salvas</span> : null}
+      </FormActions>
+      {!property ? <p className="text-xs text-(--gray)">Você poderá editar tudo depois. O imóvel só aparece para hóspedes quando for publicado.</p> : null}
+      <UnsavedChangesGuard dirty={isDirty && !isSubmitting} />
     </form>
   );
 }

@@ -8,7 +8,7 @@ import { PropertyStatusBadge } from "@/components/owner/property-status-badge";
 import { StatusBadge } from "@/components/owner/status-badge";
 import { primaryButtonClassName } from "@/components/owner/styles";
 import { getApiData } from "@/lib/server-api";
-import { formatLocation, propertySummarySchema, propertyTypeLabels } from "@/lib/properties";
+import { formatCents, formatLocation, propertySummarySchema, propertyTypeLabels } from "@/lib/properties";
 
 export default async function MyPropertiesPage() {
   const result = await getApiData("/owner/properties", z.array(propertySummarySchema));
@@ -39,7 +39,7 @@ export default async function MyPropertiesPage() {
           <div>
             <h2 className="text-lg font-bold text-white">Nenhum imóvel cadastrado</h2>
             <p className="mt-1 max-w-prose text-sm leading-relaxed text-(--gray)">
-              Comece pelas informações gerais. Você pode salvar como rascunho e completar localização, áreas, fotos e quartos depois.
+              Comece pelo básico. O imóvel fica como rascunho até você informar endereço, fotos e o primeiro quarto e publicar.
             </p>
           </div>
           {newPropertyLink}
@@ -69,8 +69,14 @@ export default async function MyPropertiesPage() {
                     </span>
                     <span className="flex items-center gap-2">
                       <LuBedDouble aria-hidden="true" size={15} className="shrink-0" />
-                      {property.roomCount === 1 ? "1 quarto" : `${property.roomCount} quartos`}
+                      {property.roomCount === 1 ? "1 quarto" : `${property.roomCount} quartos`} · {property.availableRoomCount} {property.availableRoomCount === 1 ? "reservável" : "reserváveis"}
                     </span>
+                    {property.minAvailablePriceCents !== null ? (
+                      <span className="font-semibold text-white">
+                        <span className="font-normal text-(--gray)">a partir de </span>
+                        {formatCents(property.minAvailablePriceCents)}
+                      </span>
+                    ) : null}
                   </div>
                 </div>
               </Link>

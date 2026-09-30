@@ -22,7 +22,6 @@ export const propertyGeneralSchema = z.object({
   houseRules: optionalText(3000),
   generalInfo: optionalText(3000),
   features: z.array(z.string()),
-  featured: z.boolean(),
 });
 
 export const propertyLocationSchema = z.object({
@@ -43,6 +42,25 @@ export const propertyLocationSchema = z.object({
     .refine((points) => points.every((point) => point.length >= 2 && point.length <= 120), {
       error: "Cada ponto de referência deve ter entre 2 e 120 caracteres.",
     }),
+});
+
+export const propertyGuidedGeneralSchema = propertyGeneralSchema.extend({
+  description: optionalText(5000).min(1, { error: "Descreva o imóvel para continuar." }),
+});
+
+const requiredText = (max: number, message: string) => optionalText(max).min(1, { error: message });
+
+export const propertyGuidedLocationSchema = propertyLocationSchema.extend({
+  postalCode: z
+    .string()
+    .trim()
+    .min(1, { error: "Informe o CEP." })
+    .regex(/^\d{5}-?\d{3}$/, { error: "Informe um CEP com 8 dígitos." }),
+  street: requiredText(160, "Informe a rua ou avenida."),
+  number: requiredText(20, "Informe o número."),
+  neighborhood: requiredText(120, "Informe o bairro."),
+  city: requiredText(120, "Informe a cidade."),
+  state: z.union([z.literal(""), z.enum(brazilianStates)]).refine((value) => value !== "", { error: "Selecione o estado." }),
 });
 
 export const sharedAreasSchema = z.object({

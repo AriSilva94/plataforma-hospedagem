@@ -23,7 +23,7 @@ export function OwnerPage({
         {back ? (
           <Link
             href={back.href}
-            className="inline-flex items-center gap-2 rounded-lg text-sm font-semibold text-(--gray) transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--blue-light)"
+            className="inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-semibold text-(--gray) transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--blue-light)"
           >
             <LuArrowLeft aria-hidden="true" size={16} />
             {back.label}

@@ -3,10 +3,16 @@
 import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { FormFeedback } from "@/components/form-feedback";
+import { FormActions } from "@/components/owner/form-actions";
+import { SavedNotice } from "@/components/owner/saved-notice";
+import { UnsavedChangesGuard } from "@/components/owner/unsaved-changes-guard";
 import { ChoiceGroup, optionsFrom } from "@/components/owner/choice-group";
+import { ConfirmDialog } from "@/components/owner/confirm-dialog";
 import { FieldError } from "@/components/owner/field-error";
+import { FieldHint } from "@/components/owner/field-hint";
+import { OptionalDetails } from "@/components/owner/optional-details";
 import {
   dangerButtonClassName,
   fieldClassName,
@@ -23,7 +29,9 @@ import { sendApiRequest, toErrorMessage } from "@/lib/api";
 import {
   bathroomTypeLabels,
   genderIdentityLabels,
+  roomAmenityGroups,
   roomAmenityLabels,
+  roomStatusHints,
   roomStatusLabels,
   type RoomDetail,
 } from "@/lib/properties";
@@ -40,12 +48,22 @@ function FormSection({ id, title, description, children }: { id: string; title: 
   );
 }
 
-export function RoomForm({ propertyId, room }: { propertyId: string; room?: RoomDetail }) {
+function roomDetailsSummary(room: RoomDetail): string {
+  const parts = [
+    room.description ? "descrição" : null,
+    room.amenities.length > 0 ? `${room.amenities.length} ${room.amenities.length === 1 ? "comodidade" : "comodidades"}` : null,
+    room.additionalInfo ? "informações adicionais" : null,
+  ].filter(Boolean);
+  return parts.length > 0 ? `Preenchido: ${parts.join(", ")}.` : "Descrição, comodidades e informações adicionais ajudam o hóspede a escolher.";
+}
+
+export function RoomForm({ propertyId, room, createdHref }: { propertyId: string; room?: RoomDetail; createdHref?: string }) {
   const router = useRouter();
   const [error, setError] = useState<string>();
   const [message, setMessage] = useState<string>();
   const [deleting, setDeleting] = useState(false);
-  const { register, handleSubmit, formState } = useForm<RoomInput, unknown, RoomValues>({
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const { register, handleSubmit, control, getValues, reset, formState } = useForm<RoomInput, unknown, RoomValues>({
     resolver: zodResolver(roomSchema),
     defaultValues: {
       title: room?.title ?? "",
@@ -60,7 +78,8 @@ export function RoomForm({ propertyId, room }: { propertyId: string; room?: Room
     },
     mode: "onBlur",
   });
-  const { errors, isSubmitting } = formState;
+  const { errors, isSubmitting, isDirty } = formState;
+  const status = useWatch({ control, name: "status" });
 
   async function save({ price, ...values }: RoomValues) {
     setError(undefined);
@@ -70,19 +89,20 @@ export function RoomForm({ propertyId, room }: { propertyId: string; room?: Room
       if (room) {
         await sendApiRequest(`/owner/rooms/${room.id}`, { method: "PATCH", body });
         setMessage("Quarto salvo.");
+        reset(getValues());
         router.refresh();
         return;
       }
       const created = await sendApiRequest(`/owner/properties/${propertyId}/rooms`, { method: "POST", body });
       const id = typeof created === "object" && created !== null && "id" in created ? String(created.id) : undefined;
-      router.push(id ? `/meus-imoveis/${propertyId}/quartos/${id}?secao=fotos` : `/meus-imoveis/${propertyId}`);
+      router.push(createdHref ?? (id ? `/meus-imoveis/${propertyId}/quartos/${id}?secao=fotos` : `/meus-imoveis/${propertyId}`));
     } catch (requestError) {
       setError(toErrorMessage(requestError));
     }
   }
 
   async function remove() {
-    if (!room || !window.confirm("Excluir este quarto e suas fotos?")) return;
+    if (!room) return;
     setDeleting(true);
     setError(undefined);
     try {
@@ -92,6 +112,7 @@ export function RoomForm({ propertyId, room }: { propertyId: string; room?: Room
     } catch (requestError) {
       setError(toErrorMessage(requestError));
       setDeleting(false);
+      setConfirmingDelete(false);
     }
   }
 
@@ -102,7 +123,7 @@ export function RoomForm({ propertyId, room }: { propertyId: string; room?: Room
       <FormSection id="room-data-heading" title="Dados do quarto">
         <div className="grid gap-5 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           <div>
-            <label htmlFor="room-title" className={labelClassName}>Nome</label>
+            <label htmlFor="room-title" className={labelClassName}>Nome do quarto</label>
             <input
               id="room-title"
               {...register("title")}
@@ -129,17 +150,19 @@ export function RoomForm({ propertyId, room }: { propertyId: string; room?: Room
             <FieldError id="room-capacity-error" message={errors.capacity?.message} />
           </div>
         </div>
-        <div>
-          <label htmlFor="room-description" className={labelClassName}>Descrição</label>
-          <textarea
-            id="room-description"
-            rows={4}
-            {...register("description")}
-            aria-invalid={errors.description ? "true" : undefined}
-            aria-describedby={errors.description ? "room-description-error" : undefined}
+        <div className="sm:max-w-xs">
+          <label htmlFor="room-price" className={labelClassName}>Valor da diária (R$)</label>
+          <input
+            id="room-price"
+            inputMode="decimal"
+            placeholder="150,00"
+            {...register("price")}
+            aria-invalid={errors.price ? "true" : undefined}
+            aria-describedby={`room-price-hint${errors.price ? " room-price-error" : ""}`}
             className={fieldClassName}
           />
-          <FieldError id="room-description-error" message={errors.description?.message} />
+          <FieldHint id="room-price-hint">Valor base da diária. Descontos e cobranças ficam para etapas futuras.</FieldHint>
+          <FieldError id="room-price-error" message={errors.price?.message} />
         </div>
         <ChoiceGroup
           id="room-bathroom"
@@ -160,14 +183,33 @@ export function RoomForm({ propertyId, room }: { propertyId: string; room?: Room
         />
       </FormSection>
 
-      <FormSection id="room-features-heading" title="Características">
-        <ChoiceGroup
-          id="room-amenities"
-          legend="Comodidades do quarto"
-          type="checkbox"
-          options={optionsFrom(roomAmenityLabels)}
-          registration={register("amenities")}
-        />
+      <OptionalDetails
+        title="Detalhes do quarto"
+        description={room ? roomDetailsSummary(room) : "Descrição, comodidades e informações adicionais ajudam o hóspede a escolher."}
+        forceOpen={Boolean(errors.description || errors.additionalInfo)}
+      >
+        <div>
+          <label htmlFor="room-description" className={labelClassName}>Descrição</label>
+          <textarea
+            id="room-description"
+            rows={4}
+            {...register("description")}
+            aria-invalid={errors.description ? "true" : undefined}
+            aria-describedby={errors.description ? "room-description-error" : undefined}
+            className={fieldClassName}
+          />
+          <FieldError id="room-description-error" message={errors.description?.message} />
+        </div>
+        {roomAmenityGroups.map((group) => (
+          <ChoiceGroup
+            key={group.id}
+            id={`room-amenities-${group.id}`}
+            legend={group.legend}
+            type="checkbox"
+            options={group.amenities.map((amenity) => ({ value: amenity, label: roomAmenityLabels[amenity] }))}
+            registration={register("amenities")}
+          />
+        ))}
         <div>
           <label htmlFor="room-additional-info" className={labelClassName}>Informações adicionais</label>
           <textarea
@@ -180,47 +222,47 @@ export function RoomForm({ propertyId, room }: { propertyId: string; room?: Room
           />
           <FieldError id="room-additional-info-error" message={errors.additionalInfo?.message} />
         </div>
-      </FormSection>
+      </OptionalDetails>
 
-      <FormSection id="room-price-heading" title="Preço e status" description="Valor base da diária. Descontos e cobranças ficam para etapas futuras.">
-        <div className="grid gap-5 sm:grid-cols-2">
-          <div>
-            <label htmlFor="room-price" className={labelClassName}>Valor da diária (R$)</label>
-            <input
-              id="room-price"
-              inputMode="decimal"
-              placeholder="150,00"
-              {...register("price")}
-              aria-invalid={errors.price ? "true" : undefined}
-              aria-describedby={errors.price ? "room-price-error" : undefined}
-              className={fieldClassName}
-            />
-            <FieldError id="room-price-error" message={errors.price?.message} />
-          </div>
-          <div>
-            <label htmlFor="room-status" className={labelClassName}>Status</label>
-            <select id="room-status" {...register("status")} className={fieldClassName}>
+      {room ? (
+        <FormSection id="room-status-heading" title="Disponibilidade">
+          <div className="sm:max-w-xs">
+            <label htmlFor="room-status" className={labelClassName}>Situação do quarto</label>
+            <select id="room-status" {...register("status")} aria-describedby="room-status-hint" className={fieldClassName}>
               {optionsFrom(roomStatusLabels).map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
               ))}
             </select>
+            <FieldHint id="room-status-hint">{roomStatusHints[status]}</FieldHint>
           </div>
-        </div>
-      </FormSection>
+        </FormSection>
+      ) : null}
 
       {error ? <FormFeedback tone="error">{error}</FormFeedback> : null}
-      {message ? <FormFeedback tone="success">{message}</FormFeedback> : null}
+      {message ? <SavedNotice message={message} propertyId={propertyId} /> : null}
 
-      <div className="flex flex-wrap gap-3 border-t border-(--line) pt-6">
-        <button type="submit" disabled={pending} className={primaryButtonClassName}>
-          {isSubmitting ? "Salvando..." : room ? "Salvar quarto" : "Criar quarto"}
+      <FormActions>
+        <button type="submit" disabled={pending || (Boolean(room) && !isDirty)} className={primaryButtonClassName}>
+          {isSubmitting ? "Salvando..." : room ? "Salvar quarto" : createdHref ? "Salvar e continuar" : "Criar quarto"}
         </button>
+        {room && isDirty ? <span className="text-sm text-(--warning)">Alterações não salvas</span> : null}
         {room ? (
-          <button type="button" disabled={pending} onClick={() => void remove()} className={dangerButtonClassName}>
+          <button type="button" disabled={pending} onClick={() => setConfirmingDelete(true)} className={dangerButtonClassName}>
             Excluir quarto
           </button>
         ) : null}
-      </div>
+      </FormActions>
+      <UnsavedChangesGuard dirty={isDirty && !pending} />
+      <ConfirmDialog
+        open={confirmingDelete}
+        title="Excluir este quarto?"
+        description="O quarto e todas as suas fotos serão removidos. Essa ação não pode ser desfeita."
+        confirmLabel="Excluir quarto"
+        pendingLabel="Excluindo..."
+        pending={deleting}
+        onConfirm={() => void remove()}
+        onCancel={() => setConfirmingDelete(false)}
+      />
     </form>
   );
 }

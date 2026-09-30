@@ -10,9 +10,9 @@ import { getApiData } from "@/lib/server-api";
 import { propertyDetailSchema } from "@/lib/properties";
 
 const sections = [
-  { id: "geral", label: "Informações gerais" },
+  { id: "geral", label: "Sobre o imóvel" },
   { id: "localizacao", label: "Localização" },
-  { id: "areas", label: "Áreas compartilhadas" },
+  { id: "areas", label: "Áreas" },
   { id: "midia", label: "Fotos e vídeos" },
 ] as const;
 

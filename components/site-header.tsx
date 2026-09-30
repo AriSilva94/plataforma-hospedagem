@@ -249,7 +249,7 @@ function MobileBottomNavigation({
           href === "/perfil"
             ? pathname === "/perfil"
             : href === "/#inicio" && pathname === "/";
-        const className = `flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg text-[10px] font-semibold ${active ? "text-(--blue-light)" : "text-(--gray)"}`;
+        const className = `flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-semibold ${active ? "text-(--blue-light)" : "text-(--gray)"}`;
         const content = (
           <>
             <Icon aria-hidden="true" size={18} />

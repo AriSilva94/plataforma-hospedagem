@@ -6,6 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { LuPlus, LuTrash2 } from "react-icons/lu";
 import { FormFeedback } from "@/components/form-feedback";
+import { FormActions } from "@/components/owner/form-actions";
+import { SavedNotice } from "@/components/owner/saved-notice";
+import { UnsavedChangesGuard } from "@/components/owner/unsaved-changes-guard";
 import { optionsFrom } from "@/components/owner/choice-group";
 import { FieldError } from "@/components/owner/field-error";
 import {
@@ -23,7 +26,7 @@ export function SharedAreasForm({ property }: { property: PropertyDetail }) {
   const router = useRouter();
   const [error, setError] = useState<string>();
   const [message, setMessage] = useState<string>();
-  const { register, control, handleSubmit, formState } = useForm<SharedAreasValues>({
+  const { register, control, handleSubmit, getValues, reset, formState } = useForm<SharedAreasValues>({
     resolver: zodResolver(sharedAreasSchema),
     defaultValues: {
       areas: property.sharedAreas.map((area) => ({
@@ -34,7 +37,7 @@ export function SharedAreasForm({ property }: { property: PropertyDetail }) {
     },
   });
   const { fields, append, remove } = useFieldArray({ control, name: "areas" });
-  const { errors, isSubmitting } = formState;
+  const { errors, isSubmitting, isDirty } = formState;
   const areas = useWatch({ control, name: "areas" });
 
   async function save(values: SharedAreasValues) {
@@ -46,6 +49,7 @@ export function SharedAreasForm({ property }: { property: PropertyDetail }) {
         body: JSON.stringify(values),
       });
       setMessage("Áreas compartilhadas salvas.");
+      reset(getValues());
       router.refresh();
     } catch (requestError) {
       setError(toErrorMessage(requestError));
@@ -55,7 +59,7 @@ export function SharedAreasForm({ property }: { property: PropertyDetail }) {
   return (
     <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col gap-6 py-8">
       <p className="max-w-prose text-sm leading-relaxed text-(--gray)">
-        Áreas que pertencem à casa como um todo e são compartilhadas entre os quartos. Não é necessário repeti-las em cada quarto.
+        Opcional. Áreas que pertencem à casa como um todo e são compartilhadas entre os quartos. Não é necessário repeti-las em cada quarto.
       </p>
 
       {fields.length === 0 ? (
@@ -132,13 +136,15 @@ export function SharedAreasForm({ property }: { property: PropertyDetail }) {
       </div>
 
       {error ? <FormFeedback tone="error">{error}</FormFeedback> : null}
-      {message ? <FormFeedback tone="success">{message}</FormFeedback> : null}
+      {message ? <SavedNotice message={message} propertyId={property.id} showPublicLink={property.status === "ACTIVE"} /> : null}
 
-      <div className="border-t border-(--line) pt-6">
-        <button type="submit" disabled={isSubmitting} className={primaryButtonClassName}>
+      <FormActions>
+        <button type="submit" disabled={isSubmitting || !isDirty} className={primaryButtonClassName}>
           {isSubmitting ? "Salvando..." : "Salvar áreas"}
         </button>
-      </div>
+        {isDirty ? <span className="text-sm text-(--warning)">Alterações não salvas</span> : null}
+      </FormActions>
+      <UnsavedChangesGuard dirty={isDirty && !isSubmitting} />
     </form>
   );
 }

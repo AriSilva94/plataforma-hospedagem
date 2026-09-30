@@ -8,6 +8,7 @@ export const genderIdentities = ["MAN", "WOMAN", "TRANS_WOMAN", "TRANS_MAN"] as 
 export const sharedAreaTypes = ["LIVING_ROOM", "KITCHEN", "SHARED_BATHROOM", "LAUNDRY", "OUTDOOR_AREA", "GARAGE", "OTHER"] as const;
 export const propertyFeatures = ["WIFI", "ELEVATOR", "DOORMAN", "GATED_ACCESS", "SECURITY_CAMERAS", "ACCESSIBILITY", "PETS_ALLOWED", "SMOKING_ALLOWED", "CLEANING_SERVICE", "UTILITIES_INCLUDED"] as const;
 export const roomAmenities = ["AIR_CONDITIONING", "FAN", "DOUBLE_BED", "SINGLE_BED", "WARDROBE", "DESK", "TV", "MINIBAR", "WINDOW", "BALCONY", "BLACKOUT_CURTAINS", "DOOR_LOCK", "BED_LINEN", "TOWELS"] as const;
+export const publishRequirements = ["DESCRIPTION", "ADDRESS", "PHOTO", "ROOM"] as const;
 export const brazilianStates = ["AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "MT", "PA", "PB", "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC", "SE", "SP", "TO"] as const;
 
 export type PropertyType = (typeof propertyTypes)[number];
@@ -16,6 +17,7 @@ export type RoomStatus = (typeof roomStatuses)[number];
 export type BathroomType = (typeof bathroomTypes)[number];
 export type GenderIdentity = (typeof genderIdentities)[number];
 export type SharedAreaType = (typeof sharedAreaTypes)[number];
+export type PublishRequirement = (typeof publishRequirements)[number];
 
 export const propertyTypeLabels: Record<PropertyType, string> = {
   HOUSE: "Casa",
@@ -28,14 +30,20 @@ export const propertyTypeLabels: Record<PropertyType, string> = {
 
 export const propertyStatusLabels: Record<PropertyStatus, string> = {
   DRAFT: "Rascunho",
-  ACTIVE: "Ativo",
-  UNAVAILABLE: "Indisponível",
+  ACTIVE: "Publicado",
+  UNAVAILABLE: "Pausado",
 };
 
 export const roomStatusLabels: Record<RoomStatus, string> = {
-  AVAILABLE: "Disponível",
-  UNAVAILABLE: "Indisponível",
-  INACTIVE: "Inativo",
+  AVAILABLE: "Reservável",
+  UNAVAILABLE: "Pausado",
+  INACTIVE: "Arquivado",
+};
+
+export const roomStatusHints: Record<RoomStatus, string> = {
+  AVAILABLE: "Aparece na busca e pode ser reservado.",
+  UNAVAILABLE: "Pausado por enquanto: não aparece na busca, mas continua cadastrado.",
+  INACTIVE: "Arquivado: fora do anúncio e não conta como quarto do imóvel.",
 };
 
 export const bathroomTypeLabels: Record<BathroomType, string> = {
@@ -73,6 +81,18 @@ export const propertyFeatureLabels: Record<(typeof propertyFeatures)[number], st
   UTILITIES_INCLUDED: "Contas inclusas",
 };
 
+export const propertyFeatureGroups: { id: string; legend: string; features: (typeof propertyFeatures)[number][] }[] = [
+  { id: "comfort", legend: "Conforto e serviços", features: ["WIFI", "CLEANING_SERVICE", "UTILITIES_INCLUDED"] },
+  { id: "structure", legend: "Segurança e acesso", features: ["ELEVATOR", "DOORMAN", "GATED_ACCESS", "SECURITY_CAMERAS", "ACCESSIBILITY"] },
+  { id: "policies", legend: "Política da casa", features: ["PETS_ALLOWED", "SMOKING_ALLOWED"] },
+];
+
+export const roomAmenityGroups: { id: string; legend: string; amenities: (typeof roomAmenities)[number][] }[] = [
+  { id: "beds", legend: "Camas e enxoval", amenities: ["DOUBLE_BED", "SINGLE_BED", "BED_LINEN", "TOWELS"] },
+  { id: "climate", legend: "Conforto do ambiente", amenities: ["AIR_CONDITIONING", "FAN", "WINDOW", "BALCONY", "BLACKOUT_CURTAINS"] },
+  { id: "furniture", legend: "Móveis e equipamentos", amenities: ["WARDROBE", "DESK", "TV", "MINIBAR", "DOOR_LOCK"] },
+];
+
 export const roomAmenityLabels: Record<(typeof roomAmenities)[number], string> = {
   AIR_CONDITIONING: "Ar-condicionado",
   FAN: "Ventilador",
@@ -99,6 +119,13 @@ export const mediaSchema = z.object({
   position: z.number(),
 });
 
+export const postalCodeAddressSchema = z.object({
+  street: z.string(),
+  neighborhood: z.string(),
+  city: z.string(),
+  state: z.string(),
+});
+
 export const propertySummarySchema = z.object({
   id: z.string(),
   title: z.string(),
@@ -110,6 +137,8 @@ export const propertySummarySchema = z.object({
   state: z.string().nullable(),
   coverUrl: z.string().nullable(),
   roomCount: z.number(),
+  availableRoomCount: z.number(),
+  minAvailablePriceCents: z.number().nullable(),
 });
 
 export const roomSummarySchema = z.object({
@@ -133,6 +162,7 @@ export const propertyDetailSchema = z.object({
   houseRules: z.string().nullable(),
   generalInfo: z.string().nullable(),
   features: z.array(z.string()),
+  missingRequirements: z.array(z.enum(publishRequirements)),
   postalCode: z.string().nullable(),
   street: z.string().nullable(),
   number: z.string().nullable(),
