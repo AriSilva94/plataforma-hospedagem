@@ -2,20 +2,17 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import Link from "next/link";
+import { PropertyCard } from "@/components/property-card";
 import { SiteHeader } from "@/components/site-header";
+import { apiFetch } from "@/lib/api";
+import { publicPropertyPageSchema, type PublicPropertyCard, type PublicPropertyPage } from "@/lib/properties";
 import type { IconType } from "react-icons";
-import { LuCalendarDays, LuChevronDown, LuClock3, LuHeart, LuHistory, LuMapPin, LuSearch, LuStar } from "react-icons/lu";
+import { LuCalendarDays, LuChevronDown, LuClock3, LuHistory, LuMapPin, LuSearch } from "react-icons/lu";
 
-type IconName = "calendar" | "chevronDown" | "clock" | "heart" | "history" | "pin" | "search" | "starFill";
+type IconName = "calendar" | "chevronDown" | "clock" | "history" | "pin" | "search";
 
-const icons: Record<IconName, IconType> = { calendar: LuCalendarDays, chevronDown: LuChevronDown, clock: LuClock3, heart: LuHeart, history: LuHistory, pin: LuMapPin, search: LuSearch, starFill: LuStar };
-
-const featuredSpaces = [
-  { title: "Suíte Premium Asa Norte", region: "Asa Norte · DF", price: "R$ 150", rating: "4.9", image: "/rooms/room1.png" },
-  { title: "Loft Moderno Sudoeste", region: "Sudoeste · DF", price: "R$ 140", rating: "4.8", image: "/rooms/room2.png" },
-  { title: "Suíte Luxo Lago Sul", region: "Lago Sul · DF", price: "R$ 160", rating: "4.9", image: "/rooms/room3.png" },
-  { title: "Suíte Exclusiva Águas Claras", region: "Águas Claras · DF", price: "R$ 130", rating: "4.7", image: "/rooms/room4.png" },
-];
+const icons: Record<IconName, IconType> = { calendar: LuCalendarDays, chevronDown: LuChevronDown, clock: LuClock3, history: LuHistory, pin: LuMapPin, search: LuSearch };
 
 const searchFields: { label: string; placeholder: string; icon: IconName; options: string[] }[] = [
   { label: "Cidade", placeholder: "Selecione a cidade", icon: "pin", options: ["Brasília, DF", "Goiânia, GO", "Todas as regiões"] },
@@ -26,7 +23,15 @@ const searchFields: { label: string; placeholder: string; icon: IconName; option
 
 const sectionShell = "mx-auto w-full max-w-360 px-6 md:px-10 lg:px-12";
 
-export function UserHome({ user }: { user: { name: string } }) {
+export function UserHome({
+  user,
+  featured,
+  listing,
+}: {
+  user: { name: string };
+  featured: PublicPropertyCard[] | null;
+  listing: PublicPropertyPage | null;
+}) {
   const [openField, setOpenField] = useState<string>();
   const [searchValues, setSearchValues] = useState<Record<string, string>>({});
   const firstName = user.name.trim().split(/\s+/)[0];
@@ -64,15 +69,19 @@ export function UserHome({ user }: { user: { name: string } }) {
           </div>
         </section>
 
-        <section id="destaques" aria-labelledby="destaques-titulo" className={`${sectionShell} pt-14 md:pt-16`}>
-          <div className="flex items-end justify-between gap-4">
-            <h2 id="destaques-titulo" className="text-2xl font-extrabold text-white">Locais em destaque</h2>
-            <span className="text-sm font-semibold text-(--blue-light)">Ver todos</span>
-          </div>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {featuredSpaces.map((space) => <SpaceCard key={space.title} {...space} />)}
-          </div>
-        </section>
+        {featured && featured.length > 0 ? (
+          <section id="destaques" aria-labelledby="destaques-titulo" className={`${sectionShell} pt-14 md:pt-16`}>
+            <div className="flex items-end justify-between gap-4">
+              <h2 id="destaques-titulo" className="text-2xl font-extrabold text-white">Locais em destaque</h2>
+              <Link href="#todos" className="text-sm font-semibold text-(--blue-light) hover:underline">Ver todos</Link>
+            </div>
+            <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {featured.map((property) => <li key={property.id}><PropertyCard property={property} /></li>)}
+            </ul>
+          </section>
+        ) : null}
+
+        <AllProperties initial={listing} />
 
         <section aria-labelledby="proprietarios-titulo" className={`${sectionShell} pb-12 pt-14 md:pb-16 md:pt-16`}>
           <div className="relative overflow-hidden rounded-[18px] bg-[linear-gradient(120deg,#0b3a8f,#0B63E3)] p-6 md:flex md:items-center md:justify-between md:gap-8 md:p-8">
@@ -81,7 +90,7 @@ export function UserHome({ user }: { user: { name: string } }) {
               <h2 id="proprietarios-titulo" className="text-[22px] font-extrabold leading-tight text-white">Rentabilize seu espaço com segurança</h2>
               <p className="mt-2 text-[13.5px] leading-relaxed text-white/85">Anuncie quartos e suítes. Você controla agenda, preços e privacidade.</p>
             </div>
-            <span className="relative mt-5 inline-flex shrink-0 rounded-xl bg-white px-5.5 py-3.25 text-sm font-bold text-(--blue) md:mt-0">Anunciar meu espaço</span>
+            <Link href="/meus-imoveis" className="relative mt-5 inline-flex shrink-0 rounded-xl bg-white px-5.5 py-3.25 text-sm font-bold text-(--blue) transition hover:bg-white/90 md:mt-0">Anunciar meu espaço</Link>
           </div>
         </section>
       </main>
@@ -93,14 +102,56 @@ function SearchField({ label, placeholder, icon, options, value, open, onToggle,
   return <div className="relative border-b border-[rgba(3,17,40,.08)] md:border-b-0 md:border-r md:last-of-type:border-r-0"><button type="button" onClick={onToggle} aria-expanded={open} className="flex w-full items-center gap-3 px-3.5 py-3.75 text-left md:flex-wrap md:gap-x-2 md:gap-y-0.5 md:py-3"><span className="text-(--blue)"><Icon name={icon} size={18} /></span><span className="w-18.5 text-[13px] font-semibold text-[#3a4a63] md:w-auto">{label}</span><span className={`flex-1 truncate text-sm font-semibold md:order-last md:basis-full ${value ? "text-[#0f1f39]" : "text-[#8695ab]"}`}>{value ?? placeholder}</span><span className={open ? "rotate-180 text-[#8695ab] transition-transform md:ml-auto" : "text-[#8695ab] transition-transform md:ml-auto"}><Icon name="chevronDown" size={18} /></span></button>{open ? <div className="absolute inset-x-2.5 top-[calc(100%-4px)] z-20 flex flex-col gap-1 rounded-xl border border-slate-200 bg-white p-2.5 shadow-[0_16px_32px_rgba(3,17,40,.2)] md:min-w-50">{options.map((option) => <button key={option} type="button" onClick={() => onPick(option)} className="rounded-lg px-3 py-2.75 text-left text-[13.5px] font-semibold text-[#0f1f39] hover:bg-[rgba(11,99,227,.1)]">{option}</button>)}</div> : null}</div>;
 }
 
-function SpaceCard({ title, region, price, rating, image }: { title: string; region: string; price: string; rating: string; image: string }) {
-  return <article className="overflow-hidden rounded-2xl border border-(--line) bg-(--surface)">
-    <div className="relative aspect-4/3"><Image src={image} alt="" fill className="object-cover" sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" /><span className="absolute left-2.5 top-2.5 flex size-8 items-center justify-center rounded-full bg-[rgba(3,17,40,.6)] text-white"><Icon name="heart" size={18} /></span><span className="absolute right-2.5 top-2.5 flex items-center gap-1 rounded-full bg-[rgba(3,17,40,.7)] px-2.5 py-1 text-[11px] font-bold text-white"><Icon name="starFill" size={12} className="text-(--warning)" /> {rating}</span></div>
-    <div className="p-4"><h3 className="text-sm font-bold text-white">{title}</h3><p className="mt-1 text-xs text-(--gray)">{region}</p><p className="mt-3 text-xs text-(--gray)">A partir de <strong className="text-sm text-(--blue-light)">{price}</strong> / 2h</p></div>
-  </article>;
+function AllProperties({ initial }: { initial: PublicPropertyPage | null }) {
+  const [items, setItems] = useState(initial?.items ?? []);
+  const [page, setPage] = useState(initial?.page ?? 1);
+  const [total, setTotal] = useState(initial?.total ?? 0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(initial ? undefined : "Não foi possível carregar os locais agora. Tente novamente em alguns instantes.");
+
+  async function loadMore() {
+    setLoading(true);
+    setError(undefined);
+    try {
+      const response = await apiFetch(`/properties?page=${page + 1}&limit=${initial?.limit ?? 12}`);
+      if (!response.ok) throw new Error();
+      const next = publicPropertyPageSchema.parse(await response.json());
+      setItems((current) => [...current, ...next.items.filter((item) => !current.some((existing) => existing.id === item.id))]);
+      setPage(next.page);
+      setTotal(next.total);
+    } catch {
+      setError("Não foi possível carregar mais locais. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <section id="todos" aria-labelledby="todos-titulo" className={`${sectionShell} scroll-mt-20 pt-14 md:pt-16`}>
+      <div className="flex items-end justify-between gap-4">
+        <h2 id="todos-titulo" className="text-2xl font-extrabold text-white">Todos os locais</h2>
+        {total > 0 ? <span className="text-sm text-(--gray)">{total === 1 ? "1 local" : `${total} locais`}</span> : null}
+      </div>
+      {items.length > 0 ? (
+        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {items.map((property) => <li key={property.id}><PropertyCard property={property} /></li>)}
+        </ul>
+      ) : initial ? (
+        <p className="mt-6 rounded-2xl border border-dashed border-(--line-strong) p-6 text-sm text-(--gray)">Ainda não há locais disponíveis. Volte em breve.</p>
+      ) : null}
+      {error ? <p role="alert" className="mt-4 text-sm font-semibold text-[#ff9b8a]">{error}</p> : null}
+      {items.length < total ? (
+        <div className="mt-6 flex justify-center">
+          <button type="button" disabled={loading} onClick={() => void loadMore()} className="rounded-xl border border-(--line-strong) px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60">
+            {loading ? "Carregando..." : "Carregar mais"}
+          </button>
+        </div>
+      ) : null}
+    </section>
+  );
 }
 
 function Icon({ name, size, className }: { name: IconName; size: number; className?: string }) {
   const Component = icons[name];
-  return <Component aria-hidden="true" className={className} size={size} fill={name === "starFill" ? "currentColor" : "none"} />;
+  return <Component aria-hidden="true" className={className} size={size} />;
 }

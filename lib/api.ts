@@ -33,11 +33,29 @@ export async function getErrorMessage(response: Response): Promise<string> {
   return "Não foi possível concluir a solicitação. Tente novamente.";
 }
 
+export async function sendApiRequest(path: string, init: RequestInit): Promise<unknown> {
+  let response: Response;
+  try {
+    response = await apiFetch(path, init);
+  } catch {
+    throw new Error("Não foi possível conectar ao servidor. Tente novamente.");
+  }
+  if (!response.ok) throw new Error(await getErrorMessage(response));
+  return response.status === 204 ? null : response.json().catch(() => null);
+}
+
+export function toErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Não foi possível concluir a solicitação. Tente novamente.";
+}
+
 function request(path: string, init: RequestInit = {}): Promise<Response> {
   return fetch(`${apiUrl}${path}`, {
     ...init,
     credentials: "include",
-    headers: { "Content-Type": "application/json", ...init.headers },
+    headers:
+      init.body instanceof FormData
+        ? init.headers
+        : { "Content-Type": "application/json", ...init.headers },
   });
 }
 

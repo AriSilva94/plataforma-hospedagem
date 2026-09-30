@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
@@ -16,6 +17,7 @@ import {
 } from "react-icons/lu";
 import type { IconType } from "react-icons";
 import { FormFeedback } from "@/components/form-feedback";
+import { GuestIdentityForm } from "@/components/guest-identity-form";
 import { apiFetch, getErrorMessage } from "@/lib/api";
 import { profileSchema, type ProfileFormValues } from "@/lib/auth-form-schema";
 import { CurrentUser, parseCurrentUser } from "@/lib/user";
@@ -64,6 +66,8 @@ function AccessProfileCard({
   isAdding,
   icon: Icon,
   onAdd,
+  details,
+  manageHref,
 }: {
   title: string;
   description: string;
@@ -72,6 +76,8 @@ function AccessProfileCard({
   isAdding: boolean;
   icon: IconType;
   onAdd: () => void;
+  details?: ReactNode;
+  manageHref?: string;
 }) {
   return (
     <article className="flex h-full flex-col rounded-2xl border border-(--line-strong) bg-(--surface) p-5 sm:p-6">
@@ -93,11 +99,22 @@ function AccessProfileCard({
       <p className="mt-1 text-sm leading-relaxed text-(--gray)">
         {description}
       </p>
-      <p className="mt-5 border-t border-(--line) pt-4 text-xs text-(--gray)">
-        Informações deste perfil disponíveis em breve.
-      </p>
+      {active && details ? (
+        details
+      ) : (
+        <p className="mt-5 border-t border-(--line) pt-4 text-xs text-(--gray)">
+          Informações deste perfil disponíveis em breve.
+        </p>
+      )}
       <div className="mt-auto pt-5">
-        {active ? (
+        {active && manageHref ? (
+          <Link
+            href={manageHref}
+            className="flex w-full justify-center rounded-xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
+          >
+            Gerenciar imóveis
+          </Link>
+        ) : active ? (
           <button
             type="button"
             disabled
@@ -247,6 +264,12 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
           isAdding={profilePendingRole === "guest"}
           icon={LuUserRound}
           onAdd={() => void addProfile("guest")}
+          details={
+            <GuestIdentityForm
+              value={user.guestGenderIdentity}
+              onSaved={setUser}
+            />
+          }
         />
         <AccessProfileCard
           title="Proprietário"
@@ -256,6 +279,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
           isAdding={profilePendingRole === "owner"}
           icon={LuHouse}
           onAdd={() => void addProfile("owner")}
+          manageHref="/meus-imoveis"
         />
       </div>
       {profileError ? (

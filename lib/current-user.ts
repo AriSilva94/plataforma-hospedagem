@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { CurrentUser, parseCurrentUser } from "@/lib/user";
 
@@ -8,7 +9,7 @@ export type CurrentUserResult = {
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3030";
 
-export async function getCurrentUser(): Promise<CurrentUserResult> {
+export const getCurrentUser = cache(async (): Promise<CurrentUserResult> => {
   const cookieStore = await cookies();
 
   if (!cookieStore.has("access_token") && !cookieStore.has("refresh_token")) {
@@ -30,4 +31,4 @@ export async function getCurrentUser(): Promise<CurrentUserResult> {
   } catch {
     return { unavailable: true };
   }
-}
+});
