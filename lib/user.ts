@@ -1,8 +1,11 @@
+import { genderIdentities, type GenderIdentity } from "@/lib/properties";
+
 export type CurrentUser = {
   id: string;
   name: string;
   email: string;
   roles: string[];
+  guestGenderIdentity?: GenderIdentity | null;
 };
 
 export function parseCurrentUser(value: unknown): CurrentUser | undefined {
@@ -26,5 +29,19 @@ export function parseCurrentUser(value: unknown): CurrentUser | undefined {
     name: value.name,
     email: value.email,
     roles: value.roles,
+    guestGenderIdentity: parseGuestGenderIdentity(value),
   };
+}
+
+function parseGuestGenderIdentity(value: object): GenderIdentity | null {
+  if (
+    !("guestProfile" in value) ||
+    typeof value.guestProfile !== "object" ||
+    value.guestProfile === null ||
+    !("genderIdentity" in value.guestProfile)
+  ) {
+    return null;
+  }
+  const identity = value.guestProfile.genderIdentity;
+  return genderIdentities.find((option) => option === identity) ?? null;
 }

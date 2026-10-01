@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
@@ -12,16 +13,19 @@ import {
   LuMail,
   LuMailWarning,
   LuPhone,
+  LuShieldCheck,
   LuUserRound,
 } from "react-icons/lu";
 import type { IconType } from "react-icons";
 import { FormFeedback } from "@/components/form-feedback";
+import { GuestIdentityForm } from "@/components/guest-identity-form";
+import { isAdmin } from "@/lib/admin";
 import { apiFetch, getErrorMessage } from "@/lib/api";
 import { profileSchema, type ProfileFormValues } from "@/lib/auth-form-schema";
 import { CurrentUser, parseCurrentUser } from "@/lib/user";
 
 const fieldClassName =
-  "mt-2 w-full rounded-xl border border-(--line-strong) bg-(--navy) px-4 py-3 text-white outline-none transition-colors focus:border-(--blue-light) focus-visible:ring-2 focus-visible:ring-(--blue-light) disabled:cursor-not-allowed disabled:border-(--line) disabled:bg-(--surface) disabled:text-(--gray)";
+  "mt-2 w-full rounded-xl border border-(--line-strong) bg-(--navy) px-4 py-3 text-white outline-hidden transition-colors focus:border-(--blue-light) focus-visible:ring-2 focus-visible:ring-(--blue-light) disabled:cursor-not-allowed disabled:border-(--line) disabled:bg-(--surface) disabled:text-(--gray)";
 const secondaryDisabledButtonClassName =
   "rounded-xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-(--gray) disabled:cursor-not-allowed";
 
@@ -64,6 +68,8 @@ function AccessProfileCard({
   isAdding,
   icon: Icon,
   onAdd,
+  details,
+  manageHref,
 }: {
   title: string;
   description: string;
@@ -72,6 +78,8 @@ function AccessProfileCard({
   isAdding: boolean;
   icon: IconType;
   onAdd: () => void;
+  details?: ReactNode;
+  manageHref?: string;
 }) {
   return (
     <article className="flex h-full flex-col rounded-2xl border border-(--line-strong) bg-(--surface) p-5 sm:p-6">
@@ -93,11 +101,22 @@ function AccessProfileCard({
       <p className="mt-1 text-sm leading-relaxed text-(--gray)">
         {description}
       </p>
-      <p className="mt-5 border-t border-(--line) pt-4 text-xs text-(--gray)">
-        Informações deste perfil disponíveis em breve.
-      </p>
+      {active && details ? (
+        details
+      ) : (
+        <p className="mt-5 border-t border-(--line) pt-4 text-xs text-(--gray)">
+          Informações deste perfil disponíveis em breve.
+        </p>
+      )}
       <div className="mt-auto pt-5">
-        {active ? (
+        {active && manageHref ? (
+          <Link
+            href={manageHref}
+            className="flex w-full justify-center rounded-xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
+          >
+            Gerenciar imóveis
+          </Link>
+        ) : active ? (
           <button
             type="button"
             disabled
@@ -247,6 +266,12 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
           isAdding={profilePendingRole === "guest"}
           icon={LuUserRound}
           onAdd={() => void addProfile("guest")}
+          details={
+            <GuestIdentityForm
+              value={user.guestGenderIdentity}
+              onSaved={setUser}
+            />
+          }
         />
         <AccessProfileCard
           title="Proprietário"
@@ -256,8 +281,28 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
           isAdding={profilePendingRole === "owner"}
           icon={LuHouse}
           onAdd={() => void addProfile("owner")}
+          manageHref="/meus-imoveis"
         />
       </div>
+      {isAdmin(user) ? (
+        <div className="mt-4 flex flex-col gap-4 rounded-2xl border border-[rgba(47,191,135,.38)] bg-[rgba(47,191,135,.1)] p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <LuShieldCheck aria-hidden="true" size={22} className="mt-0.5 shrink-0 text-(--success)" />
+            <div>
+              <h3 className="font-bold text-white">Administrador</h3>
+              <p className="mt-1 text-sm text-(--gray)">
+                Você tem acesso à administração da plataforma.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/admin"
+            className="inline-flex shrink-0 items-center justify-center rounded-xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/5"
+          >
+            Abrir administração
+          </Link>
+        </div>
+      ) : null}
       {profileError ? (
         <div className="mt-5">
           <FormFeedback tone="error">{profileError}</FormFeedback>
