@@ -13,11 +13,13 @@ import {
   LuMail,
   LuMailWarning,
   LuPhone,
+  LuShieldCheck,
   LuUserRound,
 } from "react-icons/lu";
 import type { IconType } from "react-icons";
 import { FormFeedback } from "@/components/form-feedback";
 import { GuestIdentityForm } from "@/components/guest-identity-form";
+import { isAdmin } from "@/lib/admin";
 import { apiFetch, getErrorMessage } from "@/lib/api";
 import { profileSchema, type ProfileFormValues } from "@/lib/auth-form-schema";
 import { CurrentUser, parseCurrentUser } from "@/lib/user";
@@ -282,6 +284,25 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
           manageHref="/meus-imoveis"
         />
       </div>
+      {isAdmin(user) ? (
+        <div className="mt-4 flex flex-col gap-4 rounded-2xl border border-[rgba(47,191,135,.38)] bg-[rgba(47,191,135,.1)] p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <LuShieldCheck aria-hidden="true" size={22} className="mt-0.5 shrink-0 text-(--success)" />
+            <div>
+              <h3 className="font-bold text-white">Administrador</h3>
+              <p className="mt-1 text-sm text-(--gray)">
+                Você tem acesso à administração da plataforma.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/admin"
+            className="inline-flex shrink-0 items-center justify-center rounded-xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/5"
+          >
+            Abrir administração
+          </Link>
+        </div>
+      ) : null}
       {profileError ? (
         <div className="mt-5">
           <FormFeedback tone="error">{profileError}</FormFeedback>

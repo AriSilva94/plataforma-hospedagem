@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { LuPencil } from "react-icons/lu";
 import { FieldError } from "@/components/owner/field-error";
 import { Modal } from "@/components/owner/modal";
-import { fieldClassName, labelClassName, primaryButtonClassName, secondaryButtonClassName } from "@/components/owner/styles";
+import { ModalActions } from "@/components/owner/modal-actions";
+import { fieldClassName, labelClassName } from "@/components/owner/styles";
 import { sendApiRequest, toErrorMessage } from "@/lib/api";
 import { centsToInput, roomSchema } from "@/lib/owner-forms";
 import { formatCents } from "@/lib/properties";
@@ -73,10 +74,7 @@ export function RoomPriceEditor({ roomId, roomTitle, priceCents }: { roomId: str
             />
             <FieldError id={`price-${roomId}-error`} message={error} />
           </div>
-          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-            <button type="button" disabled={pending} onClick={close} className={secondaryButtonClassName}>Cancelar</button>
-            <button type="submit" disabled={pending} className={primaryButtonClassName}>{pending ? "Salvando..." : "Salvar valor"}</button>
-          </div>
+          <ModalActions pending={pending} submitLabel="Salvar valor" onCancel={close} />
         </form>
       </Modal>
     </>

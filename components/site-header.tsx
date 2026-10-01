@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { BrandMark } from "@/components/brand-mark";
+import { isAdmin } from "@/lib/admin";
 import { logout } from "@/lib/api";
 import {
   LuBell,
@@ -14,6 +15,7 @@ import {
   LuLogOut,
   LuMenu,
   LuMessageSquare,
+  LuShieldCheck,
   LuUserRound,
   LuX,
 } from "react-icons/lu";
@@ -27,7 +29,7 @@ const navItems = [
 
 const desktopBreakpoint = "(min-width: 768px)";
 
-export function SiteHeader({ user }: { user?: { name: string } }) {
+export function SiteHeader({ user }: { user?: { name: string; roles: string[] } }) {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logoutError, setLogoutError] = useState<string>();
@@ -118,6 +120,7 @@ export function SiteHeader({ user }: { user?: { name: string } }) {
                       <LuUserRound aria-hidden="true" size={16} />
                       Meu perfil
                     </Link>
+                    {isAdmin(user) ? <AdminMenuLink /> : null}
                     <button
                       role="menuitem"
                       type="button"
@@ -175,6 +178,7 @@ export function SiteHeader({ user }: { user?: { name: string } }) {
             <LuUserRound aria-hidden="true" size={16} />
             Meu perfil
           </Link>
+          {isAdmin(user) ? <AdminMenuLink /> : null}
           <button
             role="menuitem"
             type="button"
@@ -187,6 +191,19 @@ export function SiteHeader({ user }: { user?: { name: string } }) {
         </div>
       ) : null}
     </>
+  );
+}
+
+function AdminMenuLink() {
+  return (
+    <Link
+      role="menuitem"
+      href="/admin"
+      className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[rgba(11,99,227,.14)]"
+    >
+      <LuShieldCheck aria-hidden="true" size={16} className="text-(--success)" />
+      Administração
+    </Link>
   );
 }
 
