@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 export const propertyTypes = ["HOUSE", "APARTMENT", "TOWNHOUSE", "STUDIO", "SHARED_HOUSE", "OTHER"] as const;
 export const propertyStatuses = ["DRAFT", "ACTIVE", "UNAVAILABLE"] as const;
