@@ -1,5 +1,5 @@
 export const fieldClassName =
-  "mt-2 w-full rounded-xl border border-(--line-strong) bg-(--navy) px-4 py-3 text-white outline-none transition-colors focus:border-(--blue-light) focus-visible:ring-2 focus-visible:ring-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60 aria-invalid:border-(--danger) aria-invalid:focus-visible:ring-(--danger)";
+  "mt-2 w-full rounded-xl border border-(--line-strong) bg-(--navy) px-4 py-3 text-white outline-hidden transition-colors focus:border-(--blue-light) focus-visible:ring-2 focus-visible:ring-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60 aria-invalid:border-(--danger) aria-invalid:focus-visible:ring-(--danger)";
 
 export const labelClassName = "block text-sm font-semibold text-(--gray)";
 

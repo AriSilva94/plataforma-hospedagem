@@ -60,7 +60,7 @@ export function GuestIdentityForm({
             setSelected(genderIdentities.find((option) => option === event.target.value) ?? "");
             setMessage(undefined);
           }}
-          className="w-full rounded-xl border border-(--line-strong) bg-(--navy) px-4 py-3 text-sm text-white outline-none transition-colors focus:border-(--blue-light) focus-visible:ring-2 focus-visible:ring-(--blue-light) disabled:opacity-60"
+          className="w-full rounded-xl border border-(--line-strong) bg-(--navy) px-4 py-3 text-sm text-white outline-hidden transition-colors focus:border-(--blue-light) focus-visible:ring-2 focus-visible:ring-(--blue-light) disabled:opacity-60"
         >
           <option value="">Selecione</option>
           {genderIdentities.map((option) => (
