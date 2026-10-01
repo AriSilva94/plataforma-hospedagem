@@ -9,6 +9,19 @@ export const sharedAreaTypes = ["LIVING_ROOM", "KITCHEN", "SHARED_BATHROOM", "LA
 export const propertyFeatures = ["WIFI", "ELEVATOR", "DOORMAN", "GATED_ACCESS", "SECURITY_CAMERAS", "ACCESSIBILITY", "PETS_ALLOWED", "SMOKING_ALLOWED", "CLEANING_SERVICE", "UTILITIES_INCLUDED"] as const;
 export const roomAmenities = ["AIR_CONDITIONING", "FAN", "DOUBLE_BED", "SINGLE_BED", "WARDROBE", "DESK", "TV", "MINIBAR", "WINDOW", "BALCONY", "BLACKOUT_CURTAINS", "DOOR_LOCK", "BED_LINEN", "TOWELS"] as const;
 export const publishRequirements = ["DESCRIPTION", "ADDRESS", "PHOTO", "ROOM"] as const;
+export const completenessCriteria = [
+  "ROOM_DESCRIPTION",
+  "ROOM_PHOTOS",
+  "ROOM_AMENITIES",
+  "ROOM_ADDITIONAL_INFO",
+  "PROPERTY_DESCRIPTION",
+  "PROPERTY_PHOTOS",
+  "PROPERTY_FEATURES",
+  "HOUSE_RULES",
+  "GENERAL_INFO",
+  "SHARED_AREAS",
+  "REFERENCE_POINTS",
+] as const;
 export const brazilianStates = ["AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "MT", "PA", "PB", "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC", "SE", "SP", "TO"] as const;
 
 export type PropertyType = (typeof propertyTypes)[number];
@@ -18,6 +31,7 @@ export type BathroomType = (typeof bathroomTypes)[number];
 export type GenderIdentity = (typeof genderIdentities)[number];
 export type SharedAreaType = (typeof sharedAreaTypes)[number];
 export type PublishRequirement = (typeof publishRequirements)[number];
+export type CompletenessCriterion = (typeof completenessCriteria)[number];
 
 export const propertyTypeLabels: Record<PropertyType, string> = {
   HOUSE: "Casa",
@@ -131,7 +145,6 @@ export const propertySummarySchema = z.object({
   title: z.string(),
   type: z.enum(propertyTypes),
   status: z.enum(propertyStatuses),
-  featured: z.boolean(),
   neighborhood: z.string().nullable(),
   city: z.string().nullable(),
   state: z.string().nullable(),
@@ -149,6 +162,7 @@ export const roomSummarySchema = z.object({
   capacity: z.number(),
   bathroomType: z.enum(bathroomTypes),
   acceptedAudiences: z.array(z.enum(genderIdentities)),
+  completenessScore: z.number(),
   coverUrl: z.string().nullable(),
 });
 
@@ -157,7 +171,6 @@ export const propertyDetailSchema = z.object({
   title: z.string(),
   type: z.enum(propertyTypes),
   status: z.enum(propertyStatuses),
-  featured: z.boolean(),
   description: z.string().nullable(),
   houseRules: z.string().nullable(),
   generalInfo: z.string().nullable(),
@@ -194,27 +207,34 @@ export const roomDetailSchema = z.object({
   acceptedAudiences: z.array(z.enum(genderIdentities)),
   amenities: z.array(z.string()),
   additionalInfo: z.string().nullable(),
+  completenessScore: z.number(),
+  completenessMissing: z.array(z.enum(completenessCriteria)),
   media: z.array(mediaSchema),
   property: z.object({ id: z.string(), title: z.string() }),
 });
 
-export const publicPropertyCardSchema = z.object({
+export const publicRoomCardSchema = z.object({
   id: z.string(),
   title: z.string(),
-  type: z.enum(propertyTypes),
+  priceCents: z.number(),
   featured: z.boolean(),
-  neighborhood: z.string().nullable(),
-  city: z.string().nullable(),
-  state: z.string().nullable(),
   coverUrl: z.string().nullable(),
-  startingPriceCents: z.number(),
+  property: z.object({
+    id: z.string(),
+    title: z.string(),
+    type: z.enum(propertyTypes),
+    neighborhood: z.string().nullable(),
+    city: z.string().nullable(),
+    state: z.string().nullable(),
+  }),
 });
 
-export const publicPropertyPageSchema = z.object({
-  items: z.array(publicPropertyCardSchema),
-  page: z.number(),
-  limit: z.number(),
-  total: z.number(),
+export const roomListingPageSize = 12;
+
+export const publicRoomPageSchema = z.object({
+  items: z.array(publicRoomCardSchema),
+  nextCursor: z.string().nullable(),
+  total: z.number().optional(),
 });
 
 export const publicPropertyDetailSchema = z.object({
@@ -254,8 +274,8 @@ export const publicPropertyDetailSchema = z.object({
 });
 
 export type Media = z.infer<typeof mediaSchema>;
-export type PublicPropertyCard = z.infer<typeof publicPropertyCardSchema>;
-export type PublicPropertyPage = z.infer<typeof publicPropertyPageSchema>;
+export type PublicRoomCard = z.infer<typeof publicRoomCardSchema>;
+export type PublicRoomPage = z.infer<typeof publicRoomPageSchema>;
 export type PublicPropertyDetail = z.infer<typeof publicPropertyDetailSchema>;
 export type PropertySummary = z.infer<typeof propertySummarySchema>;
 export type PropertyDetail = z.infer<typeof propertyDetailSchema>;

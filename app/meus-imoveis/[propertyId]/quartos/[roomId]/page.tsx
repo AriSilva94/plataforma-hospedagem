@@ -2,6 +2,7 @@ import { MediaGallery } from "@/components/owner/media-gallery";
 import { OwnerDataNotice } from "@/components/owner/owner-notice";
 import { OwnerPage } from "@/components/owner/owner-page";
 import { RoomStatusBadge } from "@/components/owner/property-status-badge";
+import { RoomCompleteness } from "@/components/owner/room-completeness";
 import { RoomForm } from "@/components/owner/room-form";
 import { SectionTabs } from "@/components/owner/section-tabs";
 import { getApiData } from "@/lib/server-api";
@@ -33,6 +34,7 @@ export default async function EditRoomPage({ params, searchParams }: PageProps<"
       description={`Quarto em ${room.property.title}`}
       back={{ href: `/meus-imoveis/${propertyId}`, label: room.property.title }}
     >
+      <RoomCompleteness propertyId={propertyId} roomId={room.id} score={room.completenessScore} missing={room.completenessMissing} />
       <SectionTabs
         label="Seções do quarto"
         current={section}

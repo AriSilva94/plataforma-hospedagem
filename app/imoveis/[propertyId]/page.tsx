@@ -149,7 +149,7 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
               {property.rooms.map((room) => {
                 const roomImages = room.media.filter((item) => item.type === "IMAGE");
                 return (
-                  <li key={room.id} className="grid overflow-hidden rounded-2xl border border-(--line-strong) bg-(--surface) md:grid-cols-[18rem_minmax(0,1fr)]">
+                  <li key={room.id} id={`quarto-${room.id}`} className="grid scroll-mt-20 overflow-hidden rounded-2xl border border-(--line-strong) bg-(--surface) md:grid-cols-[18rem_minmax(0,1fr)]">
                     <Photo media={roomImages[0]} alt={`Foto de ${room.title}`} sizes="(min-width: 768px) 288px, 100vw" className="aspect-4/3 md:aspect-auto md:min-h-56" />
                     <div className="flex flex-col gap-3 p-5">
                       <div className="flex flex-wrap items-start justify-between gap-3">

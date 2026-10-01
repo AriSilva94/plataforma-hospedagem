@@ -5,7 +5,6 @@ import { CoverImage } from "@/components/owner/cover-image";
 import { OwnerDataNotice } from "@/components/owner/owner-notice";
 import { OwnerPage } from "@/components/owner/owner-page";
 import { PropertyStatusBadge } from "@/components/owner/property-status-badge";
-import { StatusBadge } from "@/components/owner/status-badge";
 import { primaryButtonClassName } from "@/components/owner/styles";
 import { getApiData } from "@/lib/server-api";
 import { formatCents, formatLocation, propertySummarySchema, propertyTypeLabels } from "@/lib/properties";
@@ -60,7 +59,6 @@ export default async function MyPropertiesPage() {
                   </div>
                   <p className="flex flex-wrap items-center gap-2 text-sm text-(--gray)">
                     {propertyTypeLabels[property.type]}
-                    {property.featured ? <StatusBadge tone="neutral">Destaque</StatusBadge> : null}
                   </p>
                   <div className="mt-auto flex flex-col gap-2 border-t border-(--line) pt-3 text-sm text-(--gray)">
                     <span className="flex items-center gap-2">

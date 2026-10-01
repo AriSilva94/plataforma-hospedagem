@@ -3,8 +3,8 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { LuArrowRight, LuBath, LuCircleCheck, LuEye, LuExternalLink, LuPencil, LuPlus, LuUsers } from "react-icons/lu";
 import { Chips } from "@/components/chips";
+import { CompletenessMeter } from "@/components/owner/completeness-meter";
 import { CoverImage } from "@/components/owner/cover-image";
-import { FeaturedToggle } from "@/components/owner/featured-toggle";
 import { OwnerDataNotice } from "@/components/owner/owner-notice";
 import { OwnerPage } from "@/components/owner/owner-page";
 import { PropertyStatusBadge, RoomStatusBadge } from "@/components/owner/property-status-badge";
@@ -146,11 +146,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
             </Link>
           </div>
         </div>
-      ) : (
-        <div className="mt-6">
-          <FeaturedToggle propertyId={property.id} featured={property.featured} visible={visible} />
-        </div>
-      )}
+      ) : null}
 
       <div className="mt-8 grid gap-5 lg:grid-cols-2">
         <InfoCard title="Sobre o imóvel" editHref={editHref("geral")}>
@@ -250,6 +246,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
                         Banheiro {bathroomTypeLabels[room.bathroomType].toLowerCase()}
                       </span>
                     </div>
+                    <CompletenessMeter score={room.completenessScore} label="Completude" />
                   </div>
                 </Link>
                 <div className="flex flex-col gap-3 border-t border-(--line) px-5 py-3">

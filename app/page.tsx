@@ -1,7 +1,7 @@
 import { PublicHome } from "@/components/public-home";
 import { UserHome } from "@/components/user-home";
 import { getCurrentUser } from "@/lib/current-user";
-import { publicPropertyPageSchema } from "@/lib/properties";
+import { publicRoomPageSchema, roomListingPageSize } from "@/lib/properties";
 import { getApiData } from "@/lib/server-api";
 
 export default async function Home() {
@@ -9,16 +9,7 @@ export default async function Home() {
 
   if (!user) return <PublicHome />;
 
-  const [featured, listing] = await Promise.all([
-    getApiData("/properties?featured=true&limit=8", publicPropertyPageSchema),
-    getApiData("/properties?limit=12", publicPropertyPageSchema),
-  ]);
+  const listing = await getApiData(`/rooms?limit=${roomListingPageSize}`, publicRoomPageSchema);
 
-  return (
-    <UserHome
-      user={user}
-      featured={featured.status === "ok" ? featured.data.items : null}
-      listing={listing.status === "ok" ? listing.data : null}
-    />
-  );
+  return <UserHome user={user} listing={listing.status === "ok" ? listing.data : null} />;
 }

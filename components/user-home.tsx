@@ -3,10 +3,10 @@
 import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
-import { PropertyCard } from "@/components/property-card";
+import { RoomCard } from "@/components/room-card";
 import { SiteHeader } from "@/components/site-header";
 import { apiFetch } from "@/lib/api";
-import { publicPropertyPageSchema, type PublicPropertyCard, type PublicPropertyPage } from "@/lib/properties";
+import { publicRoomPageSchema, roomListingPageSize, type PublicRoomPage } from "@/lib/properties";
 import type { IconType } from "react-icons";
 import { LuCalendarDays, LuChevronDown, LuClock3, LuHistory, LuMapPin, LuSearch } from "react-icons/lu";
 
@@ -23,15 +23,7 @@ const searchFields: { label: string; placeholder: string; icon: IconName; option
 
 const sectionShell = "mx-auto w-full max-w-360 px-6 md:px-10 lg:px-12";
 
-export function UserHome({
-  user,
-  featured,
-  listing,
-}: {
-  user: { name: string };
-  featured: PublicPropertyCard[] | null;
-  listing: PublicPropertyPage | null;
-}) {
+export function UserHome({ user, listing }: { user: { name: string; roles: string[] }; listing: PublicRoomPage | null }) {
   const [openField, setOpenField] = useState<string>();
   const [searchValues, setSearchValues] = useState<Record<string, string>>({});
   const firstName = user.name.trim().split(/\s+/)[0];
@@ -69,19 +61,7 @@ export function UserHome({
           </div>
         </section>
 
-        {featured && featured.length > 0 ? (
-          <section id="destaques" aria-labelledby="destaques-titulo" className={`${sectionShell} pt-14 md:pt-16`}>
-            <div className="flex items-end justify-between gap-4">
-              <h2 id="destaques-titulo" className="text-2xl font-extrabold text-white">Locais em destaque</h2>
-              <Link href="#todos" className="text-sm font-semibold text-(--blue-light) hover:underline">Ver todos</Link>
-            </div>
-            <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {featured.map((property) => <li key={property.id}><PropertyCard property={property} /></li>)}
-            </ul>
-          </section>
-        ) : null}
-
-        <AllProperties initial={listing} />
+        <AllRooms initial={listing} />
 
         <section aria-labelledby="proprietarios-titulo" className={`${sectionShell} pb-12 pt-14 md:pb-16 md:pt-16`}>
           <div className="relative overflow-hidden rounded-[18px] bg-[linear-gradient(120deg,#0b3a8f,#0B63E3)] p-6 md:flex md:items-center md:justify-between md:gap-8 md:p-8">
@@ -102,25 +82,24 @@ function SearchField({ label, placeholder, icon, options, value, open, onToggle,
   return <div className="relative border-b border-[rgba(3,17,40,.08)] md:border-b-0 md:border-r md:last-of-type:border-r-0"><button type="button" onClick={onToggle} aria-expanded={open} className="flex w-full items-center gap-3 px-3.5 py-3.75 text-left md:flex-wrap md:gap-x-2 md:gap-y-0.5 md:py-3"><span className="text-(--blue)"><Icon name={icon} size={18} /></span><span className="w-18.5 text-[13px] font-semibold text-[#3a4a63] md:w-auto">{label}</span><span className={`flex-1 truncate text-sm font-semibold md:order-last md:basis-full ${value ? "text-[#0f1f39]" : "text-[#8695ab]"}`}>{value ?? placeholder}</span><span className={open ? "rotate-180 text-[#8695ab] transition-transform md:ml-auto" : "text-[#8695ab] transition-transform md:ml-auto"}><Icon name="chevronDown" size={18} /></span></button>{open ? <div className="absolute inset-x-2.5 top-[calc(100%-4px)] z-20 flex flex-col gap-1 rounded-xl border border-slate-200 bg-white p-2.5 shadow-[0_16px_32px_rgba(3,17,40,.2)] md:min-w-50">{options.map((option) => <button key={option} type="button" onClick={() => onPick(option)} className="rounded-lg px-3 py-2.75 text-left text-[13.5px] font-semibold text-[#0f1f39] hover:bg-[rgba(11,99,227,.1)]">{option}</button>)}</div> : null}</div>;
 }
 
-function AllProperties({ initial }: { initial: PublicPropertyPage | null }) {
+function AllRooms({ initial }: { initial: PublicRoomPage | null }) {
   const [items, setItems] = useState(initial?.items ?? []);
-  const [page, setPage] = useState(initial?.page ?? 1);
-  const [total, setTotal] = useState(initial?.total ?? 0);
+  const [nextCursor, setNextCursor] = useState(initial?.nextCursor ?? null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(initial ? undefined : "Não foi possível carregar os locais agora. Tente novamente em alguns instantes.");
+  const [error, setError] = useState(initial ? undefined : "Não foi possível carregar os quartos agora. Tente novamente em alguns instantes.");
+  const total = initial?.total ?? 0;
 
-  async function loadMore() {
+  async function loadMore(cursor: string) {
     setLoading(true);
     setError(undefined);
     try {
-      const response = await apiFetch(`/properties?page=${page + 1}&limit=${initial?.limit ?? 12}`);
+      const response = await apiFetch(`/rooms?limit=${roomListingPageSize}&cursor=${encodeURIComponent(cursor)}`);
       if (!response.ok) throw new Error();
-      const next = publicPropertyPageSchema.parse(await response.json());
+      const next = publicRoomPageSchema.parse(await response.json());
       setItems((current) => [...current, ...next.items.filter((item) => !current.some((existing) => existing.id === item.id))]);
-      setPage(next.page);
-      setTotal(next.total);
+      setNextCursor(next.nextCursor);
     } catch {
-      setError("Não foi possível carregar mais locais. Tente novamente.");
+      setError("Não foi possível carregar mais quartos. Tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -129,20 +108,20 @@ function AllProperties({ initial }: { initial: PublicPropertyPage | null }) {
   return (
     <section id="todos" aria-labelledby="todos-titulo" className={`${sectionShell} scroll-mt-20 pt-14 md:pt-16`}>
       <div className="flex items-end justify-between gap-4">
-        <h2 id="todos-titulo" className="text-2xl font-extrabold text-white">Todos os locais</h2>
-        {total > 0 ? <span className="text-sm text-(--gray)">{total === 1 ? "1 local" : `${total} locais`}</span> : null}
+        <h2 id="todos-titulo" className="text-2xl font-extrabold text-white">Quartos disponíveis</h2>
+        {total > 0 ? <span className="text-sm text-(--gray)">{total === 1 ? "1 quarto" : `${total} quartos`}</span> : null}
       </div>
       {items.length > 0 ? (
         <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {items.map((property) => <li key={property.id}><PropertyCard property={property} /></li>)}
+          {items.map((room) => <li key={room.id}><RoomCard room={room} /></li>)}
         </ul>
       ) : initial ? (
-        <p className="mt-6 rounded-2xl border border-dashed border-(--line-strong) p-6 text-sm text-(--gray)">Ainda não há locais disponíveis. Volte em breve.</p>
+        <p className="mt-6 rounded-2xl border border-dashed border-(--line-strong) p-6 text-sm text-(--gray)">Ainda não há quartos disponíveis. Volte em breve.</p>
       ) : null}
       {error ? <p role="alert" className="mt-4 text-sm font-semibold text-[#ff9b8a]">{error}</p> : null}
-      {items.length < total ? (
+      {nextCursor ? (
         <div className="mt-6 flex justify-center">
-          <button type="button" disabled={loading} onClick={() => void loadMore()} className="rounded-xl border border-(--line-strong) px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60">
+          <button type="button" disabled={loading} onClick={() => void loadMore(nextCursor)} className="rounded-xl border border-(--line-strong) px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60">
             {loading ? "Carregando..." : "Carregar mais"}
           </button>
         </div>
