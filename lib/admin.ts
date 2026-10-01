@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { propertyStatuses, propertyTypes, roomStatuses } from "@/lib/properties";
 
 export const ADMIN_PAGE_SIZE = 20;

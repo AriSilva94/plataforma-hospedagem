@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { LuArrowLeft, LuArrowRight, LuImagePlus, LuStar, LuTrash2 } from "react-icons/lu";
 import { FormFeedback } from "@/components/form-feedback";
 import { ConfirmDialog } from "@/components/owner/confirm-dialog";
