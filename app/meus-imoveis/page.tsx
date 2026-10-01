@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { LuBedDouble, LuHousePlus, LuMapPin, LuPlus } from "react-icons/lu";
 import { CoverImage } from "@/components/owner/cover-image";
 import { OwnerDataNotice } from "@/components/owner/owner-notice";
