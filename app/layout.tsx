@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { connection } from "next/server";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -13,7 +14,9 @@ export const metadata: Metadata = {
   description: "Encontre estadias e gerencie seus anúncios com segurança.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  await connection();
+
   return (
     <html
       lang="pt-BR"
