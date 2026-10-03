@@ -54,19 +54,20 @@ export default async function SetupPropertyPage({ params, searchParams }: PagePr
   const previous = setupSteps[index - 1];
   const next = setupSteps[index + 1];
   const nextHref = next ? setupStepHref(property.id, next.id) : undefined;
+  const previousHref = previous ? setupStepHref(property.id, previous.id) : undefined;
+  const formStep = step === "basico" || step === "endereco" || (step === "quarto" && property.rooms.length === 0);
   const { title, description } = stepCopy[step];
 
   return (
     <OwnerPage
       title={title}
-      eyebrow={<span className="text-sm font-semibold text-(--gray)">{property.title}</span>}
       description={description}
-      back={{ href: `/meus-imoveis/${property.id}`, label: "Detalhes do imóvel" }}
+      back={{ href: `/meus-imoveis/${property.id}`, label: property.title }}
     >
       <SetupSteps current={step} propertyId={property.id} missing={property.missingRequirements} />
 
       {step === "basico" && nextHref ? <PropertyGeneralForm key={property.id} property={property} guided={{ nextHref }} /> : null}
-      {step === "endereco" && nextHref ? <PropertyLocationForm property={property} guided={{ nextHref }} /> : null}
+      {step === "endereco" && nextHref ? <PropertyLocationForm property={property} guided={{ nextHref, previousHref }} /> : null}
 
       {step === "fotos" ? (
         <div className="py-8">
@@ -76,7 +77,7 @@ export default async function SetupPropertyPage({ params, searchParams }: PagePr
 
       {step === "quarto" ? (
         property.rooms.length === 0 && nextHref ? (
-          <RoomForm propertyId={property.id} createdHref={nextHref} />
+          <RoomForm propertyId={property.id} createdHref={nextHref} backHref={previousHref} />
         ) : (
           <div className="flex flex-col gap-4 py-8">
             <ul className="flex flex-col gap-3">
@@ -119,19 +120,21 @@ export default async function SetupPropertyPage({ params, searchParams }: PagePr
         </div>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-3 border-t border-(--line) pt-6 pb-4">
-        {previous ? (
-          <Link href={setupStepHref(property.id, previous.id)} className={secondaryButtonClassName}>
-            <LuArrowLeft aria-hidden="true" size={16} />
-            Voltar
-          </Link>
-        ) : null}
-        {(step === "fotos" || (step === "quarto" && property.rooms.length > 0)) && nextHref ? (
-          <Link href={nextHref} className={primaryButtonClassName}>
-            Continuar
-          </Link>
-        ) : null}
-      </div>
+      {formStep ? null : (
+        <div className="flex flex-wrap items-center gap-3 border-t border-(--line) pt-6 pb-4">
+          {previousHref ? (
+            <Link href={previousHref} className={secondaryButtonClassName}>
+              <LuArrowLeft aria-hidden="true" size={16} />
+              Voltar
+            </Link>
+          ) : null}
+          {(step === "fotos" || (step === "quarto" && property.rooms.length > 0)) && nextHref ? (
+            <Link href={nextHref} className={primaryButtonClassName}>
+              Continuar
+            </Link>
+          ) : null}
+        </div>
+      )}
     </OwnerPage>
   );
 }

@@ -24,10 +24,10 @@ export function ChoiceGroup({
   const errorId = `${id}-error`;
 
   return (
-    <fieldset aria-describedby={error ? errorId : undefined} disabled={disabled}>
+    <fieldset id={id} aria-describedby={error ? errorId : undefined} disabled={disabled}>
       <legend className="text-sm font-semibold text-(--gray)">{legend}</legend>
       {description ? <p className="mt-1 text-xs leading-relaxed text-(--gray)">{description}</p> : null}
-      <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-2 flex flex-wrap gap-2">
         {options.map((option) => (
           <label key={option.value} className={choiceClassName}>
             <input type={type} value={option.value} className={type === "radio" ? radioClassName : checkboxClassName} {...registration} />

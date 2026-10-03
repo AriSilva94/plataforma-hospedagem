@@ -4,22 +4,26 @@ import { LuArrowLeft } from "react-icons/lu";
 
 export function OwnerPage({
   title,
-  eyebrow,
+  badge,
   description,
   back,
   actions,
+  wide = false,
+  divider = true,
   children,
 }: {
   title: string;
-  eyebrow?: ReactNode;
+  badge?: ReactNode;
   description?: string;
   back?: { href: string; label: string };
   actions?: ReactNode;
+  wide?: boolean;
+  divider?: boolean;
   children: ReactNode;
 }) {
   return (
-    <main className="min-h-[calc(100vh-72px)] px-4 pt-8 pb-28 sm:px-6 md:pt-12 md:pb-16">
-      <div className="mx-auto max-w-5xl">
+    <main className="min-h-[calc(100vh-72px)] px-4 pt-4 pb-28 sm:px-6 md:pt-8 md:pb-16">
+      <div className={`mx-auto ${wide ? "max-w-6xl" : "max-w-5xl"}`}>
         {back ? (
           <Link
             href={back.href}
@@ -29,11 +33,13 @@ export function OwnerPage({
             {back.label}
           </Link>
         ) : null}
-        <header className="mt-4 flex flex-col gap-4 border-b border-(--line) pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <header className={`mt-1 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6 ${divider ? "border-b border-(--line) pb-5" : ""}`}>
           <div className="min-w-0">
-            {eyebrow ? <div className="mb-2">{eyebrow}</div> : null}
-            <h1 className="wrap-break-word text-2xl font-extrabold tracking-tight text-white sm:text-3xl">{title}</h1>
-            {description ? <p className="mt-2 max-w-prose text-sm leading-relaxed text-(--gray)">{description}</p> : null}
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+              <h1 className="wrap-break-word text-2xl font-extrabold tracking-tight text-white sm:text-3xl">{title}</h1>
+              {badge}
+            </div>
+            {description ? <p className="mt-1.5 max-w-prose text-sm leading-relaxed text-(--gray)">{description}</p> : null}
           </div>
           {actions ? <div className="flex shrink-0 flex-wrap gap-3">{actions}</div> : null}
         </header>
