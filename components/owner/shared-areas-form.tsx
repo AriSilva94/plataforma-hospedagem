@@ -5,9 +5,7 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { LuPlus, LuTrash2 } from "react-icons/lu";
-import { FormFeedback } from "@/components/form-feedback";
-import { FormActions } from "@/components/owner/form-actions";
-import { SavedNotice } from "@/components/owner/saved-notice";
+import { FormActions, FormStatus } from "@/components/owner/form-actions";
 import { UnsavedChangesGuard } from "@/components/owner/unsaved-changes-guard";
 import { optionsFrom } from "@/components/owner/choice-group";
 import { FieldError } from "@/components/owner/field-error";
@@ -57,7 +55,7 @@ export function SharedAreasForm({ property }: { property: PropertyDetail }) {
   }
 
   return (
-    <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col gap-6 py-8">
+    <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col gap-5 py-6">
       <p className="max-w-prose text-sm leading-relaxed text-(--gray)">
         Opcional. Áreas que pertencem à casa como um todo e são compartilhadas entre os quartos. Não é necessário repeti-las em cada quarto.
       </p>
@@ -135,14 +133,16 @@ export function SharedAreasForm({ property }: { property: PropertyDetail }) {
         </button>
       </div>
 
-      {error ? <FormFeedback tone="error">{error}</FormFeedback> : null}
-      {message ? <SavedNotice message={message} propertyId={property.id} showPublicLink={property.status === "ACTIVE"} /> : null}
-
       <FormActions>
         <button type="submit" disabled={isSubmitting || !isDirty} className={primaryButtonClassName}>
           {isSubmitting ? "Salvando..." : "Salvar áreas"}
         </button>
-        {isDirty ? <span className="text-sm text-(--warning)">Alterações não salvas</span> : null}
+        {isDirty ? (
+          <button type="button" disabled={isSubmitting} onClick={() => reset()} className={secondaryButtonClassName}>
+            Descartar
+          </button>
+        ) : null}
+        <FormStatus error={error} saved={message} dirty={isDirty} />
       </FormActions>
       <UnsavedChangesGuard dirty={isDirty && !isSubmitting} />
     </form>

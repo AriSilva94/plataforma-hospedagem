@@ -4,7 +4,6 @@ import {
   brazilianStates,
   genderIdentities,
   propertyTypes,
-  roomStatuses,
   sharedAreaTypes,
 } from "@/lib/properties";
 
@@ -108,7 +107,6 @@ export const roomSchema = z.object({
   acceptedAudiences: z.array(z.enum(genderIdentities)).min(1, { error: "Selecione ao menos um público aceito." }),
   amenities: z.array(z.string()),
   additionalInfo: optionalText(2000),
-  status: z.enum(roomStatuses),
 });
 
 export type PropertyGeneralInput = z.input<typeof propertyGeneralSchema>;

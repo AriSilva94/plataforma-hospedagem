@@ -5,6 +5,7 @@ WORKDIR /app
 
 FROM base AS build
 ARG NEXT_PUBLIC_API_URL
+ARG MEDIA_PUBLIC_BASE_URL
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 COPY . .

@@ -1,3 +1,4 @@
+import { LuHouse, LuImages, LuMapPin, LuSofa } from "react-icons/lu";
 import { MediaGallery } from "@/components/owner/media-gallery";
 import { OwnerDataNotice } from "@/components/owner/owner-notice";
 import { OwnerPage } from "@/components/owner/owner-page";
@@ -10,10 +11,10 @@ import { getApiData } from "@/lib/server-api";
 import { propertyDetailSchema } from "@/lib/properties";
 
 const sections = [
-  { id: "geral", label: "Sobre o imóvel" },
-  { id: "localizacao", label: "Localização" },
-  { id: "areas", label: "Áreas" },
-  { id: "midia", label: "Fotos e vídeos" },
+  { id: "geral", label: "Sobre o imóvel", icon: LuHouse },
+  { id: "localizacao", label: "Localização", icon: LuMapPin },
+  { id: "areas", label: "Áreas", icon: LuSofa },
+  { id: "midia", label: "Fotos e vídeos", icon: LuImages },
 ] as const;
 
 export default async function EditPropertyPage({ params, searchParams }: PageProps<"/meus-imoveis/[propertyId]/editar">) {
@@ -30,9 +31,10 @@ export default async function EditPropertyPage({ params, searchParams }: PagePro
   return (
     <OwnerPage
       title={property.title}
-      eyebrow={<PropertyStatusBadge status={property.status} />}
+      badge={<PropertyStatusBadge status={property.status} />}
       description="Edite cada grupo de informações separadamente. As alterações são salvas por seção."
       back={{ href: `/meus-imoveis/${property.id}`, label: "Detalhes do imóvel" }}
+      divider={false}
     >
       <SectionTabs
         label="Seções do imóvel"

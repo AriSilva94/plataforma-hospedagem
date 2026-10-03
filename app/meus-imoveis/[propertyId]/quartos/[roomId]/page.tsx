@@ -1,16 +1,18 @@
+import { LuBedDouble, LuImages } from "react-icons/lu";
 import { MediaGallery } from "@/components/owner/media-gallery";
 import { OwnerDataNotice } from "@/components/owner/owner-notice";
 import { OwnerPage } from "@/components/owner/owner-page";
-import { RoomStatusBadge } from "@/components/owner/property-status-badge";
-import { RoomCompleteness } from "@/components/owner/room-completeness";
+import { RoomCompletenessHints, RoomCompletenessSummary } from "@/components/owner/room-completeness";
 import { RoomForm } from "@/components/owner/room-form";
+import { RoomStatusStrip } from "@/components/owner/room-status-strip";
 import { SectionTabs } from "@/components/owner/section-tabs";
+import { roomCriterionSection } from "@/lib/completeness";
 import { getApiData } from "@/lib/server-api";
-import { roomDetailSchema } from "@/lib/properties";
+import { bathroomTypeLabels, formatCents, roomDetailSchema } from "@/lib/properties";
 
 const sections = [
-  { id: "dados", label: "Dados, características e preço" },
-  { id: "fotos", label: "Fotos" },
+  { id: "dados", label: "Dados e preço", icon: LuBedDouble },
+  { id: "fotos", label: "Fotos", icon: LuImages },
 ] as const;
 
 export default async function EditRoomPage({ params, searchParams }: PageProps<"/meus-imoveis/[propertyId]/quartos/[roomId]">) {
@@ -26,19 +28,38 @@ export default async function EditRoomPage({ params, searchParams }: PageProps<"
   }
 
   const room = result.data;
+  const summary = [
+    room.capacity === 1 ? "1 pessoa" : `${room.capacity} pessoas`,
+    `${formatCents(room.priceCents)} / diária`,
+    `Banheiro ${bathroomTypeLabels[room.bathroomType].toLowerCase()}`,
+  ].join(" · ");
+  const showCompleteness = room.status !== "INACTIVE";
+  const pendingSections = new Set(showCompleteness ? room.completenessMissing.map(roomCriterionSection) : []);
 
   return (
     <OwnerPage
       title={room.title}
-      eyebrow={<RoomStatusBadge status={room.status} />}
-      description={`Quarto em ${room.property.title}`}
+      description={summary}
       back={{ href: `/meus-imoveis/${propertyId}`, label: room.property.title }}
+      actions={showCompleteness ? <RoomCompletenessSummary score={room.completenessScore} missingCount={room.completenessMissing.length} /> : undefined}
+      divider={false}
     >
-      <RoomCompleteness propertyId={propertyId} roomId={room.id} score={room.completenessScore} missing={room.completenessMissing} />
+      <RoomStatusStrip
+        roomId={room.id}
+        roomTitle={room.title}
+        status={room.status}
+        propertyStatus={room.property.status}
+        availableRoomCount={room.property.availableRoomCount}
+      />
+      {showCompleteness ? <RoomCompletenessHints propertyId={propertyId} roomId={room.id} missing={room.completenessMissing} section={section} /> : null}
       <SectionTabs
         label="Seções do quarto"
         current={section}
-        tabs={sections.map((item) => ({ ...item, href: `/meus-imoveis/${propertyId}/quartos/${room.id}?secao=${item.id}` }))}
+        tabs={sections.map((item) => ({
+          ...item,
+          href: `/meus-imoveis/${propertyId}/quartos/${room.id}?secao=${item.id}`,
+          pending: pendingSections.has(item.id),
+        }))}
       />
       {section === "dados" ? <RoomForm propertyId={propertyId} room={room} /> : null}
       {section === "fotos" ? (

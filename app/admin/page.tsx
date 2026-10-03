@@ -17,7 +17,7 @@ export default async function AdminDashboardPage() {
   const { users, properties, rooms, featuring } = result.data;
 
   return (
-    <OwnerPage title="Painel administrativo" eyebrow={<StatusBadge tone="neutral">Administração</StatusBadge>} description="Visão geral da plataforma. Escolha uma área para ver os detalhes.">
+    <OwnerPage title="Painel administrativo" badge={<StatusBadge tone="neutral">Administração</StatusBadge>} description="Visão geral da plataforma. Escolha uma área para ver os detalhes.">
       <ul className="mt-8 grid gap-5 sm:grid-cols-2">
         <DashboardCard
           href="/admin/usuarios"
