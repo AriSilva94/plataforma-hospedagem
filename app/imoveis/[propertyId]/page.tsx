@@ -1,11 +1,14 @@
-import Image from "next/image";
+import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { LuArrowLeft, LuBath, LuEyeOff, LuImage, LuMapPin, LuUsers } from "react-icons/lu";
+import { LuArrowDown, LuArrowLeft, LuBath, LuEyeOff, LuMapPin, LuUsers } from "react-icons/lu";
 import { Chips } from "@/components/chips";
+import { FavoriteButton } from "@/components/favorite-button";
 import { PageNotice } from "@/components/page-notice";
+import { PropertyPhotoGrid, RoomCover } from "@/components/property-gallery";
 import { SiteHeader } from "@/components/site-header";
 import { getCurrentUser } from "@/lib/current-user";
+import { favoriteRoomIdsSchema } from "@/lib/favorites";
 import {
   bathroomTypeLabels,
   formatCents,
@@ -17,7 +20,6 @@ import {
   publicPropertyDetailSchema,
   roomAmenityLabels,
   sharedAreaTypeLabels,
-  type Media,
 } from "@/lib/properties";
 import { getApiData } from "@/lib/server-api";
 
@@ -30,18 +32,12 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function Photo({ media, alt, sizes, className, eager }: { media?: Media; alt: string; sizes: string; className: string; eager?: boolean }) {
-  return (
-    <div className={`relative overflow-hidden bg-(--surface-raised) ${className}`}>
-      {media ? (
-        <Image src={media.url} alt={alt} fill unoptimized loading={eager ? "eager" : undefined} sizes={sizes} className="object-cover" />
-      ) : (
-        <div className="flex size-full items-center justify-center text-(--gray)">
-          <LuImage aria-hidden="true" size={28} />
-        </div>
-      )}
-    </div>
-  );
+export async function generateMetadata({ params }: PageProps<"/imoveis/[propertyId]">): Promise<Metadata> {
+  const { propertyId } = await params;
+  const result = await getApiData(`/properties/${propertyId}`, publicPropertyDetailSchema);
+  if (result.status !== "ok") return { title: "Local não encontrado | DOMUS X" };
+  const place = [result.data.city, result.data.state].filter(Boolean).join(" · ");
+  return { title: `${result.data.title}${place ? ` · ${place}` : ""} | DOMUS X` };
 }
 
 export default async function PublicPropertyPage({ params, searchParams }: PageProps<"/imoveis/[propertyId]">) {
@@ -65,18 +61,23 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
   }
 
   const property = result.data;
-  const images = property.media.filter((item) => item.type === "IMAGE");
+  const favorites = user ? await getApiData("/favorites/room-ids", favoriteRoomIdsSchema) : undefined;
+  const favoriteRoomIds = new Set(favorites?.status === "ok" ? favorites.data.roomIds : []);
+  const photos = property.media
+    .filter((item) => item.type === "IMAGE")
+    .map((item, index) => ({ id: item.id, url: item.url, alt: index === 0 ? `Foto principal de ${property.title}` : `Foto ${index + 1} de ${property.title}` }));
   const videos = property.media.filter((item) => item.type === "VIDEO");
-  const [cover, ...otherImages] = images;
+  const lowestPrice = property.rooms.length > 0 ? Math.min(...property.rooms.map((room) => room.priceCents)) : undefined;
+  const roomCount = property.rooms.length === 1 ? "1 quarto disponível" : `${property.rooms.length} quartos disponíveis`;
 
   return (
     <>
       <SiteHeader user={user} />
       {previa === "1" ? (
-        <div className="border-b border-(--line-strong) bg-(--surface-raised) px-4 py-3 sm:px-6">
+        <div className="sticky top-16 z-10 border-b border-(--line-strong) bg-(--surface-raised) px-4 py-3 sm:px-6 md:top-18">
           <p className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 text-sm text-(--gray)">
             <span>Prévia: é assim que os hóspedes veem este anúncio.</span>
-            <Link href={`/meus-imoveis/${property.id}`} className="font-semibold text-(--blue-light) underline-offset-4 hover:underline">
+            <Link href={`/meus-imoveis/${property.id}`} className="font-semibold text-white underline underline-offset-4 hover:text-(--blue-light)">
               Voltar ao gerenciamento
             </Link>
           </p>
@@ -88,27 +89,7 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
             <LuArrowLeft aria-hidden="true" size={16} /> Início
           </Link>
 
-          <div className={`mt-4 grid gap-2 overflow-hidden rounded-2xl ${otherImages.length > 0 ? "md:grid-cols-4 md:grid-rows-2" : ""}`}>
-            <Photo
-              media={cover}
-              eager
-              alt={`Foto principal de ${property.title}`}
-              sizes={otherImages.length > 0 ? "(min-width: 768px) 50vw, 100vw" : "100vw"}
-              className={otherImages.length > 0 ? "aspect-4/3 md:col-span-2 md:row-span-2 md:aspect-auto md:min-h-96" : "aspect-4/3 md:aspect-21/9"}
-            />
-            {otherImages.slice(0, 4).map((image, index) => (
-              <Photo key={image.id} media={image} alt={`Foto ${index + 2} de ${property.title}`} sizes="25vw" className="hidden aspect-4/3 md:block" />
-            ))}
-          </div>
-          {otherImages.length > 0 ? (
-            <ul className="mt-2 flex gap-2 overflow-x-auto md:hidden">
-              {otherImages.map((image, index) => (
-                <li key={image.id} className="w-32 shrink-0">
-                  <Photo media={image} alt={`Foto ${index + 2} de ${property.title}`} sizes="128px" className="aspect-4/3 rounded-xl" />
-                </li>
-              ))}
-            </ul>
-          ) : null}
+          <PropertyPhotoGrid title={property.title} photos={photos} />
 
           <header className="py-8">
             <p className="text-sm font-semibold text-(--blue-light)">{propertyTypeLabels[property.type]}</p>
@@ -116,7 +97,69 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
             <p className="mt-3 flex items-center gap-2 text-sm text-(--gray)">
               <LuMapPin aria-hidden="true" size={16} className="shrink-0" /> {formatLocation(property)}
             </p>
+            {lowestPrice !== undefined ? (
+              <a
+                href="#quartos"
+                className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-(--line-strong) bg-(--surface) px-4 text-sm text-white transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
+              >
+                <span className="font-semibold">{roomCount}</span>
+                <span className="text-(--gray)">· a partir de</span>
+                <span className="font-bold">{formatCents(lowestPrice)}</span>
+                <span className="text-(--gray)">/ diária</span>
+                <LuArrowDown aria-hidden="true" size={16} className="text-(--blue-light)" />
+              </a>
+            ) : null}
           </header>
+
+          <section id="quartos" aria-labelledby="rooms-title" className="scroll-mt-24 border-t border-(--line) py-8">
+            <h2 id="rooms-title" className="text-2xl font-extrabold tracking-tight text-white">Quartos disponíveis</h2>
+            <p className="mt-1 text-sm text-(--gray)">Cada quarto tem preço e disponibilidade próprios.</p>
+            <ul className="mt-5 flex flex-col gap-5">
+              {property.rooms.map((room, roomIndex) => {
+                const roomPhotos = room.media
+                  .filter((item) => item.type === "IMAGE")
+                  .map((item, index) => ({ id: item.id, url: item.url, alt: index === 0 ? `Foto de ${room.title}` : `Foto ${index + 1} de ${room.title}` }));
+                return (
+                  <li
+                    key={room.id}
+                    id={`quarto-${room.id}`}
+                    className="grid scroll-mt-24 overflow-hidden rounded-2xl border border-(--line-strong) bg-(--surface) target:border-(--blue-light) target:ring-2 target:ring-(--blue-light) md:grid-cols-[18rem_minmax(0,1fr)]"
+                  >
+                    <RoomCover title={room.title} photos={roomPhotos} eager={roomIndex === 0} className="aspect-4/3 md:aspect-auto md:min-h-56" />
+                    <div className="flex flex-col gap-3 p-5">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <h3 className="wrap-break-word text-lg font-bold text-white">{room.title}</h3>
+                        <p className="text-lg font-extrabold text-white">
+                          {formatCents(room.priceCents)} <span className="text-sm font-semibold text-(--gray)">/ diária</span>
+                        </p>
+                      </div>
+                      <div className="flex flex-col gap-1.5 text-sm text-(--gray)">
+                        <span className="flex items-center gap-2">
+                          <LuUsers aria-hidden="true" size={15} className="shrink-0" />
+                          {room.capacity === 1 ? "1 pessoa" : `Até ${room.capacity} pessoas`} · Aceita: {room.acceptedAudiences.map((audience) => genderIdentityLabels[audience]).join(", ")}
+                        </span>
+                        <span className="flex items-center gap-2">
+                          <LuBath aria-hidden="true" size={15} className="shrink-0" /> Banheiro {bathroomTypeLabels[room.bathroomType].toLowerCase()}
+                        </span>
+                      </div>
+                      {room.description ? <p className="whitespace-pre-line text-sm leading-relaxed text-(--gray)">{room.description}</p> : null}
+                      {room.amenities.length > 0 ? <Chips items={room.amenities.map((amenity) => labelOf(roomAmenityLabels, amenity))} /> : null}
+                      <div className="mt-auto pt-2">
+                        <FavoriteButton
+                          roomId={room.id}
+                          roomTitle={room.title}
+                          initialFavorited={favoriteRoomIds.has(room.id)}
+                          signedIn={Boolean(user)}
+                          loginReturnPath={`/imoveis/${property.id}#quarto-${room.id}`}
+                          variant="inline"
+                        />
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
 
           {property.description ? (
             <Section title="Sobre o local">
@@ -143,53 +186,11 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
             </Section>
           ) : null}
 
-          <section aria-labelledby="rooms-title" className="border-t border-(--line) py-8">
-            <h2 id="rooms-title" className="text-lg font-bold text-white">Quartos disponíveis</h2>
-            <ul className="mt-5 flex flex-col gap-5">
-              {property.rooms.map((room) => {
-                const roomImages = room.media.filter((item) => item.type === "IMAGE");
-                return (
-                  <li key={room.id} id={`quarto-${room.id}`} className="grid scroll-mt-20 overflow-hidden rounded-2xl border border-(--line-strong) bg-(--surface) md:grid-cols-[18rem_minmax(0,1fr)]">
-                    <Photo media={roomImages[0]} alt={`Foto de ${room.title}`} sizes="(min-width: 768px) 288px, 100vw" className="aspect-4/3 md:aspect-auto md:min-h-56" />
-                    <div className="flex flex-col gap-3 p-5">
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <h3 className="wrap-break-word text-lg font-bold text-white">{room.title}</h3>
-                        <p className="text-lg font-extrabold text-white">
-                          {formatCents(room.priceCents)} <span className="text-sm font-semibold text-(--gray)">/ diária</span>
-                        </p>
-                      </div>
-                      <div className="flex flex-col gap-1.5 text-sm text-(--gray)">
-                        <span className="flex items-center gap-2">
-                          <LuUsers aria-hidden="true" size={15} className="shrink-0" />
-                          {room.capacity === 1 ? "1 pessoa" : `Até ${room.capacity} pessoas`} · Aceita: {room.acceptedAudiences.map((audience) => genderIdentityLabels[audience]).join(", ")}
-                        </span>
-                        <span className="flex items-center gap-2">
-                          <LuBath aria-hidden="true" size={15} className="shrink-0" /> Banheiro {bathroomTypeLabels[room.bathroomType].toLowerCase()}
-                        </span>
-                      </div>
-                      {room.description ? <p className="whitespace-pre-line text-sm leading-relaxed text-(--gray)">{room.description}</p> : null}
-                      {room.amenities.length > 0 ? <Chips items={room.amenities.map((amenity) => labelOf(roomAmenityLabels, amenity))} /> : null}
-                      {roomImages.length > 1 ? (
-                        <ul className="flex gap-2 overflow-x-auto pt-1">
-                          {roomImages.slice(1).map((image, index) => (
-                            <li key={image.id} className="w-24 shrink-0">
-                              <Photo media={image} alt={`Foto ${index + 2} de ${room.title}`} sizes="96px" className="aspect-4/3 rounded-lg" />
-                            </li>
-                          ))}
-                        </ul>
-                      ) : null}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-
           {videos.length > 0 ? (
             <Section title="Vídeos">
               <div className="grid gap-4 md:grid-cols-2">
                 {videos.map((video, index) => (
-                  <video key={video.id} src={video.url} controls preload="metadata" aria-label={`Vídeo ${index + 1} de ${property.title}`} className="aspect-video w-full rounded-xl bg-(--surface-raised)" />
+                  <video key={video.id} src={`${video.url}#t=0.1`} controls preload="metadata" aria-label={`Vídeo ${index + 1} de ${property.title}`} className="aspect-video w-full rounded-xl bg-(--surface-raised)" />
                 ))}
               </div>
             </Section>
