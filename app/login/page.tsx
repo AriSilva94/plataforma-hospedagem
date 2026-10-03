@@ -1,13 +1,15 @@
 import { AuthForm } from "@/components/auth-form";
+import { safeReturnPath } from "@/lib/return-path";
 
-export default function LoginPage() {
+export default async function LoginPage({ searchParams }: PageProps<"/login">) {
+  const { next } = await searchParams;
   return (
     <AuthForm
       title="Entrar"
       description="Acesse sua conta para gerenciar seu perfil."
       endpoint="/auth/login"
       submitLabel="Entrar"
-      successPath="/"
+      successPath={safeReturnPath(next) ?? "/"}
       fields={[
         {
           name: "email",
