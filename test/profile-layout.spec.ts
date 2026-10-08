@@ -4,12 +4,14 @@ import { expect, test } from "@playwright/test";
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3030";
 let server: Server;
 let submittedProfile: unknown;
+let verificationRequests = 0;
 let profileError = false;
 let profileDelayMs = 0;
 let user = {
   id: "user-1",
   name: "Ana Silva",
   email: "ana@example.com",
+  emailVerifiedAt: null as string | null,
   roles: [] as string[],
 };
 
@@ -36,11 +38,16 @@ test.beforeAll(async () => {
       for await (const chunk of request) chunks.push(chunk);
       const body = JSON.parse(Buffer.concat(chunks).toString()) as {
         name: string;
-        email: string;
       };
       submittedProfile = body;
-      user = { ...user, name: body.name, email: body.email };
+      user = { ...user, name: body.name };
       response.writeHead(200).end(JSON.stringify(user));
+      return;
+    }
+
+    if (request.url === "/auth/email-verification" && request.method === "POST") {
+      verificationRequests += 1;
+      response.writeHead(202).end("{}");
       return;
     }
 
@@ -66,8 +73,9 @@ test.afterAll(async () => {
 });
 
 test.beforeEach(async ({ context }) => {
-  user = { id: "user-1", name: "Ana Silva", email: "ana@example.com", roles: [] };
+  user = { id: "user-1", name: "Ana Silva", email: "ana@example.com", emailVerifiedAt: null, roles: [] };
   submittedProfile = undefined;
+  verificationRequests = 0;
   profileError = false;
   profileDelayMs = 0;
   await context.addCookies([
@@ -90,6 +98,25 @@ test("organiza os dados e distingue recursos futuros", async ({ page }) => {
   await expect(page.getByText("Cadastrado, não verificado")).toBeVisible();
   await expect(page.getByRole("button", { name: /Alterar senha/ })).toBeDisabled();
   await expect(page.getByRole("button", { name: /Desativar conta/ })).toBeDisabled();
+});
+
+test("envia o link de confirmação quando o e-mail não está verificado", async ({ page }) => {
+  await page.goto("/perfil");
+
+  await page.getByRole("button", { name: "Enviar link de confirmação" }).click();
+
+  await expect(page.getByText("Enviamos um link de confirmação para ana@example.com. Ele vale por 24 horas.")).toBeVisible();
+  expect(verificationRequests).toBe(1);
+});
+
+test("mostra o e-mail como verificado sem oferecer novo envio", async ({ page }) => {
+  user = { ...user, emailVerifiedAt: "2026-10-08T00:00:00.000Z" };
+  await page.goto("/perfil");
+
+  await expect(page.getByText("Seu e-mail está verificado.")).toBeVisible();
+  await expect(page.getByText("Verificado", { exact: true })).toBeVisible();
+  await expect(page.getByText("Cadastrado, não verificado")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Enviar link de confirmação" })).toHaveCount(0);
 });
 
 test("destaca a ativação antes dos dados quando não há perfis", async ({ page }) => {
@@ -119,7 +146,7 @@ test("salva os dados atuais e adiciona somente o perfil ausente", async ({ page 
   await page.getByRole("button", { name: "Salvar dados" }).click();
   await expect(page.getByRole("heading", { name: "Ana Souza", level: 1 })).toBeVisible();
   await expect(page.getByText("Dados atualizados.")).toBeVisible();
-  expect(submittedProfile).toEqual({ name: "Ana Souza", email: "ana@example.com" });
+  expect(submittedProfile).toEqual({ name: "Ana Souza" });
 
   await page.getByRole("button", { name: "Adicionar perfil de hóspede" }).click();
   await expect(page.getByText("Perfil ativo")).toHaveCount(1);
@@ -144,25 +171,22 @@ test("valida nome curto no formulário e não envia PATCH", async ({ page }) => 
   expect(submittedProfile).toBeUndefined();
 });
 
-test("valida e-mail inválido no formulário e não envia PATCH", async ({ page }) => {
+test("mostra o e-mail da conta sem permitir alteração", async ({ page }) => {
   await page.goto("/perfil");
   const email = page.getByRole("textbox", { name: "E-mail" });
-  await email.fill("invalido");
-  await page.getByRole("button", { name: "Salvar dados" }).click();
 
-  await expect(page.getByText("Informe um e-mail válido.")).toBeVisible();
-  await expect(email).toHaveAttribute("aria-invalid", "true");
-  expect(submittedProfile).toBeUndefined();
+  await expect(email).toHaveValue("ana@example.com");
+  await expect(email).toBeDisabled();
+  await expect(page.getByText("O e-mail identifica sua conta e não pode ser alterado.")).toBeVisible();
 });
 
-test("normaliza nome e e-mail antes de enviar PATCH", async ({ page }) => {
+test("normaliza o nome antes de enviar PATCH sem incluir o e-mail", async ({ page }) => {
   await page.goto("/perfil");
   await page.getByRole("textbox", { name: "Nome" }).fill(" Ana Souza ");
-  await page.getByRole("textbox", { name: "E-mail" }).fill(" ANA@EXAMPLE.COM ");
   await page.getByRole("button", { name: "Salvar dados" }).click();
 
   await expect(page.getByText("Dados atualizados.")).toBeVisible();
-  expect(submittedProfile).toEqual({ name: "Ana Souza", email: "ana@example.com" });
+  expect(submittedProfile).toEqual({ name: "Ana Souza" });
 });
 
 test("mostra espera e falha do perfil no contexto da ação", async ({ page }) => {

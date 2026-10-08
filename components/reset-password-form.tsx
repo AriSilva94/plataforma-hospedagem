@@ -1,30 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import { useSyncExternalStore } from "react";
-import { resetPasswordSchema } from "@/lib/auth-form-schema";
+import { linkTokenSchema } from "@/lib/auth-form-schema";
+import { useLinkToken } from "@/lib/link-token";
 import { AuthForm } from "./auth-form";
-import { AuthShell } from "./auth-shell";
+import { AuthShell, InvalidLinkShell } from "./auth-shell";
 
 const title = "Redefinir senha";
 const description = "Escolha uma nova senha para sua conta.";
 
-function subscribeToLocation(onChange: () => void) {
-  window.addEventListener("hashchange", onChange);
-  return () => window.removeEventListener("hashchange", onChange);
-}
-
-function readTokenFromLocation(): string {
-  const { hash, search } = window.location;
-  return (
-    new URLSearchParams(hash.slice(1)).get("token") ??
-    new URLSearchParams(search).get("token") ??
-    ""
-  );
-}
-
 export function ResetPasswordForm() {
-  const token = useSyncExternalStore(subscribeToLocation, readTokenFromLocation, () => null);
+  const token = useLinkToken();
 
   if (token === null) {
     return (
@@ -34,20 +19,13 @@ export function ResetPasswordForm() {
     );
   }
 
-  if (!resetPasswordSchema.shape.token.safeParse(token).success) {
+  if (!linkTokenSchema.safeParse(token).success) {
     return (
-      <AuthShell
-        title="Link inválido"
+      <InvalidLinkShell
         description="Este link de redefinição está incompleto ou foi alterado. Peça um novo para escolher sua senha."
+        action={{ href: "/recuperar-senha", label: "Pedir novo link" }}
         links={[{ href: "/login", label: "Voltar para entrar" }]}
-      >
-        <div className="mt-5">
-          <Link href="/recuperar-senha" className="auth-submit">
-            <span>Pedir novo link</span>
-            <span aria-hidden="true">→</span>
-          </Link>
-        </div>
-      </AuthShell>
+      />
     );
   }
 

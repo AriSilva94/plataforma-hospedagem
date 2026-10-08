@@ -48,6 +48,7 @@ type AuthFormProps = {
   presetValues?: { token: string };
   submitLabel: string;
   successPath?: string;
+  sentConfirmation?: { title: string; description: string };
   notice?: string;
   links: { href: string; label: string }[];
 };
@@ -60,12 +61,14 @@ export function AuthForm({
   presetValues,
   submitLabel,
   successPath,
+  sentConfirmation,
   notice,
   links,
 }: AuthFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string>();
   const [success, setSuccess] = useState<string>();
+  const [isConfirmationSent, setIsConfirmationSent] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const {
     register,
@@ -100,10 +103,22 @@ export function AuthForm({
         router.refresh();
         return;
       }
+      if (sentConfirmation) {
+        setIsConfirmationSent(true);
+        return;
+      }
       setSuccess("Solicitação recebida. Verifique sua caixa de e-mail.");
     } catch {
       setError("Não foi possível conectar ao servidor. Tente novamente.");
     }
+  }
+
+  if (sentConfirmation && isConfirmationSent) {
+    return (
+      <AuthShell title={sentConfirmation.title} description={sentConfirmation.description} links={links}>
+        {null}
+      </AuthShell>
+    );
   }
 
   return (
