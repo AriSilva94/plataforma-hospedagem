@@ -2,9 +2,14 @@ import { AuthForm } from "@/components/auth-form";
 import { safeReturnPath } from "@/lib/return-path";
 
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
-  const { next } = await searchParams;
+  const { next, senha } = await searchParams;
   return (
     <AuthForm
+      notice={
+        senha === "redefinida"
+          ? "Senha redefinida. Já pode entrar."
+          : undefined
+      }
       title="Entrar"
       description="Acesse sua conta para gerenciar seu perfil."
       endpoint="/auth/login"

@@ -192,6 +192,24 @@ body.scroll-locked {
   caret-color: var(--blue-light);
 }
 
+.auth-reveal {
+  display: grid;
+  flex: none;
+  margin: -0.25rem -0.5rem -0.25rem 0;
+  padding: 0.5rem;
+  place-items: center;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: color 180ms ease;
+}
+
+.auth-reveal:hover {
+  color: var(--white);
+}
+
 .auth-submit {
   position: relative;
   display: flex;
@@ -229,6 +247,11 @@ body.scroll-locked {
 .auth-submit:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 1.1rem 2.1rem rgba(11, 99, 227, 0.4);
+}
+
+.auth-reveal:focus-visible {
+  outline: 2px solid #a9ceff;
+  outline-offset: 0;
 }
 
 .auth-submit:focus-visible,
@@ -574,6 +597,7 @@ body.scroll-locked {
 
 @media (prefers-reduced-motion: reduce) {
   .auth-input-wrap,
+  .auth-reveal,
   .auth-submit,
   .auth-provider {
     transition: none;
