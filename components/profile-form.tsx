@@ -10,7 +10,7 @@ import {
   LuHouse,
   LuIdCard,
   LuLockKeyhole,
-  LuMail,
+  LuMailCheck,
   LuMailWarning,
   LuPhone,
   LuShieldCheck,
@@ -29,17 +29,27 @@ const fieldClassName =
 const secondaryDisabledButtonClassName =
   "rounded-xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-(--gray) disabled:cursor-not-allowed";
 
+const verificationStates = {
+  verified: { label: "Verificado", className: "text-(--success)" },
+  unverified: { label: "Cadastrado, não verificado", className: "text-(--info)" },
+  unavailable: { label: "Disponível em breve", className: "text-(--warning)" },
+};
+
 function VerificationStatus({
   label,
   detail,
-  registered,
+  status,
   icon: Icon,
+  action,
 }: {
   label: string;
   detail: string;
-  registered: boolean;
+  status: keyof typeof verificationStates;
   icon: IconType;
+  action?: ReactNode;
 }) {
+  const state = verificationStates[status];
+
   return (
     <div className="flex flex-col gap-2 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:gap-4">
       <div className="flex min-w-0 items-center gap-3">
@@ -51,11 +61,12 @@ function VerificationStatus({
           <p className="wrap-break-word text-sm text-(--gray)">{detail}</p>
         </div>
       </div>
-      <span
-        className={`ml-12 whitespace-nowrap text-xs font-semibold sm:ml-auto sm:max-w-none sm:shrink-0 sm:text-right ${registered ? "text-(--info)" : "text-(--warning)"}`}
-      >
-        {registered ? "Cadastrado, não verificado" : "Disponível em breve"}
-      </span>
+      <div className="ml-12 flex flex-wrap items-center gap-x-4 gap-y-2 sm:ml-auto sm:shrink-0 sm:justify-end">
+        <span className={`whitespace-nowrap text-xs font-semibold ${state.className}`}>
+          {state.label}
+        </span>
+        {action}
+      </div>
     </div>
   );
 }
@@ -150,7 +161,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
     reset,
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
-    defaultValues: { name: initialUser.name, email: initialUser.email },
+    defaultValues: { name: initialUser.name },
     mode: "onBlur",
     reValidateMode: "onChange",
     shouldFocusError: true,
@@ -163,8 +174,11 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
   const [profilePendingRole, setProfilePendingRole] = useState<
     "guest" | "owner"
   >();
+  const [verificationError, setVerificationError] = useState<string>();
+  const [verificationMessage, setVerificationMessage] = useState<string>();
+  const [isSendingVerification, setIsSendingVerification] = useState(false);
   const nameError = formState.errors.name;
-  const emailError = formState.errors.email;
+  const EmailStatusIcon = user.emailVerified ? LuMailCheck : LuMailWarning;
   const prioritizeProfiles = initialUser.roles.length === 0;
 
   async function requestUser(
@@ -198,7 +212,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
         apiFetch("/users/me", { method: "PATCH", body: JSON.stringify(data) }),
       );
       setUser(updatedUser);
-      reset({ name: updatedUser.name, email: updatedUser.email });
+      reset({ name: updatedUser.name });
       setSaveMessage("Dados atualizados.");
     } catch (error) {
       setSaveError(
@@ -208,6 +222,26 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
       );
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function sendVerification() {
+    setVerificationError(undefined);
+    setVerificationMessage(undefined);
+    setIsSendingVerification(true);
+    try {
+      const response = await apiFetch("/auth/email-verification", { method: "POST" });
+      if (!response.ok) {
+        setVerificationError(await getErrorMessage(response));
+        return;
+      }
+      setVerificationMessage(
+        `Enviamos um link de confirmação para ${user.email}. Ele vale por 24 horas.`,
+      );
+    } catch {
+      setVerificationError("Não foi possível conectar ao servidor. Tente novamente.");
+    } finally {
+      setIsSendingVerification(false);
     }
   }
 
@@ -332,8 +366,15 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
               {user.email}
             </p>
           </div>
-          <span className="col-span-2 inline-flex w-fit items-center gap-2 rounded-full border border-[rgba(47,191,135,.38)] bg-[rgba(47,191,135,.1)] px-3 py-2 text-xs font-semibold text-(--success) sm:w-auto">
-            <LuMail aria-hidden="true" size={15} /> E-mail cadastrado
+          <span
+            className={`col-span-2 inline-flex w-fit items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold sm:w-auto ${
+              user.emailVerified
+                ? "border-[rgba(47,191,135,.38)] bg-[rgba(47,191,135,.1)] text-(--success)"
+                : "border-[rgba(200,182,255,.38)] bg-[rgba(200,182,255,.1)] text-(--info)"
+            }`}
+          >
+            <EmailStatusIcon aria-hidden="true" size={15} />
+            {user.emailVerified ? "E-mail verificado" : "E-mail não verificado"}
           </span>
         </header>
 
@@ -380,21 +421,16 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
               <div>
                 <label htmlFor="profile-email" className="block text-sm font-semibold text-(--gray)">E-mail</label>
                 <input
-                  {...register("email")}
                   id="profile-email"
-                  disabled={isSaving}
+                  disabled
                   type="email"
-                  autoComplete="email"
-                  defaultValue={initialUser.email}
-                  aria-invalid={emailError ? "true" : undefined}
-                  aria-describedby={emailError ? "profile-email-error" : undefined}
-                  className={`${fieldClassName} aria-invalid:border-(--danger) aria-invalid:focus:border-(--danger) aria-invalid:focus-visible:ring-(--danger)`}
+                  value={user.email}
+                  aria-describedby="profile-email-hint"
+                  className={fieldClassName}
                 />
-                {emailError?.message ? (
-                  <p id="profile-email-error" className="auth-field-error" role="alert">
-                    <LuCircleAlert aria-hidden="true" size={15} />{emailError.message}
-                  </p>
-                ) : null}
+                <p id="profile-email-hint" className="mt-2 text-xs leading-relaxed text-(--gray)">
+                  O e-mail identifica sua conta e não pode ser alterado.
+                </p>
               </div>
             </div>
             <p className="mt-5 text-xs leading-relaxed text-(--gray)">
@@ -432,28 +468,52 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
             Verificação
           </h2>
           <p className="mt-1 text-sm text-(--gray)">
-            O e-mail está cadastrado, mas ainda não foi verificado.
+            {user.emailVerified
+              ? "Seu e-mail está verificado."
+              : "O e-mail está cadastrado, mas ainda não foi verificado."}
           </p>
           <div className="mt-6 divide-y divide-(--line)">
             <VerificationStatus
               label="E-mail"
               detail={user.email}
-              registered
-              icon={LuMailWarning}
+              status={user.emailVerified ? "verified" : "unverified"}
+              icon={EmailStatusIcon}
+              action={
+                user.emailVerified ? null : (
+                  <button
+                    type="button"
+                    disabled={isSendingVerification}
+                    onClick={sendVerification}
+                    className="rounded-lg border border-(--line-strong) px-3 py-2 text-xs font-bold text-white transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isSendingVerification ? "Enviando..." : "Enviar link de confirmação"}
+                  </button>
+                )
+              }
             />
             <VerificationStatus
               label="Telefone"
               detail="Verificação ainda não disponível"
-              registered={false}
+              status="unavailable"
               icon={LuPhone}
             />
             <VerificationStatus
               label="Identidade"
               detail="Verificação ainda não disponível"
-              registered={false}
+              status="unavailable"
               icon={LuIdCard}
             />
           </div>
+          {verificationError ? (
+            <div className="mt-4">
+              <FormFeedback tone="error">{verificationError}</FormFeedback>
+            </div>
+          ) : null}
+          {verificationMessage ? (
+            <div className="mt-4">
+              <FormFeedback tone="success">{verificationMessage}</FormFeedback>
+            </div>
+          ) : null}
         </section>
 
         {!prioritizeProfiles ? accessSection : null}

@@ -5,10 +5,12 @@ import { FcGoogle } from "react-icons/fc";
 import { LuShieldCheck } from "react-icons/lu";
 import { BrandMark } from "@/components/brand-mark";
 
+type AuthLink = { href: string; label: string };
+
 type AuthShellProps = {
   title: string;
   description: string;
-  links: { href: string; label: string }[];
+  links: AuthLink[];
   children: ReactNode;
 };
 
@@ -73,5 +75,26 @@ export function AuthShell({ title, description, links, children }: AuthShellProp
         <span>Seu espaço, do seu jeito.</span>
       </footer>
     </main>
+  );
+}
+
+export function InvalidLinkShell({
+  description,
+  action,
+  links,
+}: {
+  description: string;
+  action: AuthLink;
+  links: AuthLink[];
+}) {
+  return (
+    <AuthShell title="Link inválido" description={description} links={links}>
+      <div className="mt-5">
+        <Link href={action.href} className="auth-submit">
+          <span>{action.label}</span>
+          <span aria-hidden="true">→</span>
+        </Link>
+      </div>
+    </AuthShell>
   );
 }

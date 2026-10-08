@@ -4,6 +4,7 @@ export type CurrentUser = {
   id: string;
   name: string;
   email: string;
+  emailVerified: boolean;
   roles: string[];
   guestGenderIdentity?: GenderIdentity | null;
 };
@@ -28,6 +29,8 @@ export function parseCurrentUser(value: unknown): CurrentUser | undefined {
     id: value.id,
     name: value.name,
     email: value.email,
+    emailVerified:
+      "emailVerifiedAt" in value && typeof value.emailVerifiedAt === "string",
     roles: value.roles,
     guestGenderIdentity: parseGuestGenderIdentity(value),
   };
