@@ -46,7 +46,7 @@ export const forgotPasswordSchema = z.object({
 export const resetPasswordSchema = z.object({
   token: z
     .string({ error: 'Token inválido.' })
-    .min(32, { error: 'Token inválido.' }),
+    .regex(/^[0-9a-f]{64}$/i, { error: 'Token inválido.' }),
   password: registrationPasswordSchema,
 });
 

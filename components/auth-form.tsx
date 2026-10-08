@@ -1,14 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FcGoogle } from "react-icons/fc";
-import { LuCircleAlert, LuLockKeyhole, LuMail, LuShieldCheck } from "react-icons/lu";
+import { LuCircleAlert, LuEye, LuEyeOff, LuLockKeyhole, LuMail } from "react-icons/lu";
 import { useForm, type FieldPath } from "react-hook-form";
-import { BrandMark } from "@/components/brand-mark";
+import { AuthShell } from "@/components/auth-shell";
 import { FormFeedback } from "@/components/form-feedback";
 import { apiFetch, getErrorMessage } from "@/lib/api";
 import {
@@ -40,7 +37,7 @@ type Field = {
   label: string;
   type: "email" | "password" | "text";
   autoComplete?: string;
-  defaultValue?: string;
+  hint?: string;
 };
 
 type AuthFormProps = {
@@ -48,8 +45,10 @@ type AuthFormProps = {
   description: string;
   endpoint: keyof typeof authSchemas;
   fields: Field[];
+  presetValues?: { token: string };
   submitLabel: string;
   successPath?: string;
+  notice?: string;
   links: { href: string; label: string }[];
 };
 
@@ -58,13 +57,16 @@ export function AuthForm({
   description,
   endpoint,
   fields,
+  presetValues,
   submitLabel,
   successPath,
+  notice,
   links,
 }: AuthFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string>();
   const [success, setSuccess] = useState<string>();
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const {
     register,
     handleSubmit,
@@ -72,6 +74,7 @@ export function AuthForm({
     formState,
   } = useForm<AuthFormValues>({
     resolver: zodResolver(authSchemas[endpoint]),
+    defaultValues: presetValues,
     mode: "onBlur",
     reValidateMode: "onChange",
     shouldFocusError: true,
@@ -104,104 +107,69 @@ export function AuthForm({
   }
 
   return (
-    <main className="auth-shell">
-      <section className="auth-frame">
-        <section className="auth-scene">
-          <Image
-            alt=""
-            className="auth-room-image"
-            data-testid="auth-room-image"
-            fill
-            priority
-            sizes="(min-width: 1024px) 50vw, 100vw"
-            src="/rooms/room3.png"
-          />
-          <div className="auth-scene-content">
-            <BrandMark href="/" size="md" />
-            <div className="auth-scene-copy max-w-sm">
-              <h1 className="auth-scene-title">Seu próximo lugar começa aqui.</h1>
-              <p className="mt-4 max-w-72 text-sm leading-6 text-[#d4deeb] sm:text-base">
-                Encontre estadias ou cuide dos seus espaços com segurança e discrição.
-              </p>
-            </div>
-          </div>
-        </section>
-        <section className="auth-panel">
-          <div className="auth-card">
-            <div className="auth-emblem" aria-hidden="true">D</div>
-            <h2 className="mt-5 font-serif text-3xl tracking-[-0.04em] text-(--white)">
-              {title}
-            </h2>
-            <p className="mt-2 leading-relaxed text-(--gray)">{description}</p>
-            <form className="mt-5 space-y-3.5" noValidate onSubmit={handleSubmit(onSubmit)}>
-              {fields.map((field) => {
-                const Icon = field.type === "email" ? LuMail : field.type === "password" ? LuLockKeyhole : null;
-                const fieldError = getFieldState(field.name, formState).error;
-                const inputId = `auth-${field.name}`;
-                const errorId = `${inputId}-error`;
+    <AuthShell title={title} description={description} links={links}>
+      <form className="mt-5 space-y-3.5" noValidate onSubmit={handleSubmit(onSubmit)}>
+        {notice ? <FormFeedback tone="success">{notice}</FormFeedback> : null}
+        {fields.map((field) => {
+          const Icon = field.type === "email" ? LuMail : field.type === "password" ? LuLockKeyhole : null;
+          const fieldError = getFieldState(field.name, formState).error;
+          const inputId = `auth-${field.name}`;
+          const errorId = `${inputId}-error`;
+          const hintId = `${inputId}-hint`;
+          const describedBy = fieldError ? errorId : field.hint ? hintId : undefined;
 
-                return (
-                  <div key={field.name} className="auth-field">
-                    <label htmlFor={inputId} className="block text-sm font-semibold text-[#d5dfed]">
-                      {field.label}
-                      <span className="auth-input-wrap">
-                        {Icon ? <Icon aria-hidden="true" size={17} /> : null}
-                        <input
-                          {...register(field.name)}
-                          id={inputId}
-                          type={field.type}
-                          autoComplete={field.autoComplete}
-                          defaultValue={field.defaultValue}
-                          aria-invalid={fieldError ? "true" : undefined}
-                          aria-describedby={fieldError ? errorId : undefined}
-                          className="auth-input"
-                        />
-                      </span>
-                    </label>
-                    {fieldError?.message ? (
-                      <p id={errorId} className="auth-field-error" role="alert">
-                        <LuCircleAlert aria-hidden="true" size={15} />
-                        {fieldError.message}
-                      </p>
-                    ) : null}
-                  </div>
-                );
-              })}
-              {error ? <FormFeedback tone="error">{error}</FormFeedback> : null}
-              {success ? <FormFeedback tone="success">{success}</FormFeedback> : null}
-              <button disabled={isPending} className="auth-submit" type="submit">
-                <span>{isPending ? "Enviando..." : submitLabel}</span>
-                <span aria-hidden="true">→</span>
-              </button>
-            </form>
-            <div className="auth-divider">ou continue com</div>
-            <div className="flex justify-center">
-              <a
-                aria-label="Continuar com Google"
-                href={`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3030"}/auth/google`}
-                className="auth-provider"
-              >
-                <FcGoogle aria-hidden="true" size={24} />
-              </a>
+          return (
+            <div key={field.name} className="auth-field">
+              <label htmlFor={inputId} className="block text-sm font-semibold text-[#d5dfed]">
+                {field.label}
+                <span className="auth-input-wrap">
+                  {Icon ? <Icon aria-hidden="true" size={17} /> : null}
+                  <input
+                    {...register(field.name)}
+                    id={inputId}
+                    type={field.type === "password" && isPasswordVisible ? "text" : field.type}
+                    autoComplete={field.autoComplete}
+                    aria-invalid={fieldError ? "true" : undefined}
+                    aria-describedby={describedBy}
+                    className="auth-input"
+                  />
+                  {field.type === "password" ? (
+                    <button
+                      type="button"
+                      className="auth-reveal"
+                      aria-label={isPasswordVisible ? "Ocultar senha" : "Mostrar senha"}
+                      aria-pressed={isPasswordVisible}
+                      onClick={() => setIsPasswordVisible((visible) => !visible)}
+                    >
+                      {isPasswordVisible ? (
+                        <LuEyeOff aria-hidden="true" size={17} />
+                      ) : (
+                        <LuEye aria-hidden="true" size={17} />
+                      )}
+                    </button>
+                  ) : null}
+                </span>
+              </label>
+              {fieldError?.message ? (
+                <p id={errorId} className="auth-field-error" role="alert">
+                  <LuCircleAlert aria-hidden="true" size={15} />
+                  {fieldError.message}
+                </p>
+              ) : field.hint ? (
+                <p id={hintId} className="mt-1.5 text-xs leading-normal text-(--gray)">
+                  {field.hint}
+                </p>
+              ) : null}
             </div>
-            <nav className="mt-5 flex flex-col items-center gap-2 text-center text-sm font-semibold text-(--blue-light)">
-              {links.map((link) => (
-                <Link key={link.href} href={link.href} className="auth-link">
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-            <p className="auth-reassurance">
-              <LuShieldCheck aria-hidden="true" data-testid="auth-reassurance-icon" size={15} />
-              <span>Seus dados estão seguros com a gente</span>
-            </p>
-          </div>
-        </section>
-      </section>
-      <footer className="auth-footer">
-        <span>© 2026 DOMUS X. Todos os direitos reservados.</span>
-        <span>Seu espaço, do seu jeito.</span>
-      </footer>
-    </main>
+          );
+        })}
+        {error ? <FormFeedback tone="error">{error}</FormFeedback> : null}
+        {success ? <FormFeedback tone="success">{success}</FormFeedback> : null}
+        <button disabled={isPending} className="auth-submit" type="submit">
+          <span>{isPending ? "Enviando..." : submitLabel}</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </form>
+    </AuthShell>
   );
 }
