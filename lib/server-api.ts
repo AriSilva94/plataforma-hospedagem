@@ -1,5 +1,6 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import type { z } from "zod";
+import { internalApiHeaders } from "@/lib/internal-api";
 
 export type ApiResult<T> =
   | { status: "ok"; data: T }
@@ -13,7 +14,10 @@ export async function getApiData<T>(path: string, schema: z.ZodType<T>): Promise
   try {
     const response = await fetch(`${apiUrl}${path}`, {
       cache: "no-store",
-      headers: { Cookie: cookieStore.toString() },
+      headers: {
+        Cookie: cookieStore.toString(),
+        ...internalApiHeaders(await headers()),
+      },
     });
 
     if (response.status === 404) return { status: "not-found" };

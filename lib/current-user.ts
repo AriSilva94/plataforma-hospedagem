@@ -1,5 +1,6 @@
 import { cache } from "react";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { internalApiHeaders } from "@/lib/internal-api";
 import { CurrentUser, parseCurrentUser } from "@/lib/user";
 
 export type CurrentUserResult = {
@@ -19,7 +20,10 @@ export const getCurrentUser = cache(async (): Promise<CurrentUserResult> => {
   try {
     const response = await fetch(`${apiUrl}/users/me`, {
       cache: "no-store",
-      headers: { Cookie: cookieStore.toString() },
+      headers: {
+        Cookie: cookieStore.toString(),
+        ...internalApiHeaders(await headers()),
+      },
     });
 
     if (response.ok) {
