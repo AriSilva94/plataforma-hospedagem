@@ -22,7 +22,7 @@ import {
 
 const navItems = [
   { label: "Início", href: "/#inicio" },
-  { label: "Favoritos" },
+  { label: "Favoritos", href: "/favoritos" },
   { label: "Reservas" },
   { label: "Mensagens" },
 ];
@@ -236,7 +236,7 @@ const focusableSelector =
 
 const mobileNavigationItems = [
   { label: "Início", href: "/#inicio", icon: LuHouse },
-  { label: "Favoritos", icon: LuHeart },
+  { label: "Favoritos", href: "/favoritos", icon: LuHeart },
   { label: "Reservas", icon: LuCalendarDays },
   { label: "Mensagens", icon: LuMessageSquare },
   { label: "Perfil", href: "/perfil", icon: LuUserRound },
@@ -262,10 +262,7 @@ function MobileBottomNavigation({
         const isProfile = label === "Perfil";
         const visibleLabel = isProfile && !hasUser ? "Entrar" : label;
         const VisibleIcon = isProfile && !hasUser ? LuLogIn : Icon;
-        const active =
-          href === "/perfil"
-            ? pathname === "/perfil"
-            : href === "/#inicio" && pathname === "/";
+        const active = href === "/#inicio" ? pathname === "/" : pathname === href;
         const className = `flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-semibold ${active ? "text-(--blue-light)" : "text-(--gray)"}`;
         const content = (
           <>

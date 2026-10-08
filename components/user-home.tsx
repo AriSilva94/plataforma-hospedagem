@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
+import { FavoriteButton } from "@/components/favorite-button";
 import { RoomCard } from "@/components/room-card";
 import { SiteHeader } from "@/components/site-header";
 import { apiFetch } from "@/lib/api";
@@ -23,7 +24,15 @@ const searchFields: { label: string; placeholder: string; icon: IconName; option
 
 const sectionShell = "mx-auto w-full max-w-360 px-6 md:px-10 lg:px-12";
 
-export function UserHome({ user, listing }: { user: { name: string; roles: string[] }; listing: PublicRoomPage | null }) {
+export function UserHome({
+  user,
+  listing,
+  favoriteRoomIds,
+}: {
+  user: { name: string; roles: string[] };
+  listing: PublicRoomPage | null;
+  favoriteRoomIds: string[];
+}) {
   const [openField, setOpenField] = useState<string>();
   const [searchValues, setSearchValues] = useState<Record<string, string>>({});
   const firstName = user.name.trim().split(/\s+/)[0];
@@ -61,7 +70,7 @@ export function UserHome({ user, listing }: { user: { name: string; roles: strin
           </div>
         </section>
 
-        <AllRooms initial={listing} />
+        <AllRooms initial={listing} favoriteRoomIds={favoriteRoomIds} />
 
         <section aria-labelledby="proprietarios-titulo" className={`${sectionShell} pb-12 pt-14 md:pb-16 md:pt-16`}>
           <div className="relative overflow-hidden rounded-[18px] bg-[linear-gradient(120deg,#0b3a8f,#0B63E3)] p-6 md:flex md:items-center md:justify-between md:gap-8 md:p-8">
@@ -82,7 +91,8 @@ function SearchField({ label, placeholder, icon, options, value, open, onToggle,
   return <div className="relative border-b border-[rgba(3,17,40,.08)] md:border-b-0 md:border-r md:last-of-type:border-r-0"><button type="button" onClick={onToggle} aria-expanded={open} className="flex w-full items-center gap-3 px-3.5 py-3.75 text-left md:flex-wrap md:gap-x-2 md:gap-y-0.5 md:py-3"><span className="text-(--blue)"><Icon name={icon} size={18} /></span><span className="w-18.5 text-[13px] font-semibold text-[#3a4a63] md:w-auto">{label}</span><span className={`flex-1 truncate text-sm font-semibold md:order-last md:basis-full ${value ? "text-[#0f1f39]" : "text-[#8695ab]"}`}>{value ?? placeholder}</span><span className={open ? "rotate-180 text-[#8695ab] transition-transform md:ml-auto" : "text-[#8695ab] transition-transform md:ml-auto"}><Icon name="chevronDown" size={18} /></span></button>{open ? <div className="absolute inset-x-2.5 top-[calc(100%-4px)] z-20 flex flex-col gap-1 rounded-xl border border-slate-200 bg-white p-2.5 shadow-[0_16px_32px_rgba(3,17,40,.2)] md:min-w-50">{options.map((option) => <button key={option} type="button" onClick={() => onPick(option)} className="rounded-lg px-3 py-2.75 text-left text-[13.5px] font-semibold text-[#0f1f39] hover:bg-[rgba(11,99,227,.1)]">{option}</button>)}</div> : null}</div>;
 }
 
-function AllRooms({ initial }: { initial: PublicRoomPage | null }) {
+function AllRooms({ initial, favoriteRoomIds }: { initial: PublicRoomPage | null; favoriteRoomIds: string[] }) {
+  const [favorites] = useState(() => new Set(favoriteRoomIds));
   const [items, setItems] = useState(initial?.items ?? []);
   const [nextCursor, setNextCursor] = useState(initial?.nextCursor ?? null);
   const [loading, setLoading] = useState(false);
@@ -113,7 +123,22 @@ function AllRooms({ initial }: { initial: PublicRoomPage | null }) {
       </div>
       {items.length > 0 ? (
         <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {items.map((room) => <li key={room.id}><RoomCard room={room} /></li>)}
+          {items.map((room) => (
+            <li key={room.id}>
+              <RoomCard
+                room={room}
+                action={
+                  <FavoriteButton
+                    roomId={room.id}
+                    roomTitle={room.title}
+                    initialFavorited={favorites.has(room.id)}
+                    signedIn
+                    loginReturnPath="/#todos"
+                  />
+                }
+              />
+            </li>
+          ))}
         </ul>
       ) : initial ? (
         <p className="mt-6 rounded-2xl border border-dashed border-(--line-strong) p-6 text-sm text-(--gray)">Ainda não há quartos disponíveis. Volte em breve.</p>

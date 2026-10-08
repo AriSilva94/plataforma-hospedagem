@@ -7,7 +7,11 @@ export default function RegisterPage() {
       description="Crie sua conta e escolha depois como deseja usar a plataforma."
       endpoint="/auth/register"
       submitLabel="Criar conta"
-      successPath="/perfil"
+      sentConfirmation={{
+        title: "Confira seu e-mail",
+        description:
+          "Enviamos um link de confirmação para o e-mail informado. Abra o link para ativar sua conta; ele vale por 24 horas. Se não chegar em alguns minutos, veja a caixa de spam.",
+      }}
       fields={[
         {
           name: "name",
@@ -26,6 +30,7 @@ export default function RegisterPage() {
           label: "Senha",
           type: "password",
           autoComplete: "new-password",
+          hint: "Use pelo menos 12 caracteres.",
         },
       ]}
       links={[{ href: "/login", label: "Já tenho uma conta" }]}

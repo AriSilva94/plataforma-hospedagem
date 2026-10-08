@@ -5,7 +5,7 @@ export function CoverImage({ url, alt, sizes }: { url: string | null; alt: strin
   return (
     <div className="relative aspect-4/3 overflow-hidden bg-(--surface-raised)">
       {url ? (
-        <Image src={url} alt={alt} fill unoptimized sizes={sizes} className="object-cover" />
+        <Image src={url} alt={alt} fill sizes={sizes} className="object-cover" />
       ) : (
         <div className="flex size-full flex-col items-center justify-center gap-2 text-(--gray)">
           <LuImage aria-hidden="true" size={28} />

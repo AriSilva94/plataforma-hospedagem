@@ -1,10 +1,12 @@
 # syntax=docker/dockerfile:1
 FROM node:24-bookworm-slim AS base
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 ENV NEXT_TELEMETRY_DISABLED=1
 WORKDIR /app
 
 FROM base AS build
 ARG NEXT_PUBLIC_API_URL
+ARG MEDIA_PUBLIC_BASE_URL
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 COPY . .

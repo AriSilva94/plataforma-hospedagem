@@ -34,7 +34,7 @@ jobs:
             exit 1
           fi
       - run: npm ci --no-audit --no-fund
-      - run: npm audit --audit-level=high
+      - run: node scripts/audit.mjs
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run build

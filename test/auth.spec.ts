@@ -2,6 +2,8 @@ import { expect, test } from "@playwright/test";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3030";
 
+const validToken = "a".repeat(64);
+
 function trackPostRequests(page: import("@playwright/test").Page, endpoint: string) {
   let postCount = 0;
   page.on("request", (request) => {
@@ -117,20 +119,22 @@ for (const path of [
   });
 }
 
-test("cadastro envia dados sem perfil e abre a página de perfil", async ({ page }) => {
+test("cadastro envia dados sem perfil e pede a confirmação do e-mail", async ({ page }) => {
   let submittedBody: unknown;
   await page.route(`${apiUrl}/auth/register`, async (route) => {
     submittedBody = route.request().postDataJSON();
-    await route.fulfill({ status: 201, body: JSON.stringify({}) });
+    await route.fulfill({ status: 202, body: JSON.stringify({}) });
   });
 
   await page.goto("/cadastro");
   await page.getByRole("textbox", { name: "Nome completo" }).fill("Ana Silva");
   await page.getByRole("textbox", { name: "E-mail" }).fill("ana@example.com");
-  await page.getByLabel("Senha").fill("senha-segura1");
+  await page.getByLabel("Senha", { exact: true }).fill("senha-segura1");
   await page.getByRole("button", { name: "Criar conta" }).click();
 
-  await expect(page).toHaveURL(/\/perfil$/);
+  await expect(page.getByRole("heading", { name: "Confira seu e-mail" })).toBeVisible();
+  await expect(page).toHaveURL(/\/cadastro$/);
+  await expect(page.getByRole("button", { name: "Criar conta" })).toHaveCount(0);
   expect(submittedBody).toEqual({
     name: "Ana Silva",
     email: "ana@example.com",
@@ -144,7 +148,7 @@ test("login mostra erro de e-mail inválido e não envia POST", async ({ page })
   const email = page.getByRole("textbox", { name: "E-mail" });
   await email.fill("email-invalido");
   await email.blur();
-  await page.getByLabel("Senha").fill("senha-valida");
+  await page.getByLabel("Senha", { exact: true }).fill("senha-valida");
 
   const fieldError = page.locator(".auth-field-error").filter({ hasText: "Informe um e-mail válido." });
   await expect(fieldError).toBeVisible();
@@ -158,7 +162,7 @@ test("login mostra erro de e-mail inválido e não envia POST", async ({ page })
 
 test("login não envia POST quando o e-mail é obrigatório", async ({ page }) => {
   await page.goto("/login");
-  await page.getByLabel("Senha").fill("senha-valida");
+  await page.getByLabel("Senha", { exact: true }).fill("senha-valida");
   const expectNoPost = trackPostRequests(page, "/auth/login");
   await page.getByRole("button", { name: "Entrar" }).click();
 
@@ -186,7 +190,7 @@ test("cadastro mostra nome curto inválido e não envia POST", async ({ page }) 
 
   await expect(page.getByText("O nome deve ter pelo menos 2 caracteres.")).toBeVisible();
   await page.getByRole("textbox", { name: "E-mail" }).fill("ana@example.com");
-  await page.getByLabel("Senha").fill("senha-com-12-caracteres");
+  await page.getByLabel("Senha", { exact: true }).fill("senha-com-12-caracteres");
   const expectNoPost = trackPostRequests(page, "/auth/register");
   await page.getByRole("button", { name: "Criar conta" }).click();
   await expectNoPost();
@@ -196,7 +200,7 @@ test("cadastro mostra senha curta inválida e não envia POST", async ({ page })
   await page.goto("/cadastro");
   await page.getByRole("textbox", { name: "Nome completo" }).fill("Ana Silva");
   await page.getByRole("textbox", { name: "E-mail" }).fill("ana@example.com");
-  const password = page.getByLabel("Senha");
+  const password = page.getByLabel("Senha", { exact: true });
   await password.fill("curta");
   await password.blur();
 
@@ -206,21 +210,52 @@ test("cadastro mostra senha curta inválida e não envia POST", async ({ page })
   await expectNoPost();
 });
 
-test("redefinição rejeita token inválido e não envia POST", async ({ page }) => {
-  await page.goto("/redefinir-senha?token=invalido");
-  const token = page.getByRole("textbox", { name: "Token" });
-  await token.focus();
-  await token.blur();
-  await expect(page.getByText("Token inválido.")).toBeVisible();
+for (const path of ["/redefinir-senha?token=invalido", "/redefinir-senha"]) {
+  test(`${path} oferece novo link em vez do formulário`, async ({ page }) => {
+    await page.goto(path);
 
-  await page.getByLabel("Nova senha").fill("senha-validade-12+");
-  const expectNoPost = trackPostRequests(page, "/auth/reset-password");
+    await expect(page.getByRole("heading", { name: "Link inválido" })).toBeVisible();
+    await expect(page.getByLabel("Nova senha")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Redefinir senha" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Pedir novo link" })).toHaveAttribute(
+      "href",
+      "/recuperar-senha",
+    );
+  });
+}
+
+test("redefinição envia o token do link sem exibi-lo e abre o login", async ({ page }) => {
+  let submittedBody: unknown;
+  await page.route(`${apiUrl}/auth/reset-password`, async (route) => {
+    submittedBody = route.request().postDataJSON();
+    await route.fulfill({ status: 201, body: JSON.stringify({}) });
+  });
+
+  await page.goto(`/redefinir-senha#token=${validToken}`);
+  await expect(page.getByRole("textbox", { name: "Token" })).toHaveCount(0);
+  await page.getByLabel("Nova senha").fill("senha-com-12-caracteres");
   await page.getByRole("button", { name: "Redefinir senha" }).click();
+
+  await expect(page).toHaveURL(/\/login\?senha=redefinida$/);
+  await expect(page.getByRole("status")).toHaveText("Senha redefinida. Já pode entrar.");
+  expect(submittedBody).toEqual({ token: validToken, password: "senha-com-12-caracteres" });
+});
+
+test("botão de mostrar senha alterna a visibilidade sem enviar o formulário", async ({ page }) => {
+  await page.goto(`/redefinir-senha?token=${validToken}`);
+  const password = page.getByLabel("Nova senha");
+  await password.fill("senha-com-12-caracteres");
+  const expectNoPost = trackPostRequests(page, "/auth/reset-password");
+
+  await page.getByRole("button", { name: "Mostrar senha" }).click();
+  await expect(password).toHaveAttribute("type", "text");
+  await page.getByRole("button", { name: "Ocultar senha" }).click();
+  await expect(password).toHaveAttribute("type", "password");
   await expectNoPost();
 });
 
 test("redefinição rejeita senha curta e não envia POST", async ({ page }) => {
-  await page.goto(`/redefinir-senha?token=${"t".repeat(32)}`);
+  await page.goto(`/redefinir-senha?token=${validToken}`);
   const password = page.getByLabel("Nova senha");
   await password.fill("curta");
   await password.blur();
@@ -229,4 +264,44 @@ test("redefinição rejeita senha curta e não envia POST", async ({ page }) => 
   const expectNoPost = trackPostRequests(page, "/auth/reset-password");
   await page.getByRole("button", { name: "Redefinir senha" }).click();
   await expectNoPost();
+});
+
+test("confirmação envia o token do link e abre o perfil", async ({ page }) => {
+  let submittedBody: unknown;
+  await page.route(`${apiUrl}/auth/verify-email`, async (route) => {
+    submittedBody = route.request().postDataJSON();
+    await route.fulfill({ status: 200, body: JSON.stringify({ verified: true }) });
+  });
+
+  await page.goto(`/confirmar-email#token=${validToken}`);
+  await page.getByRole("button", { name: "Confirmar e-mail" }).click();
+
+  await expect(page).toHaveURL(/\/perfil$/);
+  expect(submittedBody).toEqual({ token: validToken });
+});
+
+test("confirmação mostra o erro do link expirado e mantém as saídas", async ({ page }) => {
+  await page.route(`${apiUrl}/auth/verify-email`, async (route) => {
+    await route.fulfill({
+      status: 401,
+      body: JSON.stringify({ message: "O link de confirmação é inválido ou expirou." }),
+    });
+  });
+
+  await page.goto(`/confirmar-email#token=${validToken}`);
+  await page.getByRole("button", { name: "Confirmar e-mail" }).click();
+
+  await expect(page.getByText("O link de confirmação é inválido ou expirou.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Fazer o cadastro de novo" })).toHaveAttribute(
+    "href",
+    "/cadastro",
+  );
+});
+
+test("confirmação sem token válido oferece novo cadastro em vez do botão", async ({ page }) => {
+  await page.goto("/confirmar-email");
+
+  await expect(page.getByRole("heading", { name: "Link inválido" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Confirmar e-mail" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Criar conta" })).toHaveAttribute("href", "/cadastro");
 });

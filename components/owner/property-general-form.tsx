@@ -4,15 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
-import { FormFeedback } from "@/components/form-feedback";
-import { FormActions } from "@/components/owner/form-actions";
-import { SavedNotice } from "@/components/owner/saved-notice";
+import { FormActions, FormStatus } from "@/components/owner/form-actions";
 import { UnsavedChangesGuard } from "@/components/owner/unsaved-changes-guard";
 import { ChoiceGroup, optionsFrom } from "@/components/owner/choice-group";
 import { FieldError } from "@/components/owner/field-error";
 import { CharacterCount, FieldHint } from "@/components/owner/field-hint";
 import { OptionalDetails } from "@/components/owner/optional-details";
-import { fieldClassName, labelClassName, primaryButtonClassName } from "@/components/owner/styles";
+import { fieldClassName, labelClassName, primaryButtonClassName, secondaryButtonClassName } from "@/components/owner/styles";
 import {
   propertyGeneralSchema,
   propertyGuidedGeneralSchema,
@@ -87,8 +85,8 @@ export function PropertyGeneralForm({ property, guided }: { property?: PropertyD
   }
 
   return (
-    <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col gap-6 py-8">
-      <div className="grid gap-5 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+    <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col gap-5 py-6">
+      <div className="grid gap-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div>
           <label htmlFor="property-title" className={labelClassName}>Título do anúncio</label>
           <input
@@ -127,33 +125,36 @@ export function PropertyGeneralForm({ property, guided }: { property?: PropertyD
         </label>
         <textarea
           id="property-description"
-          rows={5}
+          rows={4}
           {...register("description")}
           placeholder="Apresente o imóvel, o ambiente e o que torna a estadia confortável."
           aria-invalid={errors.description ? "true" : undefined}
           aria-describedby={`property-description-hint property-description-count${errors.description ? " property-description-error" : ""}`}
           className={fieldClassName}
         />
-        <FieldHint id="property-description-hint">
-          {published
-            ? "Obrigatória: um imóvel publicado precisa manter a descrição."
-            : "Obrigatória para publicar. Fale do ambiente, da vizinhança e do que está incluso."}
-        </FieldHint>
-        <CharacterCount id="property-description-count" length={description.length} max={5000} />
+        <div className="flex items-start justify-between gap-4">
+          <FieldHint id="property-description-hint">
+            {published
+              ? "Obrigatória: um imóvel publicado precisa manter a descrição."
+              : "Obrigatória para publicar. Fale do ambiente, da vizinhança e do que está incluso."}
+          </FieldHint>
+          <CharacterCount id="property-description-count" length={description.length} max={5000} />
+        </div>
         <FieldError id="property-description-error" message={errors.description?.message} />
       </div>
 
       <OptionalDetails
         title="Mais detalhes"
+        tag="recomendado"
         description={detailsSummary(property)}
         forceOpen={detailsHaveErrors}
       >
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           <div>
             <label htmlFor="property-rules" className={labelClassName}>Regras da casa</label>
             <textarea
               id="property-rules"
-              rows={4}
+              rows={3}
               {...register("houseRules")}
               placeholder="Ex.: silêncio após 22h, visitas com aviso prévio."
               aria-invalid={errors.houseRules ? "true" : undefined}
@@ -166,7 +167,7 @@ export function PropertyGeneralForm({ property, guided }: { property?: PropertyD
             <label htmlFor="property-info" className={labelClassName}>Informações úteis ao hóspede</label>
             <textarea
               id="property-info"
-              rows={4}
+              rows={3}
               {...register("generalInfo")}
               placeholder="Ex.: check-in a partir das 14h, ponto de ônibus a 5 min."
               aria-invalid={errors.generalInfo ? "true" : undefined}
@@ -177,7 +178,7 @@ export function PropertyGeneralForm({ property, guided }: { property?: PropertyD
           </div>
         </div>
 
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-4">
           <p className="text-xs leading-relaxed text-(--gray)">Marque o que o imóvel oferece. Os hóspedes veem isso no anúncio.</p>
           {propertyFeatureGroups.map((group) => (
             <ChoiceGroup
@@ -192,14 +193,16 @@ export function PropertyGeneralForm({ property, guided }: { property?: PropertyD
         </div>
       </OptionalDetails>
 
-      {error ? <FormFeedback tone="error">{error}</FormFeedback> : null}
-      {message && property ? <SavedNotice message={message} propertyId={property.id} showPublicLink={property.status === "ACTIVE"} /> : null}
-
       <FormActions>
         <button type="submit" disabled={isSubmitting || (editing && !isDirty)} className={primaryButtonClassName}>
           {isSubmitting ? "Salvando..." : isGuided ? "Salvar e continuar" : "Salvar informações"}
         </button>
-        {editing && isDirty ? <span className="text-sm text-(--warning)">Alterações não salvas</span> : null}
+        {editing && isDirty ? (
+          <button type="button" disabled={isSubmitting} onClick={() => reset()} className={secondaryButtonClassName}>
+            Descartar
+          </button>
+        ) : null}
+        <FormStatus error={error} saved={message} dirty={editing && isDirty} />
       </FormActions>
       {!property ? <p className="text-xs text-(--gray)">Você poderá editar tudo depois. O imóvel só aparece para hóspedes quando for publicado.</p> : null}
       <UnsavedChangesGuard dirty={isDirty && !isSubmitting} />

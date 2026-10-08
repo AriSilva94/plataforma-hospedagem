@@ -36,17 +36,18 @@ export const registerSchema = z.object({
 
 export const profileSchema = z.object({
   name: nameSchema,
-  email: emailSchema,
 });
 
 export const forgotPasswordSchema = z.object({
   email: emailSchema,
 });
 
+export const linkTokenSchema = z
+  .string({ error: 'Token inválido.' })
+  .regex(/^[0-9a-f]{64}$/i, { error: 'Token inválido.' });
+
 export const resetPasswordSchema = z.object({
-  token: z
-    .string({ error: 'Token inválido.' })
-    .min(32, { error: 'Token inválido.' }),
+  token: linkTokenSchema,
   password: registrationPasswordSchema,
 });
 

@@ -163,6 +163,7 @@ export const roomSummarySchema = z.object({
   bathroomType: z.enum(bathroomTypes),
   acceptedAudiences: z.array(z.enum(genderIdentities)),
   completenessScore: z.number(),
+  completenessMissing: z.array(z.enum(completenessCriteria)),
   coverUrl: z.string().nullable(),
 });
 
@@ -210,7 +211,7 @@ export const roomDetailSchema = z.object({
   completenessScore: z.number(),
   completenessMissing: z.array(z.enum(completenessCriteria)),
   media: z.array(mediaSchema),
-  property: z.object({ id: z.string(), title: z.string() }),
+  property: z.object({ id: z.string(), title: z.string(), status: z.enum(propertyStatuses), availableRoomCount: z.number() }),
 });
 
 export const publicRoomCardSchema = z.object({
