@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { internalApiHeaders } from "@/lib/internal-api";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3030";
 const isDevelopment = process.env.NODE_ENV === "development";
@@ -33,7 +34,10 @@ async function refreshSession(request: NextRequest): Promise<string[]> {
   try {
     const refreshed = await fetch(`${apiUrl}/auth/refresh`, {
       method: "POST",
-      headers: { Cookie: `refresh_token=${refreshToken}` },
+      headers: {
+        Cookie: `refresh_token=${refreshToken}`,
+        ...internalApiHeaders(request.headers),
+      },
       cache: "no-store",
     });
     return refreshed.ok ? refreshed.headers.getSetCookie() : [];
