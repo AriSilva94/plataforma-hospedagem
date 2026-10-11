@@ -5,6 +5,7 @@ export type CurrentUser = {
   name: string;
   email: string;
   emailVerified: boolean;
+  hasPassword: boolean;
   phone: string | null;
   birthDate: string | null;
   city: string | null;
@@ -35,6 +36,7 @@ export function parseCurrentUser(value: unknown): CurrentUser | undefined {
     email: value.email,
     emailVerified:
       "emailVerifiedAt" in value && typeof value.emailVerifiedAt === "string",
+    hasPassword: "hasPassword" in value && value.hasPassword === true,
     phone: readOptionalString(value, "phone"),
     birthDate: readOptionalString(value, "birthDate"),
     city: readOptionalString(value, "city"),

@@ -18,9 +18,11 @@ import {
 } from "react-icons/lu";
 import type { IconType } from "react-icons";
 import { FormFeedback } from "@/components/form-feedback";
+import { ChangePasswordForm } from "@/components/change-password-form";
 import { DatePicker } from "@/components/date-picker";
+import { DeactivateAccount } from "@/components/deactivate-account";
 import { GuestIdentityForm } from "@/components/guest-identity-form";
-import { IconInput } from "@/components/icon-input";
+import { IconInput, fieldLabelClassName } from "@/components/icon-input";
 import { FieldError } from "@/components/field-error";
 import { ProfileLocationFields } from "@/components/profile-location-fields";
 import { isAdmin } from "@/lib/admin";
@@ -29,7 +31,6 @@ import { earliestBirthDate, latestAdultBirthDate, profileSchema, type ProfileFor
 import { brazilianStates } from "@/lib/properties";
 import { CurrentUser, formatPhone, parseCurrentUser } from "@/lib/user";
 
-const fieldLabelClassName = "mb-2 block text-sm font-semibold text-(--gray)";
 const secondaryDisabledButtonClassName =
   "rounded-xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-(--gray) disabled:cursor-not-allowed";
 
@@ -618,13 +619,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            disabled
-            className={`mt-5 ${secondaryDisabledButtonClassName}`}
-          >
-            Alterar senha · Disponível em breve
-          </button>
+          <ChangePasswordForm hasPassword={user.hasPassword} />
         </section>
 
         <section
@@ -637,13 +632,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
           <p className="mt-1 text-sm text-(--gray)">
             Gerencie o status da sua conta.
           </p>
-          <button
-            type="button"
-            disabled
-            className={`mt-5 ${secondaryDisabledButtonClassName}`}
-          >
-            Desativar conta · Disponível em breve
-          </button>
+          <DeactivateAccount hasPassword={user.hasPassword} />
         </section>
       </div>
     </main>

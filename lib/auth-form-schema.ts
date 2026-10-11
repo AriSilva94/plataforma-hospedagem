@@ -90,6 +90,30 @@ export const resetPasswordSchema = z.object({
   password: registrationPasswordSchema,
 });
 
+const currentPasswordSchema = z
+  .string({ error: 'Informe sua senha atual.' })
+  .min(1, { error: 'Informe sua senha atual.' })
+  .max(128, { error: 'A senha deve ter no máximo 128 caracteres.' });
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: currentPasswordSchema,
+    newPassword: registrationPasswordSchema,
+    confirmPassword: z.string({ error: 'Repita a nova senha.' }),
+  })
+  .refine((values) => values.newPassword === values.confirmPassword, {
+    path: ['confirmPassword'],
+    error: 'As senhas não coincidem.',
+  });
+
+export const deactivateAccountSchema = z.object({
+  currentPassword: currentPasswordSchema,
+});
+
+export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
+export type DeactivateAccountFormValues = z.infer<
+  typeof deactivateAccountSchema
+>;
 export type LoginFormValues = z.infer<typeof loginSchema>;
 export type RegisterFormValues = z.infer<typeof registerSchema>;
 export type ProfileFormValues = z.infer<typeof profileSchema>;

@@ -1,4 +1,4 @@
-import { createServer, type Server } from "node:http";
+import { createServer, type IncomingMessage, type Server } from "node:http";
 import { expect, test } from "@playwright/test";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3030";
@@ -7,6 +7,9 @@ let submittedProfile: unknown;
 let submittedIdentity: unknown;
 let ownerRequests: { method: string; url: string; body: unknown }[] = [];
 let verificationRequests = 0;
+let accountRequests: { url: string; body: unknown }[] = [];
+let deactivated = false;
+const currentPassword = "senha-atual-segura";
 let profileError = false;
 let profileDelayMs = 0;
 let postalCodeDelayMs = 0;
@@ -43,6 +46,7 @@ const initialUser = {
   name: "Ana Silva",
   email: "ana@example.com",
   emailVerifiedAt: null as string | null,
+  hasPassword: true,
   phone: null as string | null,
   birthDate: null as string | null,
   city: null as string | null,
@@ -50,6 +54,12 @@ const initialUser = {
   roles: [] as string[],
 };
 let user = initialUser;
+
+async function readBody(request: IncomingMessage): Promise<unknown> {
+  const chunks: Uint8Array[] = [];
+  for await (const chunk of request) chunks.push(chunk);
+  return JSON.parse(Buffer.concat(chunks).toString());
+}
 
 test.beforeAll(async () => {
   server = createServer(async (request, response) => {
@@ -65,14 +75,16 @@ test.beforeAll(async () => {
     }
 
     if (request.url === "/users/me" && request.method === "GET") {
+      if (deactivated) {
+        response.writeHead(401).end(JSON.stringify({ message: "Sessão inválida ou expirada." }));
+        return;
+      }
       response.writeHead(200).end(JSON.stringify(user));
       return;
     }
 
     if (request.url === "/users/me" && request.method === "PATCH") {
-      const chunks: Uint8Array[] = [];
-      for await (const chunk of request) chunks.push(chunk);
-      const body = JSON.parse(Buffer.concat(chunks).toString()) as {
+      const body = (await readBody(request)) as {
         name: string;
         phone: string | null;
         birthDate: string | null;
@@ -94,6 +106,18 @@ test.beforeAll(async () => {
     if (request.url === "/auth/email-verification" && request.method === "POST") {
       verificationRequests += 1;
       response.writeHead(202).end("{}");
+      return;
+    }
+
+    if ((request.url === "/auth/change-password" || request.url === "/auth/deactivate-account") && request.method === "POST") {
+      const body = (await readBody(request)) as { currentPassword?: string };
+      accountRequests.push({ url: request.url, body });
+      if (body.currentPassword !== currentPassword) {
+        response.writeHead(400).end(JSON.stringify({ message: "Senha atual incorreta." }));
+        return;
+      }
+      if (request.url === "/auth/deactivate-account") deactivated = true;
+      response.writeHead(204).end();
       return;
     }
 
@@ -124,17 +148,13 @@ test.beforeAll(async () => {
     }
 
     if (request.url?.startsWith("/owner/properties") && request.method !== "GET") {
-      const chunks: Uint8Array[] = [];
-      for await (const chunk of request) chunks.push(chunk);
-      ownerRequests.push({ method: request.method ?? "", url: request.url, body: JSON.parse(Buffer.concat(chunks).toString()) });
+      ownerRequests.push({ method: request.method ?? "", url: request.url, body: await readBody(request) });
       response.writeHead(200).end(JSON.stringify(ownerProperty));
       return;
     }
 
     if (request.url === "/users/me/profiles/guest" && request.method === "PATCH") {
-      const chunks: Uint8Array[] = [];
-      for await (const chunk of request) chunks.push(chunk);
-      submittedIdentity = JSON.parse(Buffer.concat(chunks).toString());
+      submittedIdentity = await readBody(request);
       response.writeHead(200).end(JSON.stringify({ ...user, guestProfile: submittedIdentity }));
       return;
     }
@@ -166,6 +186,8 @@ test.beforeEach(async ({ context }) => {
   submittedIdentity = undefined;
   ownerRequests = [];
   verificationRequests = 0;
+  accountRequests = [];
+  deactivated = false;
   profileError = false;
   profileDelayMs = 0;
   postalCodeDelayMs = 0;
@@ -191,8 +213,66 @@ test("organiza os dados e distingue recursos futuros", async ({ page }) => {
   await expect(page.getByText("estarão disponíveis em breve")).toHaveCount(0);
   await expect(page.getByText("O e-mail está cadastrado, mas ainda não foi verificado.")).toBeVisible();
   await expect(page.getByText("Cadastrado, não verificado")).toBeVisible();
-  await expect(page.getByRole("button", { name: /Alterar senha/ })).toBeDisabled();
-  await expect(page.getByRole("button", { name: /Desativar conta/ })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Alterar senha" })).toBeEnabled();
+  await expect(page.getByRole("button", { name: "Desativar conta" })).toBeEnabled();
+});
+
+test("altera a senha validando a confirmação e mostrando o erro da API", async ({ page }) => {
+  await page.goto("/perfil");
+  await page.getByRole("button", { name: "Alterar senha" }).click();
+  const current = page.getByLabel("Senha atual");
+  const next = page.getByLabel("Nova senha", { exact: true });
+  const confirmation = page.getByLabel("Repita a nova senha");
+
+  await current.fill("senha-errada");
+  await next.fill("nova-senha-segura");
+  await confirmation.fill("outra-senha-segura");
+  await page.getByRole("button", { name: "Salvar nova senha" }).click();
+  await expect(page.getByText("As senhas não coincidem.")).toBeVisible();
+  expect(accountRequests).toEqual([]);
+
+  await confirmation.fill("nova-senha-segura");
+  await page.getByRole("button", { name: "Salvar nova senha" }).click();
+  await expect(page.getByText("Senha atual incorreta.")).toBeVisible();
+
+  await current.fill(currentPassword);
+  await page.getByRole("button", { name: "Salvar nova senha" }).click();
+  await expect(page.getByText("Senha alterada. Os outros dispositivos foram desconectados.")).toBeVisible();
+  await expect(page.getByLabel("Senha atual")).toHaveCount(0);
+  expect(accountRequests.at(-1)).toEqual({
+    url: "/auth/change-password",
+    body: { currentPassword, newPassword: "nova-senha-segura" },
+  });
+});
+
+test("orienta a definir senha por e-mail quando a conta não tem senha", async ({ page }) => {
+  user = { ...user, hasPassword: false };
+  await page.goto("/perfil");
+
+  await expect(page.getByRole("button", { name: "Alterar senha" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Definir senha por e-mail" })).toHaveAttribute("href", "/recuperar-senha");
+});
+
+test("desativa a conta após confirmar com a senha e leva ao login", async ({ page }) => {
+  await page.goto("/perfil");
+  await page.getByRole("button", { name: "Desativar conta" }).click();
+  const dialog = page.getByRole("dialog", { name: "Desativar sua conta?" });
+  await expect(dialog).toBeVisible();
+
+  await dialog.getByRole("button", { name: "Desativar conta" }).click();
+  await expect(dialog.getByText("Informe sua senha atual.")).toBeVisible();
+  expect(accountRequests).toEqual([]);
+
+  await dialog.getByRole("button", { name: "Cancelar" }).click();
+  await expect(dialog).toBeHidden();
+
+  await page.getByRole("button", { name: "Desativar conta" }).click();
+  await dialog.getByLabel("Confirme com sua senha").fill(currentPassword);
+  await dialog.getByRole("button", { name: "Desativar conta" }).click();
+
+  await expect(page).toHaveURL(/\/login\?conta=desativada$/);
+  await expect(page.getByText("Sua conta foi desativada.")).toBeVisible();
+  expect(accountRequests).toEqual([{ url: "/auth/deactivate-account", body: { currentPassword } }]);
 });
 
 test("envia o link de confirmação quando o e-mail não está verificado", async ({ page }) => {

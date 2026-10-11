@@ -1,6 +1,8 @@
 import type { ComponentProps } from "react";
 import type { IconType } from "react-icons";
 
+export const fieldLabelClassName = "mb-2 block text-sm font-semibold text-(--gray)";
+
 export function IconInput({ icon: Icon, ...props }: Omit<ComponentProps<"input">, "className"> & { icon: IconType }) {
   return (
     <div className="group relative">
