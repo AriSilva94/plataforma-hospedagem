@@ -85,7 +85,7 @@ export default async function SetupPropertyPage({ params, searchParams }: PagePr
                 <li key={room.id} className="flex items-center justify-between gap-4 rounded-2xl border border-(--line-strong) bg-(--surface) p-4">
                   <Link
                     href={`/meus-imoveis/${property.id}/quartos/${room.id}`}
-                    className="min-w-0 wrap-break-word font-bold text-white hover:text-(--blue-light) focus-visible:outline-2 focus-visible:outline-(--blue-light)"
+                    className="min-w-0 wrap-break-word font-bold text-(--white) hover:text-(--blue-light) focus-visible:outline-2 focus-visible:outline-(--blue-light)"
                   >
                     {room.title}
                   </Link>

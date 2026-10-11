@@ -46,7 +46,7 @@ export function OptionalDetails({
       onToggle={(event) => setOpen(event.currentTarget.open)}
       className="group rounded-2xl border border-(--line-strong) bg-(--surface)"
     >
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-2xl p-4 font-bold sm:p-5 text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-2xl p-4 font-bold sm:p-5 text-(--white) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) [&::-webkit-details-marker]:hidden">
         <span>
           {title} <span className="font-normal text-(--gray)">({tag})</span>
           <span className="mt-1 block text-sm font-normal text-(--gray)">{description}</span>

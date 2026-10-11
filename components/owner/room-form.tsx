@@ -10,7 +10,7 @@ import { FormActions, FormStatus } from "@/components/owner/form-actions";
 import { UnsavedChangesGuard } from "@/components/owner/unsaved-changes-guard";
 import { ChoiceGroup, optionsFrom } from "@/components/owner/choice-group";
 import { ConfirmDialog } from "@/components/owner/confirm-dialog";
-import { FieldError } from "@/components/owner/field-error";
+import { FieldError } from "@/components/field-error";
 import { FieldHint } from "@/components/owner/field-hint";
 import { OptionalDetails } from "@/components/owner/optional-details";
 import {
@@ -40,7 +40,7 @@ function FormSection({ id, title, description, children }: { id: string; title: 
   return (
     <section aria-labelledby={id} className="flex flex-col gap-4 border-t border-(--line) pt-6 first:border-t-0 first:pt-0">
       <div>
-        <h2 id={id} className="text-lg font-bold text-white">{title}</h2>
+        <h2 id={id} className="text-lg font-bold text-(--white)">{title}</h2>
         {description ? <p className="mt-1 max-w-prose text-sm leading-relaxed text-(--gray)">{description}</p> : null}
       </div>
       {children}

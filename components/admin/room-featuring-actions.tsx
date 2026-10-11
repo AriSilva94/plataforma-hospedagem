@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/owner/confirm-dialog";
-import { FieldError } from "@/components/owner/field-error";
+import { FieldError } from "@/components/field-error";
 import { Modal } from "@/components/owner/modal";
 import { ModalActions } from "@/components/owner/modal-actions";
 import { fieldClassName, labelClassName, secondaryButtonClassName } from "@/components/owner/styles";

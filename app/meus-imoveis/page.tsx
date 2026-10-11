@@ -36,7 +36,7 @@ export default async function MyPropertiesPage() {
             <LuHousePlus aria-hidden="true" size={24} />
           </span>
           <div>
-            <h2 className="text-lg font-bold text-white">Nenhum imóvel cadastrado</h2>
+            <h2 className="text-lg font-bold text-(--white)">Nenhum imóvel cadastrado</h2>
             <p className="mt-1 max-w-prose text-sm leading-relaxed text-(--gray)">
               Comece pelo básico. O imóvel fica como rascunho até você informar endereço, fotos e o primeiro quarto e publicar.
             </p>
@@ -54,7 +54,7 @@ export default async function MyPropertiesPage() {
                 <CoverImage url={property.coverUrl} alt="" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" />
                 <div className="flex flex-1 flex-col gap-3 p-5">
                   <div className="flex items-start justify-between gap-3">
-                    <h2 className="min-w-0 wrap-break-word text-lg font-bold text-white">{property.title}</h2>
+                    <h2 className="min-w-0 wrap-break-word text-lg font-bold text-(--white)">{property.title}</h2>
                     <PropertyStatusBadge status={property.status} />
                   </div>
                   <p className="flex flex-wrap items-center gap-2 text-sm text-(--gray)">
@@ -70,7 +70,7 @@ export default async function MyPropertiesPage() {
                       {property.roomCount === 1 ? "1 quarto" : `${property.roomCount} quartos`} · {property.availableRoomCount} {property.availableRoomCount === 1 ? "reservável" : "reserváveis"}
                     </span>
                     {property.minAvailablePriceCents !== null ? (
-                      <span className="font-semibold text-white">
+                      <span className="font-semibold text-(--white)">
                         <span className="font-normal text-(--gray)">a partir de </span>
                         {formatCents(property.minAvailablePriceCents)}
                       </span>

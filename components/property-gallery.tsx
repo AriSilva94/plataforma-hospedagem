@@ -34,7 +34,7 @@ function PhotoButton({
         loading={eager ? "eager" : undefined}
         fetchPriority={eager ? "high" : undefined}
         sizes={sizes}
-        className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+        className="object-cover transition-transform duration-300 group-hover:scale-102"
       />
     </button>
   );
@@ -73,7 +73,7 @@ export function PropertyPhotoGrid({ title, photos }: { title: string; photos: Vi
         <button
           type="button"
           onClick={() => setViewing(0)}
-          className="absolute right-3 bottom-3 inline-flex min-h-11 items-center gap-2 rounded-xl bg-black/70 px-4 text-sm font-semibold text-white transition-colors hover:bg-black/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
+          className="absolute right-3 bottom-3 inline-flex min-h-11 items-center gap-2 rounded-xl bg-(--black)/70 px-4 text-sm font-semibold text-(--white) transition-colors hover:bg-(--black)/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
         >
           <LuImages aria-hidden="true" size={16} />
           Ver as {photos.length} fotos
@@ -94,7 +94,7 @@ export function RoomCover({ title, photos, eager, className }: { title: string; 
     <div className={`relative ${className}`}>
       <PhotoButton photo={cover} eager={eager} sizes="(min-width: 768px) 288px, 100vw" className="size-full" onOpen={() => setViewing(0)} />
       {photos.length > 1 ? (
-        <span className="pointer-events-none absolute right-3 bottom-3 inline-flex items-center gap-1.5 rounded-full bg-black/70 px-2.5 py-1 text-xs font-semibold text-white">
+        <span className="pointer-events-none absolute right-3 bottom-3 inline-flex items-center gap-1.5 rounded-full bg-(--black)/70 px-2.5 py-1 text-xs font-semibold text-(--white)">
           <LuImages aria-hidden="true" size={13} />
           {photos.length} fotos
         </span>

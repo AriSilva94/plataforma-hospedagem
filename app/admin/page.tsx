@@ -95,13 +95,13 @@ function DashboardCard({
         className="group flex h-full flex-col rounded-2xl border border-(--line-strong) bg-(--surface) p-6 transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
       >
         <div className="flex items-center gap-3">
-          <span className="flex size-10 items-center justify-center rounded-xl bg-[rgba(11,99,227,.14)] text-(--blue-light)">
+          <span className="flex size-10 items-center justify-center rounded-xl bg-(--blue)/14 text-(--blue-light)">
             <Icon aria-hidden="true" size={20} />
           </span>
-          <h2 className="text-lg font-bold text-white">{title}</h2>
+          <h2 className="text-lg font-bold text-(--white)">{title}</h2>
         </div>
         <p className="mt-5">
-          <span className="text-4xl font-extrabold tracking-tight text-white">{value}</span>
+          <span className="text-4xl font-extrabold tracking-tight text-(--white)">{value}</span>
           <span className="mt-1 block text-sm text-(--gray)">{valueLabel}</span>
         </p>
         <ul className="mt-4 flex flex-col gap-1.5 border-t border-(--line) pt-4 text-sm text-(--gray)">

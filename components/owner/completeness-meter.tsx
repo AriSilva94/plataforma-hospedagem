@@ -3,7 +3,7 @@ export function CompletenessMeter({ score, label = "Completude do anúncio" }: {
     <div>
       <div className="flex items-center justify-between gap-3 text-sm">
         <span className="text-(--gray)">{label}</span>
-        <span className="font-bold text-white">{score}%</span>
+        <span className="font-bold text-(--white)">{score}%</span>
       </div>
       <progress
         value={score}

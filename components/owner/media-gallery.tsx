@@ -105,7 +105,7 @@ const MediaTile = memo(function MediaTile({
         ) : (
           <video src={`${item.url}#t=0.1`} controls preload="metadata" aria-label={label} className="size-full object-cover" />
         )}
-        <span className={`absolute left-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold text-white ${isCover ? "bg-(--blue)" : "bg-black/70"}`}>
+        <span className={`absolute left-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold text-(--white) ${isCover ? "bg-(--blue)" : "bg-(--black)/70"}`}>
           {isCover ? (
             <>
               <LuStar aria-hidden="true" size={12} /> Capa
@@ -129,7 +129,7 @@ const MediaTile = memo(function MediaTile({
             onBlur={(event) => {
               if (event.relatedTarget) actions.releaseKeyboard(item.id);
             }}
-            className="absolute right-2 top-2 flex size-11 cursor-grab touch-none items-center justify-center rounded-lg bg-black/70 text-white transition-colors hover:bg-black/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-40 aria-pressed:bg-(--blue) sm:size-9"
+            className="absolute right-2 top-2 flex size-11 cursor-grab touch-none items-center justify-center rounded-lg bg-(--black)/70 text-(--white) transition-colors hover:bg-(--black)/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-40 aria-pressed:bg-(--blue) sm:size-9"
           >
             <LuGripVertical aria-hidden="true" size={18} />
           </button>
@@ -142,7 +142,7 @@ const MediaTile = memo(function MediaTile({
             aria-label={`Tornar capa: ${label}`}
             disabled={disabled}
             onClick={() => actions.makeCover(item.id)}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-xs font-semibold text-(--blue-light) transition-colors hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-(--blue-light) disabled:opacity-40 sm:min-h-9"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-xs font-semibold text-(--blue-light) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light) disabled:opacity-40 sm:min-h-9"
           >
             <LuStar aria-hidden="true" size={14} />
             Tornar capa
@@ -155,7 +155,7 @@ const MediaTile = memo(function MediaTile({
           aria-label={`Remover ${label}`}
           disabled={disabled}
           onClick={() => actions.remove(item)}
-          className="flex size-11 items-center justify-center rounded-lg text-(--danger) transition-colors hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-(--blue-light) disabled:opacity-40 sm:size-9"
+          className="flex size-11 items-center justify-center rounded-lg text-(--danger) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light) disabled:opacity-40 sm:size-9"
         >
           <LuTrash2 aria-hidden="true" size={16} />
         </button>
@@ -487,11 +487,11 @@ export function MediaGallery({
         onDragLeave={handleFilesLeave}
         onDrop={handleFilesDrop}
         className={`flex flex-col gap-4 rounded-2xl border border-dashed p-5 transition-colors sm:flex-row sm:items-center sm:justify-between ${
-          filesOver ? "border-(--blue-light) bg-[rgba(11,99,227,.14)]" : "border-(--line-strong) bg-(--surface)"
+          filesOver ? "border-(--blue-light) bg-(--blue)/14" : "border-(--line-strong) bg-(--surface)"
         }`}
       >
         <div>
-          <h2 className="font-bold text-white">{allowVideo ? "Fotos e vídeos" : "Fotos"}</h2>
+          <h2 className="font-bold text-(--white)">{allowVideo ? "Fotos e vídeos" : "Fotos"}</h2>
           <p className="mt-1 text-sm leading-relaxed text-(--gray)">
             <span className="hidden sm:inline">Arraste arquivos para cá ou use o botão. </span>
             Fotos JPEG, PNG ou WebP até 10 MB (máx. {maxImages})
@@ -573,12 +573,12 @@ export function MediaGallery({
         <div
           ref={ghostRef}
           aria-hidden="true"
-          className="pointer-events-none fixed left-0 top-0 z-50 overflow-hidden rounded-xl border border-(--blue-light) bg-(--surface-raised) shadow-[0_24px_48px_-12px_rgba(0,0,0,.65)] will-change-transform"
+          className="pointer-events-none fixed left-0 top-0 z-50 overflow-hidden rounded-xl border border-(--blue-light) bg-(--surface-raised) shadow-[0_24px_48px_-12px_color-mix(in_srgb,var(--black)_65%,transparent)] will-change-transform"
         >
           {draggedItem.type === "IMAGE" ? (
             <Image src={draggedItem.url} alt="" fill draggable={false} sizes="320px" className="object-cover" />
           ) : (
-            <div className="flex size-full items-center justify-center text-white">
+            <div className="flex size-full items-center justify-center text-(--white)">
               <LuPlay aria-hidden="true" size={28} />
             </div>
           )}

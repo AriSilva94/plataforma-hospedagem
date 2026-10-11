@@ -1,19 +1,32 @@
 @import "tailwindcss";
 
 :root {
+  --black: #000000;
+  --navy-deep: #020b1a;
   --navy: #031128;
   --surface: #0f1f39;
   --surface-raised: #12274a;
+  --surface-high: #183259;
+  --blue-deep: #0b3a8f;
   --blue: #0b63e3;
   --blue-light: #3a83f0;
+  --blue-soft: #8ab4ff;
+  --blue-pale: #b6d1ff;
+  --blue-tint: color-mix(in srgb, var(--blue-light) 14%, transparent);
+  --blue-tint-line: color-mix(in srgb, var(--blue-light) 34%, transparent);
   --white: #f4f6f8;
+  --text-soft: #d5dfed;
   --gray: #b2bbc8;
-  --line: rgba(178, 187, 200, 0.14);
-  --line-strong: rgba(178, 187, 200, 0.26);
+  --ink-muted: #3a4a63;
+  --ink-subtle: #8695ab;
+  --line: color-mix(in srgb, var(--gray) 14%, transparent);
+  --line-strong: color-mix(in srgb, var(--gray) 26%, transparent);
   --success: #2fbf87;
+  --success-soft: #7be0b6;
   --warning: #e8b13a;
   --info: #c8b6ff;
   --danger: #e5624b;
+  --danger-soft: #ff9b8a;
 }
 
 @theme inline {
@@ -55,8 +68,8 @@ body.scroll-locked {
   overflow: hidden;
   padding: clamp(1rem, 4vw, 3rem);
   background:
-    radial-gradient(circle at 78% 12%, rgba(58, 131, 240, 0.16), transparent 23%),
-    linear-gradient(135deg, #020b1a, var(--navy) 58%, #091d3a);
+    radial-gradient(circle at 78% 12%, color-mix(in srgb, var(--blue-light) 16%, transparent), transparent 23%),
+    linear-gradient(135deg, var(--navy-deep), var(--navy) 58%, var(--surface));
 }
 
 .auth-frame {
@@ -67,7 +80,7 @@ body.scroll-locked {
   overflow: hidden;
   border-radius: 1.75rem;
   background: var(--surface);
-  box-shadow: 0 2.5rem 6rem rgba(0, 0, 0, 0.45);
+  box-shadow: 0 2.5rem 6rem color-mix(in srgb, var(--black) 45%, transparent);
 }
 
 .auth-scene {
@@ -75,7 +88,7 @@ body.scroll-locked {
   min-height: 22rem;
   overflow: hidden;
   padding: 2rem;
-  background: #06152c;
+  background: var(--navy);
 }
 
 .auth-room-image {
@@ -89,7 +102,7 @@ body.scroll-locked {
   inset: 0;
   content: "";
   pointer-events: none;
-  background: linear-gradient(90deg, rgba(3, 17, 40, 0.88), rgba(3, 17, 40, 0.22) 72%), linear-gradient(0deg, rgba(3, 17, 40, 0.82), transparent 60%);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--navy) 88%, transparent), color-mix(in srgb, var(--navy) 22%, transparent) 72%), linear-gradient(0deg, color-mix(in srgb, var(--navy) 82%, transparent), transparent 60%);
 }
 
 .auth-scene-content {
@@ -114,15 +127,15 @@ body.scroll-locked {
   display: grid;
   place-items: center;
   padding: 1.5rem;
-  background: radial-gradient(circle at 70% 14%, rgba(58, 131, 240, 0.24), transparent 28%), linear-gradient(150deg, #13294d, #0b1b35);
+  background: radial-gradient(circle at 70% 14%, color-mix(in srgb, var(--blue-light) 24%, transparent), transparent 28%), linear-gradient(150deg, var(--surface-raised), var(--surface));
 }
 
 .auth-card {
   width: min(100%, 25rem);
   padding: 1.5rem;
   border-radius: 1rem;
-  background: linear-gradient(148deg, rgba(24, 50, 89, 0.96), rgba(12, 30, 58, 0.94));
-  box-shadow: inset 0 1px 0 rgba(202, 223, 255, 0.1), 0 1.9rem 4.4rem rgba(0, 0, 0, 0.32);
+  background: linear-gradient(148deg, color-mix(in srgb, var(--surface-high) 96%, transparent), color-mix(in srgb, var(--surface) 94%, transparent));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--blue-pale) 10%, transparent), 0 1.9rem 4.4rem color-mix(in srgb, var(--black) 32%, transparent);
 }
 
 .auth-emblem {
@@ -131,9 +144,9 @@ body.scroll-locked {
   height: 3.15rem;
   place-items: center;
   border-radius: 9999px;
-  background: radial-gradient(circle at 38% 31%, #417dd2, #102b54);
-  box-shadow: inset 0 0 0 1px rgba(151, 193, 255, 0.24), 0 0.6rem 1.5rem rgba(0, 0, 0, 0.2);
-  color: #d9e8ff;
+  background: radial-gradient(circle at 38% 31%, var(--blue-light), var(--surface-high));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--blue-soft) 24%, transparent), 0 0.6rem 1.5rem color-mix(in srgb, var(--black) 20%, transparent);
+  color: var(--text-soft);
   font-family: Georgia, serif;
   font-size: 1.35rem;
 }
@@ -145,24 +158,24 @@ body.scroll-locked {
   margin-top: 0.45rem;
   padding: 0 0.9rem;
   border-radius: 0.8rem;
-  background: rgba(3, 17, 40, 0.58);
-  box-shadow: inset 0 0 0 1px rgba(160, 193, 241, 0.14), inset 0 0.5rem 1.25rem rgba(0, 0, 0, 0.12);
-  color: #8faddb;
+  background: color-mix(in srgb, var(--navy) 58%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--blue-soft) 14%, transparent), inset 0 0.5rem 1.25rem color-mix(in srgb, var(--black) 12%, transparent);
+  color: var(--blue-soft);
   transition: box-shadow 180ms ease, color 180ms ease;
 }
 
 .auth-input-wrap:focus-within {
-  box-shadow: inset 0 0 0 1px var(--blue-light), 0 0 0 0.2rem rgba(58, 131, 240, 0.22);
-  color: #c8ddff;
+  box-shadow: inset 0 0 0 1px var(--blue-light), 0 0 0 0.2rem color-mix(in srgb, var(--blue-light) 22%, transparent);
+  color: var(--blue-pale);
 }
 
 .auth-input-wrap:has(input[aria-invalid="true"]) {
   box-shadow: inset 0 0 0 1px var(--danger);
-  color: #ffb5a7;
+  color: var(--danger-soft);
 }
 
 .auth-input-wrap:has(input[aria-invalid="true"]):focus-within {
-  box-shadow: inset 0 0 0 1px var(--danger), 0 0 0 0.2rem rgba(229, 98, 75, 0.24);
+  box-shadow: inset 0 0 0 1px var(--danger), 0 0 0 0.2rem color-mix(in srgb, var(--danger) 24%, transparent);
 }
 
 .auth-field-error {
@@ -170,7 +183,7 @@ body.scroll-locked {
   align-items: flex-start;
   gap: 0.4rem;
   margin-top: 0.4rem;
-  color: #ffb5a7;
+  color: var(--danger-soft);
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.4;
@@ -221,8 +234,8 @@ body.scroll-locked {
   padding: 0.9rem 1rem;
   border: 0;
   border-radius: 0.8rem;
-  background: linear-gradient(102deg, #0752be, var(--blue) 48%, #4c91f2);
-  box-shadow: 0 0.8rem 1.7rem rgba(11, 99, 227, 0.32);
+  background: linear-gradient(102deg, var(--blue-deep), var(--blue) 48%, var(--blue-light));
+  box-shadow: 0 0.8rem 1.7rem color-mix(in srgb, var(--blue) 32%, transparent);
   color: var(--white);
   font-weight: 800;
   transition: transform 180ms ease, box-shadow 180ms ease;
@@ -236,7 +249,7 @@ body.scroll-locked {
   height: 360%;
   content: "";
   transform: rotate(27deg);
-  background: rgba(255, 255, 255, 0.32);
+  background: color-mix(in srgb, var(--white) 32%, transparent);
   animation: auth-shimmer 4s ease-in-out infinite;
 }
 
@@ -246,18 +259,18 @@ body.scroll-locked {
 
 .auth-submit:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 1.1rem 2.1rem rgba(11, 99, 227, 0.4);
+  box-shadow: 0 1.1rem 2.1rem color-mix(in srgb, var(--blue) 40%, transparent);
 }
 
 .auth-reveal:focus-visible {
-  outline: 2px solid #a9ceff;
+  outline: 2px solid var(--blue-pale);
   outline-offset: 0;
 }
 
 .auth-submit:focus-visible,
 .auth-provider:focus-visible,
 .auth-link:focus-visible {
-  outline: 3px solid #a9ceff;
+  outline: 3px solid var(--blue-pale);
   outline-offset: 4px;
 }
 
@@ -271,7 +284,7 @@ body.scroll-locked {
   align-items: center;
   gap: 0.8rem;
   margin: 1.25rem 0 1rem;
-  color: #aebbd0;
+  color: var(--gray);
   font-size: 0.75rem;
   white-space: nowrap;
 }
@@ -281,7 +294,7 @@ body.scroll-locked {
   height: 1px;
   flex: 1;
   content: "";
-  background: linear-gradient(90deg, transparent, rgba(170, 197, 239, 0.26));
+  background: linear-gradient(90deg, transparent, var(--line-strong));
 }
 
 .auth-divider::after {
@@ -294,14 +307,14 @@ body.scroll-locked {
   height: 3.5rem;
   place-items: center;
   border-radius: 9999px;
-  background: linear-gradient(145deg, #274b80, #12315e);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 0.7rem 1.5rem rgba(0, 0, 0, 0.24);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--blue-light) 30%, var(--surface-high)), var(--surface-high));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--white) 9%, transparent), 0 0.7rem 1.5rem color-mix(in srgb, var(--black) 24%, transparent);
   transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
 .auth-provider:hover {
   transform: translateY(-3px) scale(1.05);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 1.1rem 2rem rgba(0, 0, 0, 0.32);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--white) 12%, transparent), 0 1.1rem 2rem color-mix(in srgb, var(--black) 32%, transparent);
 }
 
 .auth-link {
@@ -318,14 +331,14 @@ body.scroll-locked {
   justify-content: center;
   gap: 0.45rem;
   margin: 1.2rem 0 0;
-  color: #b7c5d8;
+  color: var(--gray);
   font-size: 0.75rem;
   text-align: center;
 }
 
 .auth-reassurance svg {
   flex: none;
-  color: #8fbcff;
+  color: var(--blue-soft);
 }
 
 .auth-footer {
@@ -333,12 +346,12 @@ body.scroll-locked {
   width: min(100%, 68rem);
   justify-content: space-between;
   gap: 1rem;
-  color: #9aabc1;
+  color: var(--gray);
   font-size: 0.7rem;
 }
 
 .auth-footer span:last-child {
-  color: #b6d1ff;
+  color: var(--blue-pale);
   font-family: Georgia, serif;
   font-size: 0.95rem;
 }
@@ -396,7 +409,7 @@ body.scroll-locked {
   }
 
   .auth-scene::after {
-    background: linear-gradient(180deg, rgba(3, 17, 40, 0.3), rgba(3, 17, 40, 0.9) 64%, rgba(3, 17, 40, 0.98));
+    background: linear-gradient(180deg, color-mix(in srgb, var(--navy) 30%, transparent), color-mix(in srgb, var(--navy) 90%, transparent) 64%, color-mix(in srgb, var(--navy) 98%, transparent));
   }
 
   .auth-scene-content {
@@ -419,7 +432,7 @@ body.scroll-locked {
   .auth-card {
     width: min(100%, 25rem);
     padding: 1.25rem;
-    background: linear-gradient(148deg, rgba(24, 50, 89, 0.95), rgba(12, 30, 58, 0.94));
+    background: linear-gradient(148deg, color-mix(in srgb, var(--surface-high) 95%, transparent), color-mix(in srgb, var(--surface) 94%, transparent));
     backdrop-filter: blur(0.6rem);
   }
 
@@ -629,6 +642,88 @@ body.scroll-locked {
 
 @media (prefers-reduced-motion: reduce) {
   .public-home-room {
+    animation: none;
+  }
+}
+
+.field-popover {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  z-index: 30;
+  transform-origin: top center;
+  border: 1px solid var(--line-strong);
+  border-radius: 1rem;
+  background: var(--surface-raised);
+  box-shadow:
+    0 1.5rem 3.5rem color-mix(in srgb, var(--black) 50%, transparent),
+    0 0.25rem 0.75rem color-mix(in srgb, var(--black) 30%, transparent);
+  transition:
+    opacity 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 0s;
+}
+
+.field-popover[data-side="top"] {
+  top: auto;
+  bottom: calc(100% + 0.5rem);
+  transform-origin: bottom center;
+}
+
+.field-popover[data-align="end"] {
+  right: 0;
+  left: auto;
+}
+
+.field-popover[data-state="closed"] {
+  visibility: hidden;
+  opacity: 0;
+  filter: blur(6px);
+  transform: translateY(-0.5rem) scale(0.97);
+  pointer-events: none;
+  transition:
+    opacity 130ms ease-in,
+    transform 130ms ease-in,
+    filter 130ms ease-in,
+    visibility 0s linear 130ms;
+}
+
+.field-popover[data-state="closed"][data-side="top"] {
+  transform: translateY(0.5rem) scale(0.97);
+}
+
+.field-scroll {
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.calendar-view {
+  animation: calendar-view-in 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes calendar-view-in {
+  from {
+    opacity: 0.3;
+    transform: translateY(0.25rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field-popover,
+  .field-popover[data-align="end"] {
+  right: 0;
+  left: auto;
+}
+
+.field-popover[data-state="closed"] {
+    filter: none;
+    transform: none;
+    transition: none;
+  }
+
+  .calendar-view {
     animation: none;
   }
 }

@@ -14,9 +14,9 @@ const sampleRooms: { name: string; details: string; price: string; status: RoomS
 ];
 
 const statusStyles: Record<RoomStatus, string> = {
-  free: "bg-[rgba(47,191,135,.14)] text-(--success)",
-  renewing: "bg-[rgba(232,177,58,.14)] text-(--warning)",
-  soon: "bg-[rgba(58,131,240,.16)] text-(--blue-light)",
+  free: "bg-(--success)/14 text-(--success)",
+  renewing: "bg-(--warning)/14 text-(--warning)",
+  soon: "bg-(--blue-light)/16 text-(--blue-light)",
 };
 
 const journey: { title: string; text: string; demo: ReactNode }[] = [
@@ -60,8 +60,8 @@ const ownerBenefits = [
   "Receba os pagamentos e acompanhe cada cobrança.",
 ];
 
-const primaryAction = "inline-flex items-center justify-center rounded-xl bg-(--blue) px-6 py-3.5 text-sm font-bold text-white transition-colors hover:bg-(--blue-light)";
-const secondaryAction = "inline-flex items-center justify-center rounded-xl border border-(--line-strong) px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-white/5";
+const primaryAction = "inline-flex items-center justify-center rounded-xl bg-(--blue) px-6 py-3.5 text-sm font-bold text-(--white) transition-colors hover:bg-(--blue-light)";
+const secondaryAction = "inline-flex items-center justify-center rounded-xl border border-(--line-strong) px-6 py-3.5 text-sm font-semibold text-(--white) transition-colors hover:bg-(--white)/5";
 
 export function PublicHome() {
   return (
@@ -71,11 +71,11 @@ export function PublicHome() {
       <main>
         <section className="relative isolate overflow-hidden">
           <Image src="/rooms/room1.png" alt="" fill priority sizes="100vw" className="-z-10 object-cover" />
-          <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(3,17,40,.96)_0%,rgba(3,17,40,.86)_45%,rgba(3,17,40,.55)_100%),linear-gradient(0deg,var(--navy),transparent_40%)]" />
+          <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,color-mix(in_srgb,var(--navy)_96%,transparent)_0%,color-mix(in_srgb,var(--navy)_86%,transparent)_45%,color-mix(in_srgb,var(--navy)_55%,transparent)_100%),linear-gradient(0deg,var(--navy),transparent_40%)]" />
 
           <div className="mx-auto grid w-full max-w-360 items-center gap-12 px-6 pb-16 pt-12 md:px-10 md:pt-16 lg:min-h-[calc(100svh-72px)] lg:grid-cols-[minmax(0,1.1fr)_minmax(0,.9fr)] lg:gap-16 lg:px-12 lg:py-20">
             <div className="max-w-160">
-              <h1 className="text-balance text-[2.5rem] font-extrabold leading-[1.05] tracking-[-0.03em] text-white sm:text-6xl">
+              <h1 className="text-balance text-[2.5rem] font-extrabold leading-[1.05] tracking-[-0.03em] text-(--white) sm:text-6xl">
                 Encontre o quarto livre <span className="text-(--blue-light)">sem precisar perguntar.</span>
               </h1>
               <p className="mt-6 max-w-136 text-pretty text-lg leading-relaxed text-(--gray)">
@@ -86,7 +86,7 @@ export function PublicHome() {
                 <a href="#proprietarios" className={secondaryAction}>Quero anunciar meu espaço</a>
               </div>
               <p className="mt-5 text-sm text-(--gray)">
-                Já tem conta? <Link href="/login" className="font-semibold text-white underline decoration-(--blue-light) underline-offset-4">Entrar</Link>
+                Já tem conta? <Link href="/login" className="font-semibold text-(--white) underline decoration-(--blue-light) underline-offset-4">Entrar</Link>
               </p>
             </div>
 
@@ -99,14 +99,14 @@ export function PublicHome() {
             <div className="flex gap-4">
               <LuMessageSquareOff aria-hidden="true" size={28} className="mt-1 shrink-0 text-(--gray)" />
               <div>
-                <h2 id="problema-titulo" className="text-xl font-bold text-white">Chega de caçar vaga em mensagens</h2>
+                <h2 id="problema-titulo" className="text-xl font-bold text-(--white)">Chega de caçar vaga em mensagens</h2>
                 <p className="mt-2 max-w-lg leading-relaxed text-(--gray)">Hoje, descobrir se um quarto está livre depende de WhatsApp, Stories e conversas privadas, sem histórico e sem garantia.</p>
               </div>
             </div>
             <div className="flex gap-4">
               <LuCalendarCheck aria-hidden="true" size={28} className="mt-1 shrink-0 text-(--blue-light)" />
               <div>
-                <h2 className="text-xl font-bold text-white">Tudo rastreável em um só lugar</h2>
+                <h2 className="text-xl font-bold text-(--white)">Tudo rastreável em um só lugar</h2>
                 <p className="mt-2 max-w-lg leading-relaxed text-(--gray)">Descoberta, disponibilidade, reserva, pagamento, renovação e alertas ficam registrados na plataforma, para hóspede e anfitrião.</p>
               </div>
             </div>
@@ -116,7 +116,7 @@ export function PublicHome() {
         <section id="como-funciona" aria-labelledby="jornada-titulo" className="mx-auto w-full max-w-360 scroll-mt-20 px-6 py-20 md:px-10 lg:px-12 lg:py-28">
           <div className="grid gap-12 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-20">
             <div className="lg:sticky lg:top-28 lg:self-start">
-              <h2 id="jornada-titulo" className="text-balance text-3xl font-extrabold leading-tight tracking-[-0.02em] text-white md:text-4xl">Da busca à próxima diária</h2>
+              <h2 id="jornada-titulo" className="text-balance text-3xl font-extrabold leading-tight tracking-[-0.02em] text-(--white) md:text-4xl">Da busca à próxima diária</h2>
               <p className="mt-4 leading-relaxed text-(--gray)">Cada etapa da estadia acontece dentro da plataforma, com o estado da reserva sempre visível.</p>
               <Link href="/cadastro" className={`${primaryAction} mt-8 hidden lg:inline-flex`}>Começar agora</Link>
             </div>
@@ -126,7 +126,7 @@ export function PublicHome() {
                 <li key={step.title} className="relative grid gap-5 pl-16 md:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] md:gap-10">
                   <span aria-hidden="true" className="absolute left-0 top-0 flex size-10 items-center justify-center rounded-full border border-(--line-strong) bg-(--navy) text-sm font-extrabold text-(--blue-light)">{index + 1}</span>
                   <div className="pt-1.5">
-                    <h3 className="text-xl font-bold text-white">{step.title}</h3>
+                    <h3 className="text-xl font-bold text-(--white)">{step.title}</h3>
                     <p className="mt-2 max-w-120 leading-relaxed text-(--gray)">{step.text}</p>
                   </div>
                   <div aria-hidden="true" className="rounded-2xl border border-(--line) bg-(--surface) p-4">{step.demo}</div>
@@ -138,12 +138,12 @@ export function PublicHome() {
 
         <section aria-labelledby="seguranca-titulo" className="bg-(--surface)">
           <div className="mx-auto w-full max-w-360 px-6 py-20 md:px-10 lg:px-12">
-            <h2 id="seguranca-titulo" className="max-w-xl text-balance text-3xl font-extrabold leading-tight tracking-[-0.02em] text-white">Discrição e segurança fazem parte do fluxo</h2>
+            <h2 id="seguranca-titulo" className="max-w-xl text-balance text-3xl font-extrabold leading-tight tracking-[-0.02em] text-(--white)">Discrição e segurança fazem parte do fluxo</h2>
             <ul className="mt-12 grid gap-10 md:grid-cols-3 md:gap-8">
               {assurances.map(({ icon: Icon, title, text }) => (
                 <li key={title} className="border-t border-(--line-strong) pt-6">
                   <Icon aria-hidden="true" size={24} className="text-(--blue-light)" />
-                  <h3 className="mt-4 text-lg font-bold text-white">{title}</h3>
+                  <h3 className="mt-4 text-lg font-bold text-(--white)">{title}</h3>
                   <p className="mt-2 leading-relaxed text-(--gray)">{text}</p>
                 </li>
               ))}
@@ -152,28 +152,28 @@ export function PublicHome() {
         </section>
 
         <section id="proprietarios" aria-labelledby="proprietarios-titulo" className="mx-auto w-full max-w-360 scroll-mt-20 px-6 py-20 md:px-10 lg:px-12 lg:py-28">
-          <div className="grid items-center gap-12 overflow-hidden rounded-[1.75rem] bg-[linear-gradient(120deg,#0b3a8f,var(--blue))] lg:grid-cols-2 lg:gap-0">
+          <div className="grid items-center gap-12 overflow-hidden rounded-[1.75rem] bg-[linear-gradient(120deg,var(--blue-deep),var(--blue))] lg:grid-cols-2 lg:gap-0">
             <div className="relative min-h-64 lg:order-2 lg:h-full lg:min-h-128">
               <Image src="/rooms/room2.png" alt="Quarto preparado para hóspedes" fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" />
             </div>
             <div className="px-6 pb-10 md:px-10 lg:px-14 lg:py-16">
-              <h2 id="proprietarios-titulo" className="text-balance text-3xl font-extrabold leading-tight tracking-[-0.02em] text-white md:text-4xl">Anuncie o imóvel. Alugue cada quarto do seu jeito.</h2>
-              <p className="mt-4 max-w-120 leading-relaxed text-white/85">Um único anúncio para o imóvel, com quartos e suítes que você gerencia de forma independente.</p>
+              <h2 id="proprietarios-titulo" className="text-balance text-3xl font-extrabold leading-tight tracking-[-0.02em] text-(--white) md:text-4xl">Anuncie o imóvel. Alugue cada quarto do seu jeito.</h2>
+              <p className="mt-4 max-w-120 leading-relaxed text-(--white)/85">Um único anúncio para o imóvel, com quartos e suítes que você gerencia de forma independente.</p>
               <ul className="mt-8 flex flex-col gap-3.5">
                 {ownerBenefits.map((benefit) => (
-                  <li key={benefit} className="flex gap-3 text-white">
-                    <LuCircleCheck aria-hidden="true" size={20} className="mt-0.5 shrink-0 text-white/80" />
+                  <li key={benefit} className="flex gap-3 text-(--white)">
+                    <LuCircleCheck aria-hidden="true" size={20} className="mt-0.5 shrink-0 text-(--white)/80" />
                     <span className="leading-relaxed">{benefit}</span>
                   </li>
                 ))}
               </ul>
-              <Link href="/cadastro" className="mt-10 inline-flex items-center justify-center rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-(--blue) transition-colors hover:bg-(--white)">Anunciar meu espaço</Link>
+              <Link href="/cadastro" className="mt-10 inline-flex items-center justify-center rounded-xl bg-(--white) px-6 py-3.5 text-sm font-bold text-(--blue) transition-colors hover:bg-(--white)/90">Anunciar meu espaço</Link>
             </div>
           </div>
         </section>
 
         <section aria-labelledby="cta-titulo" className="mx-auto w-full max-w-360 px-6 pb-24 text-center md:px-10 lg:px-12">
-          <h2 id="cta-titulo" className="mx-auto max-w-xl text-balance text-3xl font-extrabold leading-tight tracking-[-0.02em] text-white md:text-4xl">Sua próxima estadia começa com uma conta.</h2>
+          <h2 id="cta-titulo" className="mx-auto max-w-xl text-balance text-3xl font-extrabold leading-tight tracking-[-0.02em] text-(--white) md:text-4xl">Sua próxima estadia começa com uma conta.</h2>
           <p className="mx-auto mt-4 max-w-120 leading-relaxed text-(--gray)">Cadastre-se com e-mail ou com sua conta Google.</p>
           <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
             <Link href="/cadastro" className={primaryAction}>Criar conta</Link>
@@ -194,16 +194,16 @@ export function PublicHome() {
 
 function PublicHeader() {
   return (
-    <header className="sticky top-0 z-20 border-b border-(--line) bg-[rgba(3,17,40,.85)] backdrop-blur">
+    <header className="sticky top-0 z-20 border-b border-(--line) bg-(--navy)/85 backdrop-blur-sm">
       <div className="mx-auto flex h-16 w-full max-w-360 items-center gap-6 px-6 md:h-18 md:px-10 lg:px-12">
         <BrandMark size="md" href="/" />
         <nav aria-label="Navegação principal" className="ml-auto hidden items-center gap-7 text-sm font-semibold text-(--gray) md:flex">
-          <a href="#como-funciona" className="transition-colors hover:text-white">Como funciona</a>
-          <a href="#proprietarios" className="transition-colors hover:text-white">Para proprietários</a>
+          <a href="#como-funciona" className="transition-colors hover:text-(--white)">Como funciona</a>
+          <a href="#proprietarios" className="transition-colors hover:text-(--white)">Para proprietários</a>
         </nav>
         <div className="ml-auto flex items-center gap-2 md:ml-0">
-          <Link href="/login" className="rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/5">Entrar</Link>
-          <Link href="/cadastro" className="hidden rounded-xl bg-(--blue) px-4.5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-(--blue-light) sm:inline-flex">Criar conta</Link>
+          <Link href="/login" className="rounded-xl px-4 py-2.5 text-sm font-semibold text-(--white) transition-colors hover:bg-(--white)/5">Entrar</Link>
+          <Link href="/cadastro" className="hidden rounded-xl bg-(--blue) px-4.5 py-2.5 text-sm font-bold text-(--white) transition-colors hover:bg-(--blue-light) sm:inline-flex">Criar conta</Link>
         </div>
       </div>
     </header>
@@ -212,24 +212,24 @@ function PublicHeader() {
 
 function PropertyPreview() {
   return (
-    <figure className="w-full max-w-120 justify-self-center overflow-hidden rounded-3xl border border-(--line-strong) bg-[rgba(15,31,57,.92)] shadow-[0_32px_80px_rgba(0,0,0,.45)] backdrop-blur lg:justify-self-end">
+    <figure className="w-full max-w-120 justify-self-center overflow-hidden rounded-3xl border border-(--line-strong) bg-(--surface)/92 shadow-[0_32px_80px_color-mix(in_srgb,var(--black)_45%,transparent)] backdrop-blur-sm lg:justify-self-end">
       <div className="relative h-40">
         <Image src="/rooms/room3.png" alt="Suíte de um imóvel de exemplo" fill sizes="(min-width: 1024px) 30rem, 100vw" className="object-cover" />
-        <span className="absolute left-3 top-3 rounded-full bg-[rgba(3,17,40,.75)] px-3 py-1 text-xs font-semibold text-white">Exemplo ilustrativo</span>
+        <span className="absolute left-3 top-3 rounded-full bg-(--navy)/75 px-3 py-1 text-xs font-semibold text-(--white)">Exemplo ilustrativo</span>
       </div>
       <div className="p-5">
-        <p className="text-lg font-bold text-white">Casa Jardim · 3 quartos</p>
+        <p className="text-lg font-bold text-(--white)">Casa Jardim · 3 quartos</p>
         <p className="mt-1 flex items-center gap-1.5 text-sm text-(--gray)"><LuMapPin aria-hidden="true" size={14} />Asa Sul, Brasília · região aproximada</p>
         <ul className="mt-5 flex flex-col divide-y divide-(--line)">
           {sampleRooms.map((room, index) => (
             <li key={room.name} className={`public-home-room flex items-center gap-3 py-3.5 public-home-room-${index + 1}`}>
               <div className="min-w-0 flex-1">
-                <p className="font-semibold text-white">{room.name}</p>
+                <p className="font-semibold text-(--white)">{room.name}</p>
                 <p className="truncate text-sm text-(--gray)">{room.details}</p>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1.5">
                 <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${statusStyles[room.status]}`}>{room.statusLabel}</span>
-                <span className="text-sm text-(--gray)"><strong className="font-bold text-white tabular-nums">{room.price}</strong> / diária</span>
+                <span className="text-sm text-(--gray)"><strong className="font-bold text-(--white) tabular-nums">{room.price}</strong> / diária</span>
               </div>
             </li>
           ))}
@@ -243,12 +243,12 @@ function PropertyPreview() {
 function SearchDemo() {
   return (
     <div>
-      <div className="flex items-center gap-2 rounded-xl bg-white px-3.5 py-3 text-sm font-semibold text-[#3a4a63]">
+      <div className="flex items-center gap-2 rounded-xl bg-(--white) px-3.5 py-3 text-sm font-semibold text-(--ink-muted)">
         <LuSearch size={16} className="text-(--blue)" />Brasília, DF
       </div>
       <div className="mt-3 flex flex-wrap gap-2">
         {["12–14 out", "Suíte", "Até R$ 200", "Banheiro privativo"].map((filter) => (
-          <span key={filter} className="rounded-full border border-(--line-strong) px-3 py-1.5 text-xs font-semibold text-white">{filter}</span>
+          <span key={filter} className="rounded-full border border-(--line-strong) px-3 py-1.5 text-xs font-semibold text-(--white)">{filter}</span>
         ))}
       </div>
     </div>
@@ -269,14 +269,14 @@ function CalendarDemo() {
           <span className="w-16 shrink-0 text-xs font-semibold text-(--gray)">{room}</span>
           <div className="grid flex-1 grid-cols-7 gap-1">
             {days.map((free, day) => (
-              <span key={day} className={`h-6 rounded-md ${free ? "bg-[rgba(47,191,135,.35)]" : "bg-white/6"}`} />
+              <span key={day} className={`h-6 rounded-md ${free ? "bg-(--success)/35" : "bg-(--white)/6"}`} />
             ))}
           </div>
         </div>
       ))}
       <div className="mt-1 flex gap-4 text-xs text-(--gray)">
-        <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-sm bg-[rgba(47,191,135,.35)]" />Livre</span>
-        <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-sm bg-white/6" />Ocupado</span>
+        <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-sm bg-(--success)/35" />Livre</span>
+        <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-sm bg-(--white)/6" />Ocupado</span>
       </div>
     </div>
   );
@@ -293,10 +293,10 @@ function ReservationDemo() {
     <ul className="flex flex-col gap-3">
       {stages.map(({ label, done }) => (
         <li key={label} className="flex items-center gap-3 text-sm font-semibold">
-          <span className={`flex size-6 items-center justify-center rounded-full ${done ? "bg-(--blue) text-white" : "border border-dashed border-(--line-strong)"}`}>
+          <span className={`flex size-6 items-center justify-center rounded-full ${done ? "bg-(--blue) text-(--white)" : "border border-dashed border-(--line-strong)"}`}>
             {done ? <LuCircleCheck size={14} /> : null}
           </span>
-          <span className={done ? "text-white" : "text-(--gray)"}>{label}</span>
+          <span className={done ? "text-(--white)" : "text-(--gray)"}>{label}</span>
         </li>
       ))}
     </ul>
@@ -306,9 +306,9 @@ function ReservationDemo() {
 function PaymentDemo() {
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-3 rounded-xl bg-white/4 px-3.5 py-3 text-sm">
+      <div className="flex items-center justify-between gap-3 rounded-xl bg-(--white)/4 px-3.5 py-3 text-sm">
         <span className="text-(--gray)">Suíte 1 · 2 diárias</span>
-        <strong className="font-bold text-white tabular-nums">R$ 300</strong>
+        <strong className="font-bold text-(--white) tabular-nums">R$ 300</strong>
       </div>
       <div className="flex items-center gap-2 text-sm font-semibold text-(--success)">
         <LuCircleCheck size={18} />Pagamento confirmado · reserva confirmada
@@ -321,8 +321,8 @@ function RenewalDemo() {
   return (
     <div>
       <p className="text-sm text-(--gray)">Próxima diária da Suíte 1</p>
-      <p className="mt-1 text-lg font-bold text-white">Confirme até <span className="tabular-nums">12:00</span></p>
-      <span className="mt-4 flex items-center justify-center rounded-xl bg-(--blue) px-4 py-3 text-sm font-bold text-white">Renovar diária</span>
+      <p className="mt-1 text-lg font-bold text-(--white)">Confirme até <span className="tabular-nums">12:00</span></p>
+      <span className="mt-4 flex items-center justify-center rounded-xl bg-(--blue) px-4 py-3 text-sm font-bold text-(--white)">Renovar diária</span>
     </div>
   );
 }

@@ -28,7 +28,7 @@ export function Switch({
       />
       <span
         aria-hidden="true"
-        className="relative h-6 w-11 shrink-0 rounded-full bg-(--surface-raised) ring-1 ring-(--line-strong) transition-colors peer-checked:bg-(--blue) after:absolute after:left-0.5 after:top-0.5 after:size-5 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-5"
+        className="relative h-6 w-11 shrink-0 rounded-full bg-(--surface-raised) ring-1 ring-(--line-strong) transition-colors peer-checked:bg-(--blue) after:absolute after:left-0.5 after:top-0.5 after:size-5 after:rounded-full after:bg-(--white) after:transition-transform peer-checked:after:translate-x-5"
       />
     </label>
   );

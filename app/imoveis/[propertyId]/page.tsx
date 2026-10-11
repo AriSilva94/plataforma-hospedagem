@@ -26,7 +26,7 @@ import { getApiData } from "@/lib/server-api";
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="border-t border-(--line) py-8">
-      <h2 className="text-lg font-bold text-white">{title}</h2>
+      <h2 className="text-lg font-bold text-(--white)">{title}</h2>
       <div className="mt-4 text-sm leading-relaxed text-(--gray)">{children}</div>
     </section>
   );
@@ -77,7 +77,7 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
         <div className="sticky top-16 z-10 border-b border-(--line-strong) bg-(--surface-raised) px-4 py-3 sm:px-6 md:top-18">
           <p className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 text-sm text-(--gray)">
             <span>Prévia: é assim que os hóspedes veem este anúncio.</span>
-            <Link href={`/meus-imoveis/${property.id}`} className="font-semibold text-white underline underline-offset-4 hover:text-(--blue-light)">
+            <Link href={`/meus-imoveis/${property.id}`} className="font-semibold text-(--white) underline underline-offset-4 hover:text-(--blue-light)">
               Voltar ao gerenciamento
             </Link>
           </p>
@@ -85,7 +85,7 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
       ) : null}
       <main className="px-4 pt-6 pb-28 sm:px-6 md:pt-10 md:pb-16">
         <div className="mx-auto max-w-5xl">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-(--gray) transition-colors hover:text-white">
+          <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-(--gray) transition-colors hover:text-(--white)">
             <LuArrowLeft aria-hidden="true" size={16} /> Início
           </Link>
 
@@ -93,14 +93,14 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
 
           <header className="py-8">
             <p className="text-sm font-semibold text-(--blue-light)">{propertyTypeLabels[property.type]}</p>
-            <h1 className="mt-1 wrap-break-word text-3xl font-extrabold tracking-tight text-white">{property.title}</h1>
+            <h1 className="mt-1 wrap-break-word text-3xl font-extrabold tracking-tight text-(--white)">{property.title}</h1>
             <p className="mt-3 flex items-center gap-2 text-sm text-(--gray)">
               <LuMapPin aria-hidden="true" size={16} className="shrink-0" /> {formatLocation(property)}
             </p>
             {lowestPrice !== undefined ? (
               <a
                 href="#quartos"
-                className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-(--line-strong) bg-(--surface) px-4 text-sm text-white transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
+                className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-(--line-strong) bg-(--surface) px-4 text-sm text-(--white) transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
               >
                 <span className="font-semibold">{roomCount}</span>
                 <span className="text-(--gray)">· a partir de</span>
@@ -112,7 +112,7 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
           </header>
 
           <section id="quartos" aria-labelledby="rooms-title" className="scroll-mt-24 border-t border-(--line) py-8">
-            <h2 id="rooms-title" className="text-2xl font-extrabold tracking-tight text-white">Quartos disponíveis</h2>
+            <h2 id="rooms-title" className="text-2xl font-extrabold tracking-tight text-(--white)">Quartos disponíveis</h2>
             <p className="mt-1 text-sm text-(--gray)">Cada quarto tem preço e disponibilidade próprios.</p>
             <ul className="mt-5 flex flex-col gap-5">
               {property.rooms.map((room, roomIndex) => {
@@ -128,8 +128,8 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
                     <RoomCover title={room.title} photos={roomPhotos} eager={roomIndex === 0} className="aspect-4/3 md:aspect-auto md:min-h-56" />
                     <div className="flex flex-col gap-3 p-5">
                       <div className="flex flex-wrap items-start justify-between gap-3">
-                        <h3 className="wrap-break-word text-lg font-bold text-white">{room.title}</h3>
-                        <p className="text-lg font-extrabold text-white">
+                        <h3 className="wrap-break-word text-lg font-bold text-(--white)">{room.title}</h3>
+                        <p className="text-lg font-extrabold text-(--white)">
                           {formatCents(room.priceCents)} <span className="text-sm font-semibold text-(--gray)">/ diária</span>
                         </p>
                       </div>
@@ -178,7 +178,7 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
               <ul className="grid gap-3 sm:grid-cols-2">
                 {property.sharedAreas.map((area, index) => (
                   <li key={`${area.type}-${index}`} className="rounded-xl border border-(--line) bg-(--surface) p-4">
-                    <p className="font-semibold text-white">{area.label ?? sharedAreaTypeLabels[area.type]}</p>
+                    <p className="font-semibold text-(--white)">{area.label ?? sharedAreaTypeLabels[area.type]}</p>
                     {area.description ? <p className="mt-1">{area.description}</p> : null}
                   </li>
                 ))}
@@ -209,7 +209,7 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
           ) : null}
 
           <Section title="Localização">
-            <p className="flex items-center gap-2 text-white">
+            <p className="flex items-center gap-2 text-(--white)">
               <LuMapPin aria-hidden="true" size={16} className="shrink-0" /> {formatLocation(property)}
             </p>
             {property.referencePoints.length > 0 ? (

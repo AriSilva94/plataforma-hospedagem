@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { LuPlus, LuTrash2 } from "react-icons/lu";
+import { Combobox } from "@/components/combobox";
 import { FormActions, FormStatus } from "@/components/owner/form-actions";
 import { UnsavedChangesGuard } from "@/components/owner/unsaved-changes-guard";
 import { optionsFrom } from "@/components/owner/choice-group";
-import { FieldError } from "@/components/owner/field-error";
+import { FieldError } from "@/components/field-error";
 import {
   cardClassName,
   fieldClassName,
@@ -19,6 +20,8 @@ import {
 import { sendApiRequest, toErrorMessage } from "@/lib/api";
 import { sharedAreasSchema, type SharedAreasValues } from "@/lib/owner-forms";
 import { sharedAreaTypeLabels, type PropertyDetail } from "@/lib/properties";
+
+const sharedAreaTypeOptions = optionsFrom(sharedAreaTypeLabels);
 
 export function SharedAreasForm({ property }: { property: PropertyDetail }) {
   const router = useRouter();
@@ -71,12 +74,29 @@ export function SharedAreasForm({ property }: { property: PropertyDetail }) {
             return (
               <li key={field.id} className={`${cardClassName} grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:items-start`}>
                 <div>
-                  <label htmlFor={`area-${index}-type`} className={labelClassName}>Área</label>
-                  <select id={`area-${index}-type`} {...register(`areas.${index}.type`)} className={fieldClassName}>
-                    {optionsFrom(sharedAreaTypeLabels).map((option) => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                  </select>
+                  <label id={`area-${index}-type-label`} htmlFor={`area-${index}-type`} className={labelClassName}>Área</label>
+                  <div className="mt-1.5">
+                    <Controller
+                      control={control}
+                      name={`areas.${index}.type`}
+                      render={({ field: typeField }) => (
+                        <Combobox
+                          ref={typeField.ref}
+                          id={`area-${index}-type`}
+                          labelId={`area-${index}-type-label`}
+                          value={typeField.value}
+                          options={sharedAreaTypeOptions}
+                          onChange={typeField.onChange}
+                          onBlur={typeField.onBlur}
+                          placeholder="Selecione"
+                          searchLabel="Buscar área"
+                          emptyMessage="Nenhuma área encontrada."
+                          clearable={false}
+                          size="compact"
+                        />
+                      )}
+                    />
+                  </div>
                   {areas[index]?.type === "OTHER" ? (
                     <>
                       <label htmlFor={`area-${index}-label`} className={`${labelClassName} mt-4`}>Nome da área</label>

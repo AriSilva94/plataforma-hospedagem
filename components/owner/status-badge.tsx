@@ -1,6 +1,6 @@
 const tones = {
-  success: "border-[rgba(47,191,135,.38)] bg-[rgba(47,191,135,.1)] text-(--success)",
-  warning: "border-[rgba(232,177,58,.38)] bg-[rgba(232,177,58,.1)] text-(--warning)",
+  success: "border-(--success)/38 bg-(--success)/10 text-(--success)",
+  warning: "border-(--warning)/38 bg-(--warning)/10 text-(--warning)",
   neutral: "border-(--line-strong) bg-(--surface-raised) text-(--gray)",
 } as const;
 

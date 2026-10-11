@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LuExternalLink } from "react-icons/lu";
-import { AdminFilters, AdminSelect } from "@/components/admin/admin-filters";
+import { AdminFilters } from "@/components/admin/admin-filters";
+import { AdminSelect } from "@/components/admin/admin-select";
 import { AdminList, AdminPagination } from "@/components/admin/admin-list";
 import { ListedIndicator } from "@/components/admin/listed-indicator";
 import { OwnerPage } from "@/components/owner/owner-page";
@@ -36,7 +37,7 @@ export default async function AdminPropertiesPage({ searchParams }: PageProps<"/
           <li key={property.id} className={`${cardClassName} flex flex-col gap-4 md:flex-row md:items-center md:justify-between`}>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="wrap-break-word font-bold text-white">{property.title}</h2>
+                <h2 className="wrap-break-word font-bold text-(--white)">{property.title}</h2>
                 <PropertyStatusBadge status={property.status} />
               </div>
               <p className="mt-1 text-sm text-(--gray)">{[propertyTypeLabels[property.type], formatPlace(property)].filter(Boolean).join(" · ")}</p>

@@ -9,7 +9,7 @@ export type ViewerPhoto = { id: string; url: string; alt: string };
 const SWIPE_THRESHOLD = 50;
 
 const navButtonClassName =
-  "absolute top-1/2 flex size-12 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)";
+  "absolute top-1/2 flex size-12 -translate-y-1/2 items-center justify-center rounded-full bg-(--black)/60 text-(--white) transition-colors hover:bg-(--black)/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)";
 
 export function PhotoViewer({
   title,
@@ -53,7 +53,7 @@ export function PhotoViewer({
         if (event.key === "ArrowLeft") go(-1);
         if (event.key === "ArrowRight") go(1);
       }}
-      className="m-0 h-dvh max-h-none w-screen max-w-none bg-black/95 p-0 text-white backdrop:bg-black/80"
+      className="m-0 h-dvh max-h-none w-screen max-w-none bg-(--black)/95 p-0 text-(--white) backdrop:bg-(--black)/80"
     >
       {photo && index !== null ? (
         <div className="flex h-full flex-col">
@@ -66,7 +66,7 @@ export function PhotoViewer({
               autoFocus
               aria-label="Fechar fotos"
               onClick={onClose}
-              className="flex size-11 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
+              className="flex size-11 items-center justify-center rounded-full text-(--white) transition-colors hover:bg-(--white)/10 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
             >
               <LuX aria-hidden="true" size={22} />
             </button>
