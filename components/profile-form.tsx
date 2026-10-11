@@ -22,7 +22,7 @@ import { ChangePasswordForm } from "@/components/change-password-form";
 import { DatePicker } from "@/components/date-picker";
 import { DeactivateAccount } from "@/components/deactivate-account";
 import { GuestIdentityForm } from "@/components/guest-identity-form";
-import { IconInput } from "@/components/icon-input";
+import { IconInput, fieldLabelClassName } from "@/components/icon-input";
 import { FieldError } from "@/components/field-error";
 import { ProfileLocationFields } from "@/components/profile-location-fields";
 import { isAdmin } from "@/lib/admin";
@@ -31,7 +31,6 @@ import { earliestBirthDate, latestAdultBirthDate, profileSchema, type ProfileFor
 import { brazilianStates } from "@/lib/properties";
 import { CurrentUser, formatPhone, parseCurrentUser } from "@/lib/user";
 
-const fieldLabelClassName = "mb-2 block text-sm font-semibold text-(--gray)";
 const secondaryDisabledButtonClassName =
   "rounded-xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-(--gray) disabled:cursor-not-allowed";
 

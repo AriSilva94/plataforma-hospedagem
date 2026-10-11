@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { LuLockKeyhole } from "react-icons/lu";
 import { FieldError } from "@/components/field-error";
 import { FormFeedback } from "@/components/form-feedback";
-import { IconInput } from "@/components/icon-input";
+import { IconInput, fieldLabelClassName } from "@/components/icon-input";
 import { Modal } from "@/components/owner/modal";
 import { dangerButtonClassName, secondaryButtonClassName } from "@/components/owner/styles";
 import { sendApiRequest, toErrorMessage } from "@/lib/api";
@@ -58,7 +58,7 @@ export function DeactivateAccount({ hasPassword }: { hasPassword: boolean }) {
         <form noValidate onSubmit={handleSubmit(deactivate)} className="flex flex-col gap-5">
           {hasPassword ? (
             <div>
-              <label htmlFor="deactivate-current-password" className="mb-2 block text-sm font-semibold text-(--gray)">
+              <label htmlFor="deactivate-current-password" className={fieldLabelClassName}>
                 Confirme com sua senha
               </label>
               <IconInput

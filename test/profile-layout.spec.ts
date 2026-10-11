@@ -1,4 +1,4 @@
-import { createServer, type Server } from "node:http";
+import { createServer, type IncomingMessage, type Server } from "node:http";
 import { expect, test } from "@playwright/test";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3030";
@@ -55,6 +55,12 @@ const initialUser = {
 };
 let user = initialUser;
 
+async function readBody(request: IncomingMessage): Promise<unknown> {
+  const chunks: Uint8Array[] = [];
+  for await (const chunk of request) chunks.push(chunk);
+  return JSON.parse(Buffer.concat(chunks).toString());
+}
+
 test.beforeAll(async () => {
   server = createServer(async (request, response) => {
     response.setHeader("Access-Control-Allow-Origin", "http://localhost:3001");
@@ -78,9 +84,7 @@ test.beforeAll(async () => {
     }
 
     if (request.url === "/users/me" && request.method === "PATCH") {
-      const chunks: Uint8Array[] = [];
-      for await (const chunk of request) chunks.push(chunk);
-      const body = JSON.parse(Buffer.concat(chunks).toString()) as {
+      const body = (await readBody(request)) as {
         name: string;
         phone: string | null;
         birthDate: string | null;
@@ -106,9 +110,7 @@ test.beforeAll(async () => {
     }
 
     if ((request.url === "/auth/change-password" || request.url === "/auth/deactivate-account") && request.method === "POST") {
-      const chunks: Uint8Array[] = [];
-      for await (const chunk of request) chunks.push(chunk);
-      const body = JSON.parse(Buffer.concat(chunks).toString()) as { currentPassword?: string };
+      const body = (await readBody(request)) as { currentPassword?: string };
       accountRequests.push({ url: request.url, body });
       if (body.currentPassword !== currentPassword) {
         response.writeHead(400).end(JSON.stringify({ message: "Senha atual incorreta." }));
@@ -146,17 +148,13 @@ test.beforeAll(async () => {
     }
 
     if (request.url?.startsWith("/owner/properties") && request.method !== "GET") {
-      const chunks: Uint8Array[] = [];
-      for await (const chunk of request) chunks.push(chunk);
-      ownerRequests.push({ method: request.method ?? "", url: request.url, body: JSON.parse(Buffer.concat(chunks).toString()) });
+      ownerRequests.push({ method: request.method ?? "", url: request.url, body: await readBody(request) });
       response.writeHead(200).end(JSON.stringify(ownerProperty));
       return;
     }
 
     if (request.url === "/users/me/profiles/guest" && request.method === "PATCH") {
-      const chunks: Uint8Array[] = [];
-      for await (const chunk of request) chunks.push(chunk);
-      submittedIdentity = JSON.parse(Buffer.concat(chunks).toString());
+      submittedIdentity = await readBody(request);
       response.writeHead(200).end(JSON.stringify({ ...user, guestProfile: submittedIdentity }));
       return;
     }

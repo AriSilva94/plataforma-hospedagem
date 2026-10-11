@@ -7,12 +7,10 @@ import { useForm } from "react-hook-form";
 import { LuLockKeyhole } from "react-icons/lu";
 import { FieldError } from "@/components/field-error";
 import { FormFeedback } from "@/components/form-feedback";
-import { IconInput } from "@/components/icon-input";
+import { IconInput, fieldLabelClassName } from "@/components/icon-input";
 import { primaryButtonClassName, secondaryButtonClassName } from "@/components/owner/styles";
 import { sendApiRequest, toErrorMessage } from "@/lib/api";
 import { changePasswordSchema, type ChangePasswordFormValues } from "@/lib/auth-form-schema";
-
-const labelClassName = "mb-2 block text-sm font-semibold text-(--gray)";
 
 const fields = [
   { name: "currentPassword", label: "Senha atual", autoComplete: "current-password" },
@@ -97,7 +95,7 @@ export function ChangePasswordForm({ hasPassword }: { hasPassword: boolean }) {
 
           return (
             <div key={field.name}>
-              <label htmlFor={inputId} className={labelClassName}>{field.label}</label>
+              <label htmlFor={inputId} className={fieldLabelClassName}>{field.label}</label>
               <IconInput
                 {...register(field.name)}
                 icon={LuLockKeyhole}
