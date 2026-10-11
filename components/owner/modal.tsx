@@ -40,7 +40,7 @@ export function Modal({
       onClick={(event) => {
         if (event.target === event.currentTarget && dismissible) onClose();
       }}
-      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-(--line-strong) bg-(--surface) p-0 text-white backdrop:bg-black/70"
+      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-(--line-strong) bg-(--surface) p-0 text-(--white) backdrop:bg-(--black)/70"
     >
       <div className="flex flex-col gap-5 p-6">
         <div>

@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { flushSync } from "react-dom";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
+import { Combobox } from "@/components/combobox";
 import Link from "next/link";
-import { LuArrowLeft, LuEyeOff, LuMapPin } from "react-icons/lu";
+import { LuArrowLeft, LuEyeOff, LuLoaderCircle, LuMapPin } from "react-icons/lu";
 import { FormActions, FormStatus } from "@/components/owner/form-actions";
 import { UnsavedChangesGuard } from "@/components/owner/unsaved-changes-guard";
-import { FieldError } from "@/components/owner/field-error";
+import { FieldError } from "@/components/field-error";
 import { OptionalTag } from "@/components/owner/field-hint";
 import { fieldClassName, labelClassName, primaryButtonClassName, secondaryButtonClassName } from "@/components/owner/styles";
 import {
@@ -18,7 +20,7 @@ import {
   type PropertyLocationValues,
 } from "@/lib/owner-forms";
 import { sendApiRequest, toErrorMessage } from "@/lib/api";
-import { brazilianStates, postalCodeAddressSchema, type PropertyDetail } from "@/lib/properties";
+import { brazilianStateOptions, brazilianStates, postalCodeAddressSchema, type PropertyDetail } from "@/lib/properties";
 
 type TextField = Exclude<keyof PropertyLocationInput, "state" | "referencePoints">;
 
@@ -26,20 +28,26 @@ const addressFields: { name: TextField; label: string; placeholder: string; auto
   { name: "postalCode", label: "CEP", placeholder: "00000-000", autoComplete: "postal-code", className: "col-span-3" },
   { name: "street", label: "Rua / avenida", placeholder: "Ex.: Rua das Flores", autoComplete: "address-line1", className: "col-span-6 sm:col-span-7" },
   { name: "number", label: "Número", placeholder: "Ex.: 120", autoComplete: "off", className: "col-span-2" },
-  { name: "complement", label: "Complemento", placeholder: "Ex.: casa dos fundos, bloco B", autoComplete: "address-line2", className: "col-span-4" },
-  { name: "neighborhood", label: "Bairro", placeholder: "Ex.: Centro", autoComplete: "address-level3", className: "col-span-6 sm:col-span-4" },
-  { name: "city", label: "Cidade", placeholder: "Ex.: São Paulo", autoComplete: "address-level2", className: "col-span-4 sm:col-span-3" },
+  { name: "complement", label: "Complemento", placeholder: "Ex.: casa dos fundos, bloco B", autoComplete: "address-line2", className: "col-span-4 sm:col-span-3" },
+  { name: "neighborhood", label: "Bairro", placeholder: "Ex.: Centro", autoComplete: "address-level3", className: "col-span-6 sm:col-span-3" },
+  { name: "city", label: "Cidade", placeholder: "Ex.: São Paulo", autoComplete: "address-level2", className: "col-span-3" },
 ];
+
+function formatPostalCode(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 8);
+  return digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
+}
 
 export function PropertyLocationForm({ property, guided }: { property: PropertyDetail; guided?: { nextHref: string; previousHref?: string } }) {
   const router = useRouter();
   const [error, setError] = useState<string>();
   const [message, setMessage] = useState<string>();
-  const [postalCodeStatus, setPostalCodeStatus] = useState<{ tone: "info" | "error"; text: string }>();
-  const { register, handleSubmit, setValue, getValues, reset, setFocus, formState } = useForm<PropertyLocationInput, unknown, PropertyLocationValues>({
+  const [isLookingUpPostalCode, setIsLookingUpPostalCode] = useState(false);
+  const [postalCodeError, setPostalCodeError] = useState<string>();
+  const { register, control, handleSubmit, setValue, getValues, reset, setFocus, formState } = useForm<PropertyLocationInput, unknown, PropertyLocationValues>({
     resolver: zodResolver(guided ? propertyGuidedLocationSchema : propertyLocationSchema),
     defaultValues: {
-      postalCode: property.postalCode ?? "",
+      postalCode: formatPostalCode(property.postalCode ?? ""),
       street: property.street ?? "",
       number: property.number ?? "",
       complement: property.complement ?? "",
@@ -57,7 +65,8 @@ export function PropertyLocationForm({ property, guided }: { property: PropertyD
   }
 
   async function lookupPostalCode(digits: string) {
-    setPostalCodeStatus({ tone: "info", text: "Buscando endereço..." });
+    setPostalCodeError(undefined);
+    setIsLookingUpPostalCode(true);
     try {
       const address = postalCodeAddressSchema.parse(await sendApiRequest(`/owner/postal-codes/${digits}`, { method: "GET" }));
       if (isOutdated(digits)) return;
@@ -67,21 +76,25 @@ export function PropertyLocationForm({ property, guided }: { property: PropertyD
       }
       const state = brazilianStates.find((item) => item === address.state);
       if (state) setValue("state", state, { shouldValidate: true, shouldDirty: true });
-      setPostalCodeStatus(undefined);
+      flushSync(() => setIsLookingUpPostalCode(false));
       setFocus(address.street ? "number" : "street");
     } catch (lookupError) {
-      if (!isOutdated(digits)) setPostalCodeStatus({ tone: "error", text: toErrorMessage(lookupError) });
+      if (isOutdated(digits)) return;
+      setIsLookingUpPostalCode(false);
+      setPostalCodeError(toErrorMessage(lookupError));
     }
   }
 
   function handlePostalCodeChange(rawValue: string) {
-    const digits = rawValue.replace(/\D/g, "").slice(0, 8);
-    setValue("postalCode", digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits);
+    const formatted = formatPostalCode(rawValue);
+    const digits = formatted.replace("-", "");
+    setValue("postalCode", formatted);
     if (digits.length === 8) {
       void lookupPostalCode(digits);
       return;
     }
-    setPostalCodeStatus(undefined);
+    setIsLookingUpPostalCode(false);
+    setPostalCodeError(undefined);
   }
 
   async function save(values: PropertyLocationValues) {
@@ -107,7 +120,7 @@ export function PropertyLocationForm({ property, guided }: { property: PropertyD
         <div className="flex items-start gap-3">
           <LuEyeOff aria-hidden="true" size={20} className="mt-0.5 shrink-0 text-(--blue-light)" />
           <div>
-            <h2 id="private-address-heading" className="text-lg font-bold text-white">Endereço completo</h2>
+            <h2 id="private-address-heading" className="text-lg font-bold text-(--white)">Endereço completo</h2>
             <p className="mt-1 text-sm leading-relaxed text-(--gray)">
               Informação privada. Não é exibida no anúncio público.
             </p>
@@ -120,42 +133,60 @@ export function PropertyLocationForm({ property, guided }: { property: PropertyD
                 {field.label}
                 {field.name === "complement" ? <OptionalTag /> : null}
               </label>
-              <input
-                id={`location-${field.name}`}
-                {...register(field.name, field.name === "postalCode" ? { onChange: (event) => handlePostalCodeChange(event.target.value) } : undefined)}
-                autoComplete={field.autoComplete}
-                placeholder={field.placeholder}
-                inputMode={field.name === "postalCode" || field.name === "number" ? "numeric" : undefined}
-                aria-invalid={errors[field.name] ? "true" : undefined}
-                aria-describedby={errors[field.name] ? `location-${field.name}-error` : undefined}
-                className={fieldClassName}
-              />
-              {field.name === "postalCode" && postalCodeStatus ? (
-                <p
-                  role={postalCodeStatus.tone === "error" ? "alert" : "status"}
-                  className={`mt-2 text-xs leading-relaxed ${postalCodeStatus.tone === "error" ? "text-(--warning)" : "text-(--gray)"}`}
-                >
-                  {postalCodeStatus.text}
+              <div className="relative">
+                <input
+                  id={`location-${field.name}`}
+                  {...register(field.name, field.name === "postalCode" ? { onChange: (event) => handlePostalCodeChange(event.target.value) } : undefined)}
+                  autoComplete={field.autoComplete}
+                  placeholder={field.placeholder}
+                  inputMode={field.name === "postalCode" || field.name === "number" ? "numeric" : undefined}
+                  disabled={field.name !== "postalCode" && isLookingUpPostalCode}
+                  aria-invalid={errors[field.name] ? "true" : undefined}
+                  aria-describedby={errors[field.name] ? `location-${field.name}-error` : undefined}
+                  className={field.name === "postalCode" ? `${fieldClassName} pr-10` : fieldClassName}
+                />
+                {field.name === "postalCode" && isLookingUpPostalCode ? (
+                  <span role="status" className="pointer-events-none absolute top-1.5 right-3 bottom-0 flex items-center text-(--blue-light)">
+                    <LuLoaderCircle aria-hidden="true" size={18} className="animate-spin motion-reduce:animate-none" />
+                    <span className="sr-only">Buscando endereço...</span>
+                  </span>
+                ) : null}
+              </div>
+              {field.name === "postalCode" && postalCodeError ? (
+                <p role="alert" className="mt-2 text-xs leading-relaxed text-(--warning)">
+                  {postalCodeError}
                 </p>
               ) : null}
               <FieldError id={`location-${field.name}-error`} message={errors[field.name]?.message} />
             </div>
           ))}
-          <div className="col-span-2 sm:col-span-1">
-            <label htmlFor="location-state" className={labelClassName}>UF</label>
-            <select
-              id="location-state"
-              {...register("state")}
-              autoComplete="address-level1"
-              aria-invalid={errors.state ? "true" : undefined}
-              aria-describedby={errors.state ? "location-state-error" : undefined}
-              className={fieldClassName}
-            >
-              <option value="">UF</option>
-              {brazilianStates.map((state) => (
-                <option key={state} value={state}>{state}</option>
-              ))}
-            </select>
+          <div className="col-span-3">
+            <label id="location-state-label" htmlFor="location-state" className={labelClassName}>UF</label>
+            <div className="mt-1.5">
+              <Controller
+                control={control}
+                name="state"
+                render={({ field }) => (
+                  <Combobox
+                    ref={field.ref}
+                    id="location-state"
+                    labelId="location-state-label"
+                    value={field.value}
+                    options={brazilianStateOptions}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    placeholder="Selecione"
+                    searchLabel="Buscar estado"
+                    emptyMessage="Nenhum estado encontrado."
+                    size="compact"
+                    align="end"
+                    disabled={isLookingUpPostalCode}
+                    invalid={Boolean(errors.state)}
+                    describedBy={errors.state ? "location-state-error" : undefined}
+                  />
+                )}
+              />
+            </div>
             <FieldError id="location-state-error" message={errors.state?.message} />
           </div>
         </div>
@@ -165,7 +196,7 @@ export function PropertyLocationForm({ property, guided }: { property: PropertyD
         <div className="flex items-start gap-3">
           <LuMapPin aria-hidden="true" size={20} className="mt-0.5 shrink-0 text-(--blue-light)" />
           <div>
-            <h2 id="public-location-heading" className="text-lg font-bold text-white">Localização aproximada</h2>
+            <h2 id="public-location-heading" className="text-lg font-bold text-(--white)">Localização aproximada</h2>
             <p className="mt-1 text-sm leading-relaxed text-(--gray)">
               No anúncio público aparecerão apenas bairro, cidade, UF e os pontos de referência abaixo.
             </p>

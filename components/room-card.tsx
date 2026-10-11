@@ -13,7 +13,7 @@ export function RoomCard({ room, action, unavailable = false }: { room: PublicRo
             src={room.coverUrl}
             alt=""
             fill
-            className={`object-cover transition-transform duration-300 ${unavailable ? "opacity-50 grayscale" : "group-hover:scale-[1.03]"}`}
+            className={`object-cover transition-transform duration-300 ${unavailable ? "opacity-50 grayscale" : "group-hover:scale-103"}`}
             sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
           />
         ) : (
@@ -22,17 +22,17 @@ export function RoomCard({ room, action, unavailable = false }: { room: PublicRo
           </div>
         )}
         {unavailable ? (
-          <span className="absolute left-2.5 top-2.5 inline-flex items-center rounded-full bg-[rgba(3,17,40,.85)] px-2.5 py-1 text-[11px] font-bold text-white">
+          <span className="absolute left-2.5 top-2.5 inline-flex items-center rounded-full bg-(--navy)/85 px-2.5 py-1 text-[11px] font-bold text-(--white)">
             Indisponível no momento
           </span>
         ) : room.featured ? (
-          <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-[rgba(3,17,40,.7)] px-2.5 py-1 text-[11px] font-bold text-white">
+          <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-(--navy)/70 px-2.5 py-1 text-[11px] font-bold text-(--white)">
             <LuStar aria-hidden="true" size={12} className="text-(--warning)" fill="currentColor" /> Destaque
           </span>
         ) : null}
       </div>
       <div className="p-4">
-        <h3 className="wrap-break-word text-sm font-bold text-white">{room.title}</h3>
+        <h3 className="wrap-break-word text-sm font-bold text-(--white)">{room.title}</h3>
         <p className="mt-1 wrap-break-word text-xs text-(--gray)">
           {room.property.title} · {propertyTypeLabels[room.property.type]}
         </p>

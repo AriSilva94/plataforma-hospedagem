@@ -51,7 +51,7 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
 
   return (
     <>
-      <header className="sticky top-0 z-20 border-b border-(--line) bg-[rgba(3,17,40,.85)] backdrop-blur">
+      <header className="sticky top-0 z-20 border-b border-(--line) bg-(--navy)/85 backdrop-blur-sm">
         <div className="grid h-16 grid-cols-[40px_1fr_40px] items-center px-4 md:hidden">
           <button
             type="button"
@@ -59,7 +59,7 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
             aria-expanded={mobileMenuOpen}
             aria-controls="mobile-menu"
             onClick={() => setMobileMenuOpen(true)}
-            className="flex size-10 items-center justify-center rounded-xl text-white transition-colors hover:bg-white/5"
+            className="flex size-10 items-center justify-center rounded-xl text-(--white) transition-colors hover:bg-(--white)/5"
           >
             <LuMenu aria-hidden="true" size={21} />
           </button>
@@ -69,7 +69,7 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
           <span
             role="img"
             aria-label="Notificações indisponíveis"
-            className="flex size-10 items-center justify-center justify-self-end rounded-xl text-white/85"
+            className="flex size-10 items-center justify-center justify-self-end rounded-xl text-(--white)/85"
           >
             <LuBell aria-hidden="true" size={19} />
           </span>
@@ -88,7 +88,7 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
           <div className="flex items-center gap-3">
             <Link
               href="/meus-imoveis"
-              className="hidden rounded-xl border border-[rgba(11,99,227,.4)] bg-[rgba(11,99,227,.14)] px-3 py-2.5 text-[13px] font-semibold text-(--blue-light) transition-colors hover:bg-[rgba(11,99,227,.24)] md:block lg:px-4.5"
+              className="hidden rounded-xl border border-(--blue)/40 bg-(--blue)/14 px-3 py-2.5 text-[13px] font-semibold text-(--blue-light) transition-colors hover:bg-(--blue)/24 md:block lg:px-4.5"
             >
               Seja um anfitrião
             </Link>
@@ -100,7 +100,7 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
                   aria-expanded={profileMenuOpen}
                   aria-controls="profile-menu"
                   onClick={() => setProfileMenuOpen((open) => !open)}
-                  className="flex size-10 items-center justify-center rounded-full border border-(--line-strong) bg-(--surface-raised) text-white"
+                  className="flex size-10 items-center justify-center rounded-full border border-(--line-strong) bg-(--surface-raised) text-(--white)"
                 >
                   <span className="text-sm font-bold">
                     {user.name.slice(0, 1).toUpperCase()}
@@ -110,12 +110,12 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
                   <div
                     id="profile-menu"
                     role="menu"
-                    className="absolute right-0 top-12 w-44 rounded-xl border border-(--line) bg-(--surface) p-1.5 shadow-[0_16px_40px_rgba(0,0,0,.35)]"
+                    className="absolute right-0 top-12 w-44 rounded-xl border border-(--line) bg-(--surface) p-1.5 shadow-[0_16px_40px_color-mix(in_srgb,var(--black)_35%,transparent)]"
                   >
                     <Link
                       role="menuitem"
                       href="/perfil"
-                      className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[rgba(11,99,227,.14)]"
+                      className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-(--white) transition-colors hover:bg-(--blue)/14"
                     >
                       <LuUserRound aria-hidden="true" size={16} />
                       Meu perfil
@@ -125,7 +125,7 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
                       role="menuitem"
                       type="button"
                       onClick={() => void endSession()}
-                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-(--danger) transition-colors hover:bg-[rgba(229,98,75,.12)]"
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-(--danger) transition-colors hover:bg-(--danger)/12"
                     >
                       <LuLogOut aria-hidden="true" size={16} />
                       Sair
@@ -133,7 +133,7 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
                     {logoutError ? (
                       <p
                         role="alert"
-                        className="px-3 py-2 text-xs leading-snug text-[#ff9b8a]"
+                        className="px-3 py-2 text-xs leading-snug text-(--danger-soft)"
                       >
                         {logoutError}
                       </p>
@@ -144,7 +144,7 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
             ) : (
               <Link
                 href="/login"
-                className="hidden rounded-xl border border-(--line-strong) px-4.5 py-2.5 text-[13px] font-semibold text-white md:block"
+                className="hidden rounded-xl border border-(--line-strong) px-4.5 py-2.5 text-[13px] font-semibold text-(--white) md:block"
               >
                 Entrar
               </Link>
@@ -168,12 +168,12 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
         <div
           id="mobile-profile-menu"
           role="menu"
-          className="fixed bottom-19 right-3 z-30 flex w-44 flex-col gap-1 rounded-xl border border-(--line) bg-(--surface) p-1.5 shadow-[0_16px_40px_rgba(0,0,0,.35)] md:hidden"
+          className="fixed bottom-19 right-3 z-30 flex w-44 flex-col gap-1 rounded-xl border border-(--line) bg-(--surface) p-1.5 shadow-[0_16px_40px_color-mix(in_srgb,var(--black)_35%,transparent)] md:hidden"
         >
           <Link
             role="menuitem"
             href="/perfil"
-            className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[rgba(11,99,227,.14)]"
+            className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-(--white) transition-colors hover:bg-(--blue)/14"
           >
             <LuUserRound aria-hidden="true" size={16} />
             Meu perfil
@@ -183,7 +183,7 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
             role="menuitem"
             type="button"
             onClick={() => void endSession()}
-            className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-(--danger) transition-colors hover:bg-[rgba(229,98,75,.12)]"
+            className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-(--danger) transition-colors hover:bg-(--danger)/12"
           >
             <LuLogOut aria-hidden="true" size={16} />
             Sair
@@ -199,7 +199,7 @@ function AdminMenuLink() {
     <Link
       role="menuitem"
       href="/admin"
-      className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[rgba(11,99,227,.14)]"
+      className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-(--white) transition-colors hover:bg-(--blue)/14"
     >
       <LuShieldCheck aria-hidden="true" size={16} className="text-(--success)" />
       Administração
@@ -222,7 +222,7 @@ function NavItem({
     <a
       href={href}
       onClick={onClick}
-      className={`text-white ${className ?? ""}`}
+      className={`text-(--white) ${className ?? ""}`}
     >
       {label}
     </a>
@@ -256,7 +256,7 @@ function MobileBottomNavigation({
   return (
     <nav
       aria-label="Navegação inferior"
-      className="fixed inset-x-0 bottom-0 z-20 grid h-18 grid-cols-5 border-t border-(--line) bg-[rgba(3,17,40,.96)] px-1 pb-[max(.35rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur md:hidden"
+      className="fixed inset-x-0 bottom-0 z-20 grid h-18 grid-cols-5 border-t border-(--line) bg-(--navy)/96 px-1 pb-[max(.35rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur-sm md:hidden"
     >
       {mobileNavigationItems.map(({ label, href, icon: Icon }) => {
         const isProfile = label === "Perfil";
@@ -371,7 +371,7 @@ function MobileMenu({
       <div
         aria-hidden="true"
         onClick={onClose}
-        className="absolute inset-0 bg-[rgba(2,8,20,.6)] opacity-0 backdrop-blur-[2px] transition-opacity duration-300 ease-out group-data-[open=true]:opacity-100"
+        className="absolute inset-0 bg-(--navy-deep)/60 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 ease-out group-data-[open=true]:opacity-100"
       />
       <div
         ref={dialogRef}
@@ -379,7 +379,7 @@ function MobileMenu({
         role="dialog"
         aria-modal="true"
         aria-label="Menu"
-        className="absolute inset-y-0 right-0 flex w-[min(86vw,360px)] translate-x-full flex-col border-l border-(--line-strong) bg-(--surface) shadow-[-24px_0_60px_rgba(0,0,0,.45)] transition-transform duration-450 ease-[cubic-bezier(.22,1,.36,1)] group-data-[open=true]:translate-x-0"
+        className="absolute inset-y-0 right-0 flex w-[min(86vw,360px)] translate-x-full flex-col border-l border-(--line-strong) bg-(--surface) shadow-[-24px_0_60px_color-mix(in_srgb,var(--black)_45%,transparent)] transition-transform duration-450 ease-[cubic-bezier(.22,1,.36,1)] group-data-[open=true]:translate-x-0"
       >
         <div className="flex h-18 shrink-0 items-center justify-between border-b border-(--line) px-6">
           <BrandMark size="md" />
@@ -388,7 +388,7 @@ function MobileMenu({
             type="button"
             aria-label="Fechar menu"
             onClick={onClose}
-            className="flex size-10 items-center justify-center rounded-xl border border-(--line-strong) text-white transition-colors hover:bg-white/5"
+            className="flex size-10 items-center justify-center rounded-xl border border-(--line-strong) text-(--white) transition-colors hover:bg-(--white)/5"
           >
             <LuX aria-hidden="true" size={20} />
           </button>
@@ -416,14 +416,14 @@ function MobileMenu({
           <Link
             href="/meus-imoveis"
             onClick={onClose}
-            className="rounded-xl border border-[rgba(11,99,227,.4)] bg-[rgba(11,99,227,.14)] px-4.5 py-3 text-center text-sm font-semibold text-(--blue-light) transition-colors hover:bg-[rgba(11,99,227,.24)]"
+            className="rounded-xl border border-(--blue)/40 bg-(--blue)/14 px-4.5 py-3 text-center text-sm font-semibold text-(--blue-light) transition-colors hover:bg-(--blue)/24"
           >
             Seja um anfitrião
           </Link>
           {showLogin ? (
             <Link
               href="/login"
-              className="rounded-xl bg-(--blue) px-4.5 py-3 text-center text-sm font-bold text-white transition-colors hover:bg-(--blue-light)"
+              className="rounded-xl bg-(--blue) px-4.5 py-3 text-center text-sm font-bold text-(--white) transition-colors hover:bg-(--blue-light)"
             >
               Entrar
             </Link>

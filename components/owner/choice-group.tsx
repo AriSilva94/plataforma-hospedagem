@@ -1,5 +1,6 @@
 import type { UseFormRegisterReturn } from "react-hook-form";
-import { FieldError } from "@/components/owner/field-error";
+import { LuCheck } from "react-icons/lu";
+import { FieldError } from "@/components/field-error";
 import { checkboxClassName, choiceClassName, radioClassName } from "@/components/owner/styles";
 
 export function ChoiceGroup({
@@ -30,7 +31,14 @@ export function ChoiceGroup({
       <div className="mt-2 flex flex-wrap gap-2">
         {options.map((option) => (
           <label key={option.value} className={choiceClassName}>
-            <input type={type} value={option.value} className={type === "radio" ? radioClassName : checkboxClassName} {...registration} />
+            {type === "radio" ? (
+              <input type="radio" value={option.value} className={radioClassName} {...registration} />
+            ) : (
+              <span className="relative flex size-4 shrink-0">
+                <input type="checkbox" value={option.value} className={checkboxClassName} {...registration} />
+                <LuCheck aria-hidden="true" size={12} strokeWidth={3} className="pointer-events-none absolute inset-0 m-auto text-(--white) opacity-0 transition-opacity peer-checked:opacity-100" />
+              </span>
+            )}
             {option.label}
           </label>
         ))}

@@ -32,13 +32,13 @@ function PropertySection({ title, editHref, children }: { title: string; editHre
   return (
     <section className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
       <div className="min-w-0">
-        <h3 className="text-sm font-bold text-white">{title}</h3>
+        <h3 className="text-sm font-bold text-(--white)">{title}</h3>
         <div className="mt-0.5 text-sm text-(--gray)">{children}</div>
       </div>
       <Link
         href={editHref}
         aria-label={`Editar ${title}`}
-        className="-mr-2 inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg px-2 text-sm font-semibold text-(--blue-light) transition-colors hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
+        className="-mr-2 inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg px-2 text-sm font-semibold text-(--blue-light) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
       >
         <LuPencil aria-hidden="true" size={14} />
         Editar
@@ -110,7 +110,7 @@ function RoomRow({
           )}
         </div>
         <div className="min-w-0">
-          <h3 className="min-w-0 wrap-break-word font-bold text-white group-hover:text-(--blue-light)">{room.title}</h3>
+          <h3 className="min-w-0 wrap-break-word font-bold text-(--white) group-hover:text-(--blue-light)">{room.title}</h3>
           <p className="mt-1 text-sm text-(--gray)">
             {room.capacity === 1 ? "1 pessoa" : `${room.capacity} pessoas`} · Banheiro {bathroomTypeLabels[room.bathroomType].toLowerCase()}
           </p>
@@ -227,12 +227,12 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
       {property.status === "ACTIVE" && publicado === "1" ? (
         <section
           aria-labelledby="published-heading"
-          className="mt-6 flex flex-col gap-4 rounded-2xl border border-[rgba(47,191,135,.38)] bg-[rgba(47,191,135,.1)] p-5 sm:p-6"
+          className="mt-6 flex flex-col gap-4 rounded-2xl border border-(--success)/38 bg-(--success)/10 p-5 sm:p-6"
         >
           <div className="flex items-start gap-3">
             <LuCircleCheck aria-hidden="true" size={24} className="mt-0.5 shrink-0 text-(--success)" />
             <div>
-              <h2 id="published-heading" className="text-lg font-bold text-white">
+              <h2 id="published-heading" className="text-lg font-bold text-(--white)">
                 Imóvel publicado
               </h2>
               <p className="mt-1 text-sm leading-relaxed text-(--gray)">
@@ -254,7 +254,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
       {property.status === "DRAFT" ? (
         <section aria-labelledby="draft-heading" className="mt-6 rounded-2xl border border-(--line-strong) bg-(--surface-raised) p-4 sm:p-5">
           <div>
-            <h2 id="draft-heading" className="font-bold text-white">
+            <h2 id="draft-heading" className="font-bold text-(--white)">
               {nextRequirement ? "Falta pouco para publicar" : "Tudo pronto para publicar"}
             </h2>
             <p className="mt-1 text-sm text-(--gray)">
@@ -272,7 +272,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
               <h2
                 id="rooms-heading"
                 tabIndex={-1}
-                className="rounded-lg text-xl font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--blue-light)"
+                className="rounded-lg text-xl font-bold text-(--white) focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--blue-light)"
               >
                 Quartos <span className="font-semibold text-(--gray)">({listedRooms.length})</span>
               </h2>
@@ -285,7 +285,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
           </div>
 
           {warning ? (
-            <p className="mt-4 flex items-start gap-3 rounded-2xl border border-[rgba(232,177,58,.38)] bg-[rgba(232,177,58,.1)] p-4 text-sm leading-relaxed text-white">
+            <p className="mt-4 flex items-start gap-3 rounded-2xl border border-(--warning)/38 bg-(--warning)/10 p-4 text-sm leading-relaxed text-(--white)">
               <LuCircleAlert aria-hidden="true" size={18} className="mt-0.5 shrink-0 text-(--warning)" />
               {warning}
             </p>
@@ -310,7 +310,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
                         scroll={false}
                         aria-current={active ? "page" : undefined}
                         className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) ${
-                          active ? "border-(--blue-light) bg-[rgba(11,99,227,.14)] text-white" : "border-(--line-strong) text-(--gray) hover:text-white"
+                          active ? "border-(--blue-light) bg-(--blue)/14 text-(--white)" : "border-(--line-strong) text-(--gray) hover:text-(--white)"
                         }`}
                       >
                         {tab.label}
@@ -337,7 +337,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
 
           {archivedRooms.length > 0 ? (
             <details open={listedRooms.length === 0} className="group mt-4">
-              <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg text-sm font-semibold text-(--gray) transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--blue-light) [&::-webkit-details-marker]:hidden">
+              <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg text-sm font-semibold text-(--gray) transition-colors hover:text-(--white) focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--blue-light) [&::-webkit-details-marker]:hidden">
                 <LuChevronDown aria-hidden="true" size={16} className="transition-transform group-open:rotate-180" />
                 Arquivados ({archivedRooms.length})
               </summary>
@@ -351,7 +351,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
         </section>
 
         <aside aria-labelledby="property-heading" className={`${cardClassName} lg:sticky lg:top-24`}>
-          <h2 id="property-heading" className="font-bold text-white">
+          <h2 id="property-heading" className="font-bold text-(--white)">
             O imóvel
           </h2>
           {cover ? (
@@ -374,11 +374,11 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
 
             <PropertySection title="Localização" editHref={editHref("localizacao")}>
               <p className="line-clamp-2">
-                <span className="font-semibold text-white">Pública: </span>
+                <span className="font-semibold text-(--white)">Pública: </span>
                 {formatLocation(property)}
               </p>
               <p className="line-clamp-2">
-                <span className="font-semibold text-white">Só você vê: </span>
+                <span className="font-semibold text-(--white)">Só você vê: </span>
                 {address ?? "endereço não informado"}
               </p>
             </PropertySection>
@@ -393,7 +393,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
           </div>
           {firstRoom && propertyMissing.length > 0 ? (
             <section aria-labelledby="property-completeness-heading" className="mt-4 rounded-xl bg-(--surface-raised) p-4">
-              <h3 id="property-completeness-heading" className="flex items-center gap-2 text-sm font-bold text-white">
+              <h3 id="property-completeness-heading" className="flex items-center gap-2 text-sm font-bold text-(--white)">
                 <LuCircleAlert aria-hidden="true" size={16} className="shrink-0 text-(--warning)" />
                 Para completar os anúncios
               </h3>
@@ -404,7 +404,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
                     <li key={criterion}>
                       <Link
                         href={hint.href}
-                        className="-mx-2 flex min-h-11 items-center justify-between gap-3 rounded-lg px-2 text-sm font-semibold text-(--blue-light) transition-colors hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
+                        className="-mx-2 flex min-h-11 items-center justify-between gap-3 rounded-lg px-2 text-sm font-semibold text-(--blue-light) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
                       >
                         {hint.label}
                         <LuArrowRight aria-hidden="true" size={14} className="shrink-0" />

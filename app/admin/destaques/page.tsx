@@ -1,4 +1,5 @@
-import { AdminFilters, AdminSelect } from "@/components/admin/admin-filters";
+import { AdminFilters } from "@/components/admin/admin-filters";
+import { AdminSelect } from "@/components/admin/admin-select";
 import { AdminList, AdminPagination } from "@/components/admin/admin-list";
 import { RoomFeaturingActions } from "@/components/admin/room-featuring-actions";
 import { AdminRoomCard } from "@/components/admin/admin-room-card";

@@ -16,7 +16,7 @@ export function BrandMark({
   href?: string;
 }) {
   const style = sizes[size];
-  const className = `inline-flex items-center gap-2 font-extrabold text-white ${style.label}`;
+  const className = `inline-flex items-center gap-2 font-extrabold text-(--white) ${style.label}`;
   const content = (
     <>
       <span

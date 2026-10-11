@@ -19,21 +19,3 @@ export function AdminFilters({ search, placeholder, children }: { search: string
     </form>
   );
 }
-
-export function AdminSelect({ name, label, value, options }: { name: string; label: string; value: string; options: { value: string; label: string }[] }) {
-  return (
-    <div className="md:w-52">
-      <label htmlFor={name} className={labelClassName}>
-        {label}
-      </label>
-      <select id={name} name={name} defaultValue={value} className={fieldClassName}>
-        <option value="">Todos</option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}

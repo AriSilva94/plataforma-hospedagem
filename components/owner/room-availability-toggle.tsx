@@ -71,7 +71,7 @@ export function RoomAvailabilityToggle({
     <div>
       <Switch checked={available} disabled={pending} onChange={requestChange}>
         <span className="sr-only">Quarto {roomTitle}: </span>
-        <span className="text-sm font-semibold text-white">Reservável</span>
+        <span className="text-sm font-semibold text-(--white)">Reservável</span>
         <span className="sr-only">. </span>
         <span className="block text-xs text-(--gray)">{availabilityHint(available, propertyStatus)}</span>
       </Switch>

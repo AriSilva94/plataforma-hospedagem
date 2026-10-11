@@ -9,9 +9,9 @@ import { loginHref } from "@/lib/return-path";
 
 const variantClassNames = {
   overlay:
-    "flex size-11 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:opacity-60",
+    "flex size-11 items-center justify-center rounded-full bg-(--black)/60 text-(--white) transition-colors hover:bg-(--black)/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:opacity-60",
   inline:
-    "inline-flex min-h-11 items-center gap-2 rounded-xl border border-(--line-strong) px-4 text-sm font-semibold text-white transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:opacity-60",
+    "inline-flex min-h-11 items-center gap-2 rounded-xl border border-(--line-strong) px-4 text-sm font-semibold text-(--white) transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:opacity-60",
 } as const;
 
 export function FavoriteButton({

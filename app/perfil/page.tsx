@@ -13,7 +13,7 @@ export default async function ProfilePage() {
         <ProfileForm user={user} />
       ) : (
         <main className="flex min-h-[calc(100vh-72px)] items-center justify-center px-6 pb-18 md:pb-0">
-          <section className="w-full max-w-md rounded-3xl border border-(--line) bg-(--surface) p-8 shadow-[0_24px_60px_rgba(0,0,0,.25)]">
+          <section className="w-full max-w-md rounded-3xl border border-(--line) bg-(--surface) p-8 shadow-[0_24px_60px_color-mix(in_srgb,var(--black)_25%,transparent)]">
             <h1 className="text-3xl font-extrabold">Seu perfil</h1>
             {unavailable ? (
               <>
@@ -22,7 +22,7 @@ export default async function ProfilePage() {
                   alguns instantes.
                 </p>
                 <Link
-                  className="mt-6 inline-flex rounded-xl bg-(--blue) px-5 py-3 text-sm font-bold text-white transition hover:bg-(--blue-light)"
+                  className="mt-6 inline-flex rounded-xl bg-(--blue) px-5 py-3 text-sm font-bold text-(--white) transition hover:bg-(--blue-light)"
                   href="/perfil"
                 >
                   Tentar novamente
@@ -34,7 +34,7 @@ export default async function ProfilePage() {
                   Entre para acessar seus dados pessoais.
                 </p>
                 <Link
-                  className="mt-6 inline-flex rounded-xl bg-(--blue) px-5 py-3 text-sm font-bold text-white transition hover:bg-(--blue-light)"
+                  className="mt-6 inline-flex rounded-xl bg-(--blue) px-5 py-3 text-sm font-bold text-(--white) transition hover:bg-(--blue-light)"
                   href="/login"
                 >
                   Ir para entrar

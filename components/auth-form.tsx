@@ -135,7 +135,7 @@ export function AuthForm({
 
           return (
             <div key={field.name} className="auth-field">
-              <label htmlFor={inputId} className="block text-sm font-semibold text-[#d5dfed]">
+              <label htmlFor={inputId} className="block text-sm font-semibold text-(--text-soft)">
                 {field.label}
                 <span className="auth-input-wrap">
                   {Icon ? <Icon aria-hidden="true" size={17} /> : null}

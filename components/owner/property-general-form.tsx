@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { Combobox } from "@/components/combobox";
 import { FormActions, FormStatus } from "@/components/owner/form-actions";
 import { UnsavedChangesGuard } from "@/components/owner/unsaved-changes-guard";
 import { ChoiceGroup, optionsFrom } from "@/components/owner/choice-group";
-import { FieldError } from "@/components/owner/field-error";
+import { FieldError } from "@/components/field-error";
 import { CharacterCount, FieldHint } from "@/components/owner/field-hint";
 import { OptionalDetails } from "@/components/owner/optional-details";
 import { fieldClassName, labelClassName, primaryButtonClassName, secondaryButtonClassName } from "@/components/owner/styles";
@@ -35,6 +36,8 @@ function detailsSummary(property?: PropertyDetail): string {
   ].filter(Boolean);
   return parts.length > 0 ? `Preenchido: ${parts.join(", ")}.` : "Regras da casa, informações úteis e características.";
 }
+
+const propertyTypeOptions = optionsFrom(propertyTypeLabels);
 
 export function PropertyGeneralForm({ property, guided }: { property?: PropertyDetail; guided?: { nextHref: string } }) {
   const router = useRouter();
@@ -102,19 +105,32 @@ export function PropertyGeneralForm({ property, guided }: { property?: PropertyD
           <FieldError id="property-title-error" message={errors.title?.message} />
         </div>
         <div>
-          <label htmlFor="property-type" className={labelClassName}>Tipo do imóvel</label>
-          <select
-            id="property-type"
-            {...register("type")}
-            aria-invalid={errors.type ? "true" : undefined}
-            aria-describedby={errors.type ? "property-type-error" : undefined}
-            className={fieldClassName}
-          >
-            <option value="">Selecione</option>
-            {optionsFrom(propertyTypeLabels).map((option) => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </select>
+          <label id="property-type-label" htmlFor="property-type" className={labelClassName}>Tipo do imóvel</label>
+          <div className="mt-1.5">
+            <Controller
+              control={control}
+              name="type"
+              render={({ field }) => (
+                <Combobox
+                  ref={field.ref}
+                  id="property-type"
+                  labelId="property-type-label"
+                  value={field.value ?? ""}
+                  options={propertyTypeOptions}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  placeholder="Selecione"
+                  searchLabel="Buscar tipo"
+                  emptyMessage="Nenhum tipo encontrado."
+                  clearable={false}
+                  size="compact"
+                  align="end"
+                  invalid={Boolean(errors.type)}
+                  describedBy={errors.type ? "property-type-error" : undefined}
+                />
+              )}
+            />
+          </div>
           <FieldError id="property-type-error" message={errors.type?.message} />
         </div>
       </div>

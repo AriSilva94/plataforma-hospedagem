@@ -44,15 +44,15 @@ export function UserHome({
       <main className="pb-18 md:pb-0">
         <section id="inicio" className="relative overflow-hidden">
           <Image src="/rooms/room1.png" alt="" fill priority className="object-cover" sizes="100vw" />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,17,40,.45),rgba(3,17,40,.9)_78%)]" />
+          <div className="absolute inset-0 bg-linear-180 from-(--navy)/45 to-(--navy)/90 to-78%" />
           <div className={`${sectionShell} relative pb-24 pt-12 md:pb-28 md:pt-20`}>
             <p className="text-base font-semibold text-(--gray)">Olá, {firstName}</p>
-            <h1 className="mt-2 max-w-2xl text-balance text-4xl font-extrabold leading-[1.1] tracking-[-0.02em] text-white sm:text-5xl">Onde vai ser a sua próxima estadia?</h1>
+            <h1 className="mt-2 max-w-2xl text-balance text-4xl font-extrabold leading-[1.1] tracking-[-0.02em] text-(--white) sm:text-5xl">Onde vai ser a sua próxima estadia?</h1>
           </div>
         </section>
 
         <section aria-label="Buscar locais" className={`${sectionShell} relative z-10 -mt-14`}>
-          <div className="grid rounded-2xl bg-white p-2 shadow-[0_24px_60px_rgba(0,0,0,.45)] md:grid-cols-[repeat(4,minmax(0,1fr))_auto] md:items-center">
+          <div className="grid rounded-2xl bg-(--white) p-2 shadow-[0_24px_60px_color-mix(in_srgb,var(--black)_45%,transparent)] md:grid-cols-[repeat(4,minmax(0,1fr))_auto] md:items-center">
             {searchFields.map((field) => (
               <SearchField
                 key={field.label}
@@ -66,20 +66,20 @@ export function UserHome({
                 }}
               />
             ))}
-            <button type="button" className="mt-1.5 flex items-center justify-center gap-2 rounded-[13px] bg-(--blue) px-6 py-3.75 text-sm font-bold text-white transition hover:bg-(--blue-light) md:mt-0 md:h-full"><Icon name="search" size={18} /> Buscar locais</button>
+            <button type="button" className="mt-1.5 flex items-center justify-center gap-2 rounded-[13px] bg-(--blue) px-6 py-3.75 text-sm font-bold text-(--white) transition hover:bg-(--blue-light) md:mt-0 md:h-full"><Icon name="search" size={18} /> Buscar locais</button>
           </div>
         </section>
 
         <AllRooms initial={listing} favoriteRoomIds={favoriteRoomIds} />
 
         <section aria-labelledby="proprietarios-titulo" className={`${sectionShell} pb-12 pt-14 md:pb-16 md:pt-16`}>
-          <div className="relative overflow-hidden rounded-[18px] bg-[linear-gradient(120deg,#0b3a8f,#0B63E3)] p-6 md:flex md:items-center md:justify-between md:gap-8 md:p-8">
-            <div className="absolute -bottom-10 -right-7 size-45 rounded-full bg-white/8" />
+          <div className="relative overflow-hidden rounded-[18px] bg-[linear-gradient(120deg,var(--blue-deep),var(--blue))] p-6 md:flex md:items-center md:justify-between md:gap-8 md:p-8">
+            <div className="absolute -bottom-10 -right-7 size-45 rounded-full bg-(--white)/8" />
             <div className="relative max-w-110">
-              <h2 id="proprietarios-titulo" className="text-[22px] font-extrabold leading-tight text-white">Rentabilize seu espaço com segurança</h2>
-              <p className="mt-2 text-[13.5px] leading-relaxed text-white/85">Anuncie quartos e suítes. Você controla agenda, preços e privacidade.</p>
+              <h2 id="proprietarios-titulo" className="text-[22px] font-extrabold leading-tight text-(--white)">Rentabilize seu espaço com segurança</h2>
+              <p className="mt-2 text-[13.5px] leading-relaxed text-(--white)/85">Anuncie quartos e suítes. Você controla agenda, preços e privacidade.</p>
             </div>
-            <Link href="/meus-imoveis" className="relative mt-5 inline-flex shrink-0 rounded-xl bg-white px-5.5 py-3.25 text-sm font-bold text-(--blue) transition hover:bg-white/90 md:mt-0">Anunciar meu espaço</Link>
+            <Link href="/meus-imoveis" className="relative mt-5 inline-flex shrink-0 rounded-xl bg-(--white) px-5.5 py-3.25 text-sm font-bold text-(--blue) transition hover:bg-(--white)/90 md:mt-0">Anunciar meu espaço</Link>
           </div>
         </section>
       </main>
@@ -88,7 +88,7 @@ export function UserHome({
 }
 
 function SearchField({ label, placeholder, icon, options, value, open, onToggle, onPick }: { label: string; placeholder: string; icon: IconName; options: string[]; value?: string; open: boolean; onToggle: () => void; onPick: (value: string) => void }) {
-  return <div className="relative border-b border-[rgba(3,17,40,.08)] md:border-b-0 md:border-r md:last-of-type:border-r-0"><button type="button" onClick={onToggle} aria-expanded={open} className="flex w-full items-center gap-3 px-3.5 py-3.75 text-left md:flex-wrap md:gap-x-2 md:gap-y-0.5 md:py-3"><span className="text-(--blue)"><Icon name={icon} size={18} /></span><span className="w-18.5 text-[13px] font-semibold text-[#3a4a63] md:w-auto">{label}</span><span className={`flex-1 truncate text-sm font-semibold md:order-last md:basis-full ${value ? "text-[#0f1f39]" : "text-[#8695ab]"}`}>{value ?? placeholder}</span><span className={open ? "rotate-180 text-[#8695ab] transition-transform md:ml-auto" : "text-[#8695ab] transition-transform md:ml-auto"}><Icon name="chevronDown" size={18} /></span></button>{open ? <div className="absolute inset-x-2.5 top-[calc(100%-4px)] z-20 flex flex-col gap-1 rounded-xl border border-slate-200 bg-white p-2.5 shadow-[0_16px_32px_rgba(3,17,40,.2)] md:min-w-50">{options.map((option) => <button key={option} type="button" onClick={() => onPick(option)} className="rounded-lg px-3 py-2.75 text-left text-[13.5px] font-semibold text-[#0f1f39] hover:bg-[rgba(11,99,227,.1)]">{option}</button>)}</div> : null}</div>;
+  return <div className="relative border-b border-(--navy)/8 md:border-b-0 md:border-r md:last-of-type:border-r-0"><button type="button" onClick={onToggle} aria-expanded={open} className="flex w-full items-center gap-3 px-3.5 py-3.75 text-left md:flex-wrap md:gap-x-2 md:gap-y-0.5 md:py-3"><span className="text-(--blue)"><Icon name={icon} size={18} /></span><span className="w-18.5 text-[13px] font-semibold text-(--ink-muted) md:w-auto">{label}</span><span className={`flex-1 truncate text-sm font-semibold md:order-last md:basis-full ${value ? "text-(--surface)" : "text-(--ink-subtle)"}`}>{value ?? placeholder}</span><span className={open ? "rotate-180 text-(--ink-subtle) transition-transform md:ml-auto" : "text-(--ink-subtle) transition-transform md:ml-auto"}><Icon name="chevronDown" size={18} /></span></button>{open ? <div className="absolute inset-x-2.5 top-[calc(100%-4px)] z-20 flex flex-col gap-1 rounded-xl border border-(--navy)/12 bg-(--white) p-2.5 shadow-[0_16px_32px_color-mix(in_srgb,var(--navy)_20%,transparent)] md:min-w-50">{options.map((option) => <button key={option} type="button" onClick={() => onPick(option)} className="rounded-lg px-3 py-2.75 text-left text-[13.5px] font-semibold text-(--surface) hover:bg-(--blue)/10">{option}</button>)}</div> : null}</div>;
 }
 
 function AllRooms({ initial, favoriteRoomIds }: { initial: PublicRoomPage | null; favoriteRoomIds: string[] }) {
@@ -118,7 +118,7 @@ function AllRooms({ initial, favoriteRoomIds }: { initial: PublicRoomPage | null
   return (
     <section id="todos" aria-labelledby="todos-titulo" className={`${sectionShell} scroll-mt-20 pt-14 md:pt-16`}>
       <div className="flex items-end justify-between gap-4">
-        <h2 id="todos-titulo" className="text-2xl font-extrabold text-white">Quartos disponíveis</h2>
+        <h2 id="todos-titulo" className="text-2xl font-extrabold text-(--white)">Quartos disponíveis</h2>
         {total > 0 ? <span className="text-sm text-(--gray)">{total === 1 ? "1 quarto" : `${total} quartos`}</span> : null}
       </div>
       {items.length > 0 ? (
@@ -143,10 +143,10 @@ function AllRooms({ initial, favoriteRoomIds }: { initial: PublicRoomPage | null
       ) : initial ? (
         <p className="mt-6 rounded-2xl border border-dashed border-(--line-strong) p-6 text-sm text-(--gray)">Ainda não há quartos disponíveis. Volte em breve.</p>
       ) : null}
-      {error ? <p role="alert" className="mt-4 text-sm font-semibold text-[#ff9b8a]">{error}</p> : null}
+      {error ? <p role="alert" className="mt-4 text-sm font-semibold text-(--danger-soft)">{error}</p> : null}
       {nextCursor ? (
         <div className="mt-6 flex justify-center">
-          <button type="button" disabled={loading} onClick={() => void loadMore(nextCursor)} className="rounded-xl border border-(--line-strong) px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60">
+          <button type="button" disabled={loading} onClick={() => void loadMore(nextCursor)} className="rounded-xl border border-(--line-strong) px-5 py-3 text-sm font-semibold text-(--white) transition-colors hover:bg-(--white)/5 disabled:cursor-not-allowed disabled:opacity-60">
             {loading ? "Carregando..." : "Carregar mais"}
           </button>
         </div>

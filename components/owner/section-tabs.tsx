@@ -21,7 +21,7 @@ export function SectionTabs({
               <Link
                 href={tab.href}
                 aria-current={active ? "page" : undefined}
-                className={`inline-flex min-h-11 items-center gap-2 border-b-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--blue-light) ${active ? "border-(--blue-light) text-white" : "border-transparent text-(--gray) hover:text-white"}`}
+                className={`inline-flex min-h-11 items-center gap-2 border-b-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--blue-light) ${active ? "border-(--blue-light) text-(--white)" : "border-transparent text-(--gray) hover:text-(--white)"}`}
               >
                 {Icon ? <Icon aria-hidden="true" size={16} className={active ? "text-(--blue-light)" : undefined} /> : null}
                 {tab.label}

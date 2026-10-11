@@ -7,7 +7,7 @@ export function RoomCompletenessSummary({ score, missingCount }: { score: number
   const complete = missingCount === 0;
   return (
     <div className="flex items-center gap-3 text-sm">
-      <span className="font-bold text-white">{score}%</span>
+      <span className="font-bold text-(--white)">{score}%</span>
       <progress
         value={score}
         max={100}
@@ -26,7 +26,7 @@ export function RoomCompletenessSummary({ score, missingCount }: { score: number
 }
 
 const chipClassName =
-  "inline-flex min-h-11 items-center gap-1.5 rounded-full sm:min-h-9 border border-(--line-strong) px-3 text-sm font-semibold text-white transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)";
+  "inline-flex min-h-11 items-center gap-1.5 rounded-full sm:min-h-9 border border-(--line-strong) px-3 text-sm font-semibold text-(--white) transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)";
 
 const VISIBLE_ROOM_HINTS = 2;
 

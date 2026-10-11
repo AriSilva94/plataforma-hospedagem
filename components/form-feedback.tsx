@@ -4,12 +4,12 @@ const tones = {
   error: {
     role: "alert",
     className:
-      "border-[rgba(229,98,75,.35)] bg-[rgba(229,98,75,.12)] text-[#ff9b8a]",
+      "border-(--danger)/35 bg-(--danger)/12 text-(--danger-soft)",
   },
   success: {
     role: "status",
     className:
-      "border-[rgba(47,191,135,.35)] bg-[rgba(47,191,135,.12)] text-[#7be0b6]",
+      "border-(--success)/35 bg-(--success)/12 text-(--success-soft)",
   },
 } as const;
 

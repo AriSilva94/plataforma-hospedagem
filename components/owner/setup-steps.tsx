@@ -30,7 +30,7 @@ export function SetupSteps({
                 className={`block h-1.5 rounded-full ${done ? "bg-(--success)" : active ? "bg-(--blue)" : "bg-(--line-strong)"}`}
               />
               <span
-                className={`mt-2 hidden items-center gap-1.5 text-xs font-semibold sm:flex ${active ? "text-white" : "text-(--gray)"}`}
+                className={`mt-2 hidden items-center gap-1.5 text-xs font-semibold sm:flex ${active ? "text-(--white)" : "text-(--gray)"}`}
               >
                 {done ? <LuCheck aria-hidden="true" size={13} className="shrink-0 text-(--success)" /> : null}
                 {step.label}

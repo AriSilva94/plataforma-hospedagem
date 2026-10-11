@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ChangeEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import {
   LuBadgeCheck,
-  LuCircleAlert,
   LuHouse,
   LuIdCard,
   LuLockKeyhole,
+  LuMail,
   LuMailCheck,
   LuMailWarning,
   LuPhone,
@@ -18,14 +18,18 @@ import {
 } from "react-icons/lu";
 import type { IconType } from "react-icons";
 import { FormFeedback } from "@/components/form-feedback";
+import { DatePicker } from "@/components/date-picker";
 import { GuestIdentityForm } from "@/components/guest-identity-form";
+import { IconInput } from "@/components/icon-input";
+import { FieldError } from "@/components/field-error";
+import { ProfileLocationFields } from "@/components/profile-location-fields";
 import { isAdmin } from "@/lib/admin";
 import { apiFetch, getErrorMessage } from "@/lib/api";
-import { profileSchema, type ProfileFormValues } from "@/lib/auth-form-schema";
-import { CurrentUser, parseCurrentUser } from "@/lib/user";
+import { earliestBirthDate, latestAdultBirthDate, profileSchema, type ProfileFormValues } from "@/lib/auth-form-schema";
+import { brazilianStates } from "@/lib/properties";
+import { CurrentUser, formatPhone, parseCurrentUser } from "@/lib/user";
 
-const fieldClassName =
-  "mt-2 w-full rounded-xl border border-(--line-strong) bg-(--navy) px-4 py-3 text-white outline-hidden transition-colors focus:border-(--blue-light) focus-visible:ring-2 focus-visible:ring-(--blue-light) disabled:cursor-not-allowed disabled:border-(--line) disabled:bg-(--surface) disabled:text-(--gray)";
+const fieldLabelClassName = "mb-2 block text-sm font-semibold text-(--gray)";
 const secondaryDisabledButtonClassName =
   "rounded-xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-(--gray) disabled:cursor-not-allowed";
 
@@ -34,6 +38,16 @@ const verificationStates = {
   unverified: { label: "Cadastrado, não verificado", className: "text-(--info)" },
   unavailable: { label: "Disponível em breve", className: "text-(--warning)" },
 };
+
+function toFormValues(user: CurrentUser): ProfileFormValues {
+  return {
+    name: user.name,
+    phone: user.phone ? formatPhone(user.phone) : "",
+    birthDate: user.birthDate ?? "",
+    city: user.city ?? "",
+    state: brazilianStates.find((state) => state === user.state) ?? "",
+  };
+}
 
 function VerificationStatus({
   label,
@@ -57,7 +71,7 @@ function VerificationStatus({
           <Icon aria-hidden="true" size={17} />
         </span>
         <div className="min-w-0">
-          <p className="font-semibold text-white">{label}</p>
+          <p className="font-semibold text-(--white)">{label}</p>
           <p className="wrap-break-word text-sm text-(--gray)">{detail}</p>
         </div>
       </div>
@@ -99,7 +113,7 @@ function AccessProfileCard({
           <Icon aria-hidden="true" size={22} />
         </span>
         {active ? (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[rgba(47,191,135,.12)] px-3 py-1.5 text-xs font-semibold text-(--success)">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-(--success)/12 px-3 py-1.5 text-xs font-semibold text-(--success)">
             <LuBadgeCheck aria-hidden="true" size={15} /> Perfil ativo
           </span>
         ) : (
@@ -108,7 +122,7 @@ function AccessProfileCard({
           </span>
         )}
       </div>
-      <h3 className="mt-5 text-lg font-bold text-white">{title}</h3>
+      <h3 className="mt-5 text-lg font-bold text-(--white)">{title}</h3>
       <p className="mt-1 text-sm leading-relaxed text-(--gray)">
         {description}
       </p>
@@ -123,7 +137,7 @@ function AccessProfileCard({
         {active && manageHref ? (
           <Link
             href={manageHref}
-            className="flex w-full justify-center rounded-xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
+            className="flex w-full justify-center rounded-xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-(--white) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
           >
             Gerenciar imóveis
           </Link>
@@ -140,7 +154,7 @@ function AccessProfileCard({
             type="button"
             disabled={pending}
             onClick={onAdd}
-            className="w-full rounded-xl bg-(--blue) px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-xl bg-(--blue) px-4 py-3 text-sm font-bold text-(--white) transition-colors hover:bg-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isAdding
               ? "Adicionando perfil..."
@@ -154,14 +168,18 @@ function AccessProfileCard({
 
 export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
   const [user, setUser] = useState(initialUser);
+  const initialValues = toFormValues(initialUser);
   const {
     register,
     handleSubmit,
     formState,
     reset,
+    setValue,
+    control,
+    subscribe,
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
-    defaultValues: { name: initialUser.name },
+    defaultValues: initialValues,
     mode: "onBlur",
     reValidateMode: "onChange",
     shouldFocusError: true,
@@ -177,7 +195,18 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
   const [verificationError, setVerificationError] = useState<string>();
   const [verificationMessage, setVerificationMessage] = useState<string>();
   const [isSendingVerification, setIsSendingVerification] = useState(false);
-  const nameError = formState.errors.name;
+  const { errors } = formState;
+
+  useEffect(
+    () =>
+      subscribe({
+        formState: { values: true },
+        callback: ({ name }) => {
+          if (name) setSaveMessage(undefined);
+        },
+      }),
+    [subscribe],
+  );
   const EmailStatusIcon = user.emailVerified ? LuMailCheck : LuMailWarning;
   const prioritizeProfiles = initialUser.roles.length === 0;
 
@@ -209,10 +238,19 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
     setIsSaving(true);
     try {
       const updatedUser = await requestUser(() =>
-        apiFetch("/users/me", { method: "PATCH", body: JSON.stringify(data) }),
+        apiFetch("/users/me", {
+          method: "PATCH",
+          body: JSON.stringify({
+            name: data.name,
+            phone: data.phone.replace(/\D/g, "") || null,
+            birthDate: data.birthDate || null,
+            city: data.city || null,
+            state: data.state || null,
+          }),
+        }),
       );
       setUser(updatedUser);
-      reset({ name: updatedUser.name });
+      reset(toFormValues(updatedUser));
       setSaveMessage("Dados atualizados.");
     } catch (error) {
       setSaveError(
@@ -274,7 +312,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
       aria-labelledby="access-heading"
       className="border-t border-(--line) py-8 sm:py-10"
     >
-      <h2 id="access-heading" className="text-xl font-bold text-white">
+      <h2 id="access-heading" className="text-xl font-bold text-(--white)">
         Perfis de acesso
       </h2>
       <p className="mt-1 text-sm text-(--gray)">
@@ -282,7 +320,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
       </p>
       {user.roles.length === 0 ? (
         <div className="mt-6 rounded-2xl border border-(--blue-light) bg-(--surface-raised) p-5 sm:p-6">
-          <h3 className="text-lg font-bold text-white">
+          <h3 className="text-lg font-bold text-(--white)">
             Escolha como quer usar a plataforma
           </h3>
           <p className="mt-2 max-w-prose text-sm leading-relaxed text-(--gray)">
@@ -319,11 +357,11 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
         />
       </div>
       {isAdmin(user) ? (
-        <div className="mt-4 flex flex-col gap-4 rounded-2xl border border-[rgba(47,191,135,.38)] bg-[rgba(47,191,135,.1)] p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-4 flex flex-col gap-4 rounded-2xl border border-(--success)/38 bg-(--success)/10 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
             <LuShieldCheck aria-hidden="true" size={22} className="mt-0.5 shrink-0 text-(--success)" />
             <div>
-              <h3 className="font-bold text-white">Administrador</h3>
+              <h3 className="font-bold text-(--white)">Administrador</h3>
               <p className="mt-1 text-sm text-(--gray)">
                 Você tem acesso à administração da plataforma.
               </p>
@@ -331,7 +369,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
           </div>
           <Link
             href="/admin"
-            className="inline-flex shrink-0 items-center justify-center rounded-xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/5"
+            className="inline-flex shrink-0 items-center justify-center rounded-xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-(--white) transition-colors hover:bg-(--white)/5"
           >
             Abrir administração
           </Link>
@@ -354,12 +392,12 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
     <main className="min-h-[calc(100vh-72px)] px-4 pt-8 pb-28 sm:px-6 md:pt-12 md:pb-16">
       <div className="mx-auto max-w-4xl">
         <header className="grid grid-cols-[4rem_minmax(0,1fr)] items-center gap-4 border-b border-(--line) pb-8 sm:flex sm:flex-wrap sm:gap-5">
-          <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-(--blue) text-2xl font-extrabold text-white sm:h-18 sm:w-18">
+          <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-(--blue) text-2xl font-extrabold text-(--white) sm:h-18 sm:w-18">
             {user.name.slice(0, 1).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-(--gray)">Seu perfil</p>
-            <h1 className="mt-1 wrap-break-word text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+            <h1 className="mt-1 wrap-break-word text-2xl font-extrabold tracking-tight text-(--white) sm:text-3xl">
               {user.name}
             </h1>
             <p className="mt-1 wrap-break-word text-sm text-(--gray)">
@@ -369,8 +407,8 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
           <span
             className={`col-span-2 inline-flex w-fit items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold sm:w-auto ${
               user.emailVerified
-                ? "border-[rgba(47,191,135,.38)] bg-[rgba(47,191,135,.1)] text-(--success)"
-                : "border-[rgba(200,182,255,.38)] bg-[rgba(200,182,255,.1)] text-(--info)"
+                ? "border-(--success)/38 bg-(--success)/10 text-(--success)"
+                : "border-(--info)/38 bg-(--info)/10 text-(--info)"
             }`}
           >
             <EmailStatusIcon aria-hidden="true" size={15} />
@@ -386,7 +424,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
         >
           <h2
             id="personal-data-heading"
-            className="text-xl font-bold text-white"
+            className="text-xl font-bold text-(--white)"
           >
             Dados pessoais
           </h2>
@@ -397,45 +435,85 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
             className="mt-6"
             noValidate
             onSubmit={handleSubmit(updateProfile)}
-            onChange={() => setSaveMessage(undefined)}
           >
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <label htmlFor="profile-name" className="block text-sm font-semibold text-(--gray)">Nome</label>
-                <input
+                <label htmlFor="profile-name" className={fieldLabelClassName}>Nome</label>
+                <IconInput
                   {...register("name")}
+                  icon={LuUserRound}
                   id="profile-name"
                   disabled={isSaving}
                   autoComplete="name"
-                  defaultValue={initialUser.name}
-                  aria-invalid={nameError ? "true" : undefined}
-                  aria-describedby={nameError ? "profile-name-error" : undefined}
-                  className={`${fieldClassName} aria-invalid:border-(--danger) aria-invalid:focus:border-(--danger) aria-invalid:focus-visible:ring-(--danger)`}
+                  defaultValue={initialValues.name}
+                  aria-invalid={errors.name ? "true" : undefined}
+                  aria-describedby={errors.name ? "profile-name-error" : undefined}
                 />
-                {nameError?.message ? (
-                  <p id="profile-name-error" className="auth-field-error" role="alert">
-                    <LuCircleAlert aria-hidden="true" size={15} />{nameError.message}
-                  </p>
-                ) : null}
+                <FieldError id="profile-name-error" message={errors.name?.message} />
               </div>
               <div>
-                <label htmlFor="profile-email" className="block text-sm font-semibold text-(--gray)">E-mail</label>
-                <input
+                <label htmlFor="profile-email" className={fieldLabelClassName}>E-mail</label>
+                <IconInput
+                  icon={LuMail}
                   id="profile-email"
                   disabled
                   type="email"
                   value={user.email}
                   aria-describedby="profile-email-hint"
-                  className={fieldClassName}
                 />
                 <p id="profile-email-hint" className="mt-2 text-xs leading-relaxed text-(--gray)">
                   O e-mail identifica sua conta e não pode ser alterado.
                 </p>
               </div>
+              <div>
+                <label htmlFor="profile-phone" className={fieldLabelClassName}>Telefone</label>
+                <IconInput
+                  {...register("phone", {
+                    onChange: (event: ChangeEvent<HTMLInputElement>) =>
+                      setValue("phone", formatPhone(event.target.value)),
+                  })}
+                  icon={LuPhone}
+                  id="profile-phone"
+                  type="tel"
+                  inputMode="tel"
+                  disabled={isSaving}
+                  autoComplete="tel-national"
+                  placeholder="(11) 91234-5678"
+                  defaultValue={initialValues.phone}
+                  aria-invalid={errors.phone ? "true" : undefined}
+                  aria-describedby={errors.phone ? "profile-phone-error" : undefined}
+                />
+                <FieldError id="profile-phone-error" message={errors.phone?.message} />
+              </div>
+              <div>
+                <label htmlFor="profile-birth-date" className={fieldLabelClassName}>Data de nascimento</label>
+                <Controller
+                  control={control}
+                  name="birthDate"
+                  render={({ field }) => (
+                    <DatePicker
+                      ref={field.ref}
+                      id="profile-birth-date"
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      min={earliestBirthDate}
+                      max={latestAdultBirthDate()}
+                      dialogLabel="Escolher data de nascimento"
+                      hint="Para maiores de 18 anos"
+                      disabled={isSaving}
+                      invalid={Boolean(errors.birthDate)}
+                      describedBy={errors.birthDate ? "profile-birth-date-error" : undefined}
+                    />
+                  )}
+                />
+                <FieldError id="profile-birth-date-error" message={errors.birthDate?.message} />
+              </div>
+              <ProfileLocationFields control={control} setValue={setValue} disabled={isSaving} labelClassName={fieldLabelClassName} />
             </div>
             <p className="mt-5 text-xs leading-relaxed text-(--gray)">
-              Telefone, data de nascimento, cidade e estado estarão disponíveis
-              em breve.
+              Telefone, data de nascimento, cidade e estado são obrigatórios
+              para anunciar um imóvel. É necessário ter pelo menos 18 anos.
             </p>
             {saveError ? (
               <div className="mt-5">
@@ -449,7 +527,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
             ) : null}
             <button
               disabled={isSaving || Boolean(profilePendingRole)}
-              className="mt-6 rounded-xl bg-(--blue) px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-6 rounded-xl bg-(--blue) px-5 py-3 text-sm font-bold text-(--white) transition-colors hover:bg-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60"
               type="submit"
             >
               {isSaving ? "Salvando..." : "Salvar dados"}
@@ -463,7 +541,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
         >
           <h2
             id="verification-heading"
-            className="text-xl font-bold text-white"
+            className="text-xl font-bold text-(--white)"
           >
             Verificação
           </h2>
@@ -484,7 +562,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
                     type="button"
                     disabled={isSendingVerification}
                     onClick={sendVerification}
-                    className="rounded-lg border border-(--line-strong) px-3 py-2 text-xs font-bold text-white transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-lg border border-(--line-strong) px-3 py-2 text-xs font-bold text-(--white) transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isSendingVerification ? "Enviando..." : "Enviar link de confirmação"}
                   </button>
@@ -531,7 +609,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
             <div>
               <h2
                 id="security-heading"
-                className="text-xl font-bold text-white"
+                className="text-xl font-bold text-(--white)"
               >
                 Segurança
               </h2>
@@ -553,7 +631,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
           aria-labelledby="account-heading"
           className="border-t border-(--line) pt-8 sm:pt-10"
         >
-          <h2 id="account-heading" className="text-xl font-bold text-white">
+          <h2 id="account-heading" className="text-xl font-bold text-(--white)">
             Conta
           </h2>
           <p className="mt-1 text-sm text-(--gray)">
