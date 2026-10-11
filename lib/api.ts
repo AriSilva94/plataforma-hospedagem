@@ -1,5 +1,11 @@
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3030";
 
+const sessionAuthPaths = [
+  "/auth/email-verification",
+  "/auth/change-password",
+  "/auth/deactivate-account",
+];
+
 export type ApiError = { message: string };
 
 export async function apiFetch(
@@ -8,7 +14,10 @@ export async function apiFetch(
 ): Promise<Response> {
   const response = await request(path, init);
 
-  if (response.status !== 401 || path.startsWith("/auth/")) {
+  if (
+    response.status !== 401 ||
+    (path.startsWith("/auth/") && !sessionAuthPaths.includes(path))
+  ) {
     return response;
   }
 
