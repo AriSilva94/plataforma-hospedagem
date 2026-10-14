@@ -17,6 +17,7 @@ import {
   formatCents,
   formatLocation,
   genderIdentityLabels,
+  isMotel,
   labelOf,
   propertyFeatureLabels,
   publicPropertyDetailSchema,
@@ -104,6 +105,7 @@ export default async function PublicRoomPage({ params }: PageProps<"/imoveis/[pr
                 hostId={property.host.id}
                 hostName={property.host.name}
                 verified={room.verified}
+                motel={isMotel(property.type)}
                 roomTitle={room.title}
                 location={formatLocation(property)}
                 highlights={highlights}

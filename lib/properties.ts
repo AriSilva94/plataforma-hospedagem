@@ -1,6 +1,6 @@
 import { z } from "@/lib/zod";
 
-export const propertyTypes = ["HOUSE", "APARTMENT", "TOWNHOUSE", "STUDIO", "SHARED_HOUSE", "OTHER"] as const;
+export const propertyTypes = ["HOUSE", "MOTEL"] as const;
 export const propertyStatuses = ["DRAFT", "ACTIVE", "UNAVAILABLE"] as const;
 export const roomStatuses = ["AVAILABLE", "UNAVAILABLE", "INACTIVE"] as const;
 export const roomVerificationStatuses = ["PENDING", "VERIFIED", "REJECTED"] as const;
@@ -60,6 +60,10 @@ export const brazilianStateOptions = brazilianStates
 
 export type PropertyType = (typeof propertyTypes)[number];
 export type PropertyStatus = (typeof propertyStatuses)[number];
+
+export function isMotel(type: PropertyType): boolean {
+  return type === "MOTEL";
+}
 export type RoomStatus = (typeof roomStatuses)[number];
 export type RoomVerificationStatus = (typeof roomVerificationStatuses)[number];
 export type BathroomType = (typeof bathroomTypes)[number];
@@ -70,11 +74,7 @@ export type CompletenessCriterion = (typeof completenessCriteria)[number];
 
 export const propertyTypeLabels: Record<PropertyType, string> = {
   HOUSE: "Casa",
-  APARTMENT: "Apartamento",
-  TOWNHOUSE: "Sobrado",
-  STUDIO: "Studio / kitnet",
-  SHARED_HOUSE: "Pensão / república",
-  OTHER: "Outro",
+  MOTEL: "Motel",
 };
 
 export const propertyStatusLabels: Record<PropertyStatus, string> = {

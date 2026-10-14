@@ -1,8 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { LuBadgeCheck, LuImage, LuMapPin, LuStar } from "react-icons/lu";
-import { formatCents, formatLocation, type PublicRoomCard } from "@/lib/properties";
+import { LuBadgeCheck, LuHotel, LuImage, LuMapPin, LuStar } from "react-icons/lu";
+import { formatCents, formatLocation, isMotel, type PublicRoomCard } from "@/lib/properties";
+
+const badgeClassName =
+  "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold text-(--white) shadow-[0_2px_8px_color-mix(in_srgb,var(--black)_35%,transparent)]";
 
 export function RoomCard({
   room,
@@ -33,18 +36,24 @@ export function RoomCard({
           <span className="absolute left-2.5 top-2.5 inline-flex items-center rounded-full bg-(--navy)/85 px-2.5 py-1 text-[11px] font-bold text-(--white)">
             Indisponível no momento
           </span>
-        ) : room.verified || room.featured ? (
+        ) : room.verified || room.featured || isMotel(room.property.type) ? (
           <div className="absolute left-2.5 top-2.5 flex flex-col items-start gap-1.5">
             {room.verified ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-(--success-deep) px-2.5 py-1 text-[11px] font-bold text-(--white) shadow-[0_2px_8px_color-mix(in_srgb,var(--black)_35%,transparent)]">
+              <span className={`${badgeClassName} bg-(--success-deep)`}>
                 <LuBadgeCheck aria-hidden="true" size={12} className="text-(--success-soft)" />
                 Verificado
               </span>
             ) : null}
             {room.featured ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-(--warning-deep) px-2.5 py-1 text-[11px] font-bold text-(--white) shadow-[0_2px_8px_color-mix(in_srgb,var(--black)_35%,transparent)]">
+              <span className={`${badgeClassName} bg-(--warning-deep)`}>
                 <LuStar aria-hidden="true" size={12} className="text-(--warning)" fill="currentColor" />
                 Destaque
+              </span>
+            ) : null}
+            {isMotel(room.property.type) ? (
+              <span className={`${badgeClassName} bg-(--info-deep)`}>
+                <LuHotel aria-hidden="true" size={12} className="text-(--info)" />
+                Motel
               </span>
             ) : null}
           </div>

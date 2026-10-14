@@ -27,6 +27,7 @@
   --warning: #e8b13a;
   --warning-deep: #7a4d0d;
   --info: #c8b6ff;
+  --info-deep: #3d2f7a;
   --danger: #e5624b;
   --danger-soft: #ff9b8a;
   --danger-pale: #ffd3c9;
@@ -34,6 +35,14 @@
 
 @theme inline {
   --font-sans: var(--font-jakarta);
+  --animate-panel-in: panel-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  @keyframes panel-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem);
+    }
+  }
 }
 
 body {

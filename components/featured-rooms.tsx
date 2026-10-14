@@ -46,17 +46,25 @@ export function FeaturedRooms({
   return (
     <div className="relative mt-10 md:mt-12">
       {edges.start ? null : (
-        <button type="button" aria-label="Ver destaques anteriores" onClick={() => scrollByPage(-1)} className={`${arrowClassName} -left-4`}>
+        <button
+          type="button"
+          aria-label="Ver destaques anteriores"
+          onClick={() => scrollByPage(-1)}
+          className={`${arrowClassName} -left-4`}
+        >
           <LuChevronLeft aria-hidden="true" size={20} />
         </button>
       )}
       <ul
         ref={railRef}
         onScroll={measure}
-        className="-mx-6 flex snap-x snap-mandatory scroll-px-6 gap-4 overflow-x-auto scroll-smooth px-6 [scrollbar-width:none] motion-reduce:scroll-auto md:mx-0 md:scroll-px-0 md:px-0 [&::-webkit-scrollbar]:hidden"
+        className="-mx-6 flex snap-x snap-mandatory scroll-px-6 gap-4 overflow-x-auto scroll-smooth px-6 scrollbar-none motion-reduce:scroll-auto md:mx-0 md:scroll-px-0 md:px-0 [&::-webkit-scrollbar]:hidden"
       >
         {rooms.map((room) => (
-          <li key={room.id} className="w-[78%] shrink-0 snap-start sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]">
+          <li
+            key={room.id}
+            className="w-[78%] shrink-0 snap-start sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]"
+          >
             <RoomCard
               room={room}
               action={
@@ -73,7 +81,12 @@ export function FeaturedRooms({
         ))}
       </ul>
       {edges.end ? null : (
-        <button type="button" aria-label="Ver próximos destaques" onClick={() => scrollByPage(1)} className={`${arrowClassName} -right-4`}>
+        <button
+          type="button"
+          aria-label="Ver próximos destaques"
+          onClick={() => scrollByPage(1)}
+          className={`${arrowClassName} -right-4`}
+        >
           <LuChevronRight aria-hidden="true" size={20} />
         </button>
       )}

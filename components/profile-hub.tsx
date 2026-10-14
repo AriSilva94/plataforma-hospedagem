@@ -64,6 +64,7 @@ export function ProfileHub({
 }) {
   const [user, setUser] = useState(initialUser);
   const [activeTab, setActiveTab] = useState<TabId>("quartos");
+  const showStats = activeTab === "quartos";
   const memberSince = formatMemberSince(user.createdAt);
 
   return (
@@ -101,16 +102,27 @@ export function ProfileHub({
           })}
         </nav>
 
-        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {statCards.map(({ key, label, icon: Icon, tone }) => (
-            <div key={key} className="flex flex-col items-center gap-2 rounded-2xl border border-(--line-strong) bg-(--surface) py-5 text-center">
-              <span className={`flex size-9 items-center justify-center rounded-full ${toneClassNames[tone]}`}>
-                <Icon aria-hidden="true" size={18} />
-              </span>
-              <span className="text-xl font-extrabold text-(--white)">{summary[key]}</span>
-              <span className="text-xs font-semibold text-(--gray)">{label}</span>
+        <div
+          inert={!showStats}
+          className={`grid transition-[grid-template-rows,opacity,translate] duration-300 ease-out motion-reduce:transition-none ${
+            showStats ? "grid-rows-[1fr] translate-y-0 opacity-100" : "grid-rows-[0fr] -translate-y-1 opacity-0"
+          }`}
+        >
+          <div className="min-h-0 overflow-hidden">
+            <div className="grid grid-cols-2 gap-2 pt-4 sm:grid-cols-4">
+              {statCards.map(({ key, label, icon: Icon, tone }) => (
+                <div key={key} className="flex items-center gap-2.5 rounded-xl border border-(--line-strong) bg-(--surface) px-3 py-2.5">
+                  <span className={`flex size-8 shrink-0 items-center justify-center rounded-full ${toneClassNames[tone]}`}>
+                    <Icon aria-hidden="true" size={16} />
+                  </span>
+                  <span className="flex min-w-0 flex-col">
+                    <span className="text-lg leading-tight font-extrabold text-(--white)">{summary[key]}</span>
+                    <span className="truncate text-xs font-semibold text-(--gray)">{label}</span>
+                  </span>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
 
         <div className="mt-8">
@@ -151,5 +163,5 @@ export function ProfileHub({
 
 function TabPanel({ active, children }: { active: boolean; children: ReactNode }) {
   if (!active) return null;
-  return <section>{children}</section>;
+  return <section className="animate-panel-in motion-reduce:animate-none">{children}</section>;
 }

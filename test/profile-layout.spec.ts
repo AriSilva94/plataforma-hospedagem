@@ -641,11 +641,24 @@ test("cadastra imóvel escolhendo o tipo no seletor com busca", async ({ page })
   expect(ownerRequests).toEqual([]);
 
   await page.getByRole("button", { name: /^Tipo do imóvel/ }).click();
-  await page.getByRole("option", { name: "Sobrado" }).click();
+  await page.getByRole("option", { name: "Casa" }).click();
   await page.getByRole("button", { name: /^Salvar/ }).click();
 
   await expect.poll(() => ownerRequests.length).toBe(1);
-  expect(ownerRequests[0]).toMatchObject({ method: "POST", url: "/owner/properties", body: { title: "Casa Central", type: "TOWNHOUSE" } });
+  expect(ownerRequests[0]).toMatchObject({ method: "POST", url: "/owner/properties", body: { title: "Casa Central", type: "HOUSE" } });
+});
+
+test("cadastra motel como tipo do imóvel", async ({ page }) => {
+  user = { ...user, ...completePersonalData, roles: ["OWNER"] };
+  await page.goto("/meus-imoveis/novo");
+  await page.getByRole("textbox", { name: "Título do anúncio" }).fill("Motel Central");
+  await page.getByRole("textbox", { name: /^Descrição do imóvel/ }).fill("Suítes com hidromassagem.");
+  await page.getByRole("button", { name: /^Tipo do imóvel/ }).click();
+  await page.getByRole("option", { name: "Motel" }).click();
+  await page.getByRole("button", { name: /^Salvar/ }).click();
+
+  await expect.poll(() => ownerRequests.length).toBe(1);
+  expect(ownerRequests[0]).toMatchObject({ method: "POST", url: "/owner/properties", body: { title: "Motel Central", type: "MOTEL" } });
 });
 
 test("salva a UF do imóvel pelo seletor com busca", async ({ page }) => {

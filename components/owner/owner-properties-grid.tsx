@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { LuBedDouble, LuHousePlus, LuMapPin, LuPlus } from "react-icons/lu";
+import { MotelTag } from "@/components/motel-tag";
 import { CoverImage } from "@/components/owner/cover-image";
 import { PropertyStatusBadge } from "@/components/owner/property-status-badge";
 import { primaryButtonClassName } from "@/components/owner/styles";
-import { formatCents, formatLocation, type PropertySummary, propertyTypeLabels } from "@/lib/properties";
+import { formatCents, formatLocation, isMotel, type PropertySummary, propertyTypeLabels } from "@/lib/properties";
 
 export function OwnerPropertiesGrid({ properties }: { properties: PropertySummary[] }) {
   const newPropertyLink = (
@@ -47,7 +48,7 @@ export function OwnerPropertiesGrid({ properties }: { properties: PropertySummar
                   <PropertyStatusBadge status={property.status} />
                 </div>
                 <p className="flex flex-wrap items-center gap-2 text-sm text-(--gray)">
-                  {propertyTypeLabels[property.type]}
+                  {isMotel(property.type) ? <MotelTag /> : propertyTypeLabels[property.type]}
                 </p>
                 <div className="mt-auto flex flex-col gap-2 border-t border-(--line) pt-3 text-sm text-(--gray)">
                   <span className="flex items-center gap-2">
