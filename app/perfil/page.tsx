@@ -1,49 +1,47 @@
-import Link from "next/link";
-import { ProfileForm } from "@/components/profile-form";
+import { PageNotice } from "@/components/page-notice";
+import { ProfileHub } from "@/components/profile-hub";
 import { SiteHeader } from "@/components/site-header";
+import { favoriteListSchema } from "@/lib/favorites";
 import { getCurrentUser } from "@/lib/current-user";
+import { ownerRoomsSummarySchema, propertySummarySchema } from "@/lib/properties";
+import { getApiData } from "@/lib/server-api";
+import { z } from "@/lib/zod";
 
 export default async function ProfilePage() {
   const { user, unavailable } = await getCurrentUser();
 
+  if (!user) {
+    return (
+      <>
+        <SiteHeader user={user} />
+        {unavailable ? (
+          <PageNotice title="Seu perfil" description="Não foi possível carregar seus dados agora. Tente novamente em alguns instantes." actionLabel="Tentar novamente" actionHref="/perfil" />
+        ) : (
+          <PageNotice title="Seu perfil" description="Entre para acessar seus dados pessoais." actionLabel="Ir para entrar" actionHref="/login" />
+        )}
+      </>
+    );
+  }
+
+  const [properties, favorites, summary] = await Promise.all([
+    getApiData("/owner/properties", z.array(propertySummarySchema)),
+    getApiData("/favorites", favoriteListSchema),
+    getApiData("/owner/rooms/summary", ownerRoomsSummarySchema),
+  ]);
+
   return (
     <>
       <SiteHeader user={user} />
-      {user ? (
-        <ProfileForm user={user} />
-      ) : (
-        <main className="flex min-h-[calc(100vh-72px)] items-center justify-center px-6 pb-18 md:pb-0">
-          <section className="w-full max-w-md rounded-3xl border border-(--line) bg-(--surface) p-8 shadow-[0_24px_60px_color-mix(in_srgb,var(--black)_25%,transparent)]">
-            <h1 className="text-3xl font-extrabold">Seu perfil</h1>
-            {unavailable ? (
-              <>
-                <p className="mt-3 leading-relaxed text-(--gray)">
-                  Não foi possível carregar seus dados agora. Tente novamente em
-                  alguns instantes.
-                </p>
-                <Link
-                  className="mt-6 inline-flex rounded-xl bg-(--blue) px-5 py-3 text-sm font-bold text-(--white) transition hover:bg-(--blue-light)"
-                  href="/perfil"
-                >
-                  Tentar novamente
-                </Link>
-              </>
-            ) : (
-              <>
-                <p className="mt-3 leading-relaxed text-(--gray)">
-                  Entre para acessar seus dados pessoais.
-                </p>
-                <Link
-                  className="mt-6 inline-flex rounded-xl bg-(--blue) px-5 py-3 text-sm font-bold text-(--white) transition hover:bg-(--blue-light)"
-                  href="/login"
-                >
-                  Ir para entrar
-                </Link>
-              </>
-            )}
-          </section>
-        </main>
-      )}
+      <ProfileHub
+        user={user}
+        properties={properties.status === "ok" ? properties.data : []}
+        favorites={favorites.status === "ok" ? favorites.data.items : []}
+        summary={
+          summary.status === "ok"
+            ? summary.data
+            : { totalRooms: 0, availableRooms: 0, pendingVerificationRooms: 0, rejectedVerificationRooms: 0 }
+        }
+      />
     </>
   );
 }

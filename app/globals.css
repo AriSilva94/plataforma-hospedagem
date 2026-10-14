@@ -23,10 +23,13 @@
   --line-strong: color-mix(in srgb, var(--gray) 26%, transparent);
   --success: #2fbf87;
   --success-soft: #7be0b6;
+  --success-deep: #0b5c3d;
   --warning: #e8b13a;
+  --warning-deep: #7a4d0d;
   --info: #c8b6ff;
   --danger: #e5624b;
   --danger-soft: #ff9b8a;
+  --danger-pale: #ffd3c9;
 }
 
 @theme inline {
@@ -116,7 +119,6 @@ body.scroll-locked {
 
 .auth-scene-title {
   color: var(--white);
-  font-family: Georgia, serif;
   font-size: clamp(2.5rem, 5.5vw, 3.75rem);
   font-weight: 400;
   line-height: 0.94;
@@ -147,7 +149,6 @@ body.scroll-locked {
   background: radial-gradient(circle at 38% 31%, var(--blue-light), var(--surface-high));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--blue-soft) 24%, transparent), 0 0.6rem 1.5rem color-mix(in srgb, var(--black) 20%, transparent);
   color: var(--text-soft);
-  font-family: Georgia, serif;
   font-size: 1.35rem;
 }
 
@@ -212,7 +213,7 @@ body.scroll-locked {
   padding: 0.5rem;
   place-items: center;
   border: 0;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   background: transparent;
   color: inherit;
   cursor: pointer;
@@ -233,7 +234,7 @@ body.scroll-locked {
   overflow: hidden;
   padding: 0.9rem 1rem;
   border: 0;
-  border-radius: 0.8rem;
+  border-radius: 1rem;
   background: linear-gradient(102deg, var(--blue-deep), var(--blue) 48%, var(--blue-light));
   box-shadow: 0 0.8rem 1.7rem color-mix(in srgb, var(--blue) 32%, transparent);
   color: var(--white);
@@ -352,7 +353,6 @@ body.scroll-locked {
 
 .auth-footer span:last-child {
   color: var(--blue-pale);
-  font-family: Georgia, serif;
   font-size: 0.95rem;
 }
 
@@ -621,28 +621,55 @@ body.scroll-locked {
   }
 }
 
-.public-home-room {
-  animation: public-home-room-in 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+.marquee {
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, var(--black) 10%, var(--black) 90%, transparent);
 }
 
-.public-home-room-2 {
-  animation-delay: 120ms;
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-slide 48s linear infinite;
 }
 
-.public-home-room-3 {
-  animation-delay: 240ms;
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
 }
 
-@keyframes public-home-room-in {
-  from {
-    opacity: 0.35;
-    transform: translateY(0.5rem);
+.marquee-group {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 3.5rem;
+  padding-right: 3.5rem;
+}
+
+@keyframes marquee-slide {
+  to {
+    transform: translateX(-50%);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .public-home-room {
+  .marquee {
+    mask-image: none;
+  }
+
+  .marquee-track {
+    width: auto;
     animation: none;
+  }
+
+  .marquee-group {
+    flex: 1;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem 2.5rem;
+    padding: 0 1.5rem;
+  }
+
+  .marquee-group[aria-hidden="true"] {
+    display: none;
   }
 }
 

@@ -50,6 +50,8 @@ export default async function EditRoomPage({ params, searchParams }: PageProps<"
         status={room.status}
         propertyStatus={room.property.status}
         availableRoomCount={room.property.availableRoomCount}
+        verificationStatus={room.verificationStatus}
+        verificationRejectedReason={room.verificationRejectedReason}
       />
       {showCompleteness ? <RoomCompletenessHints propertyId={propertyId} roomId={room.id} missing={room.completenessMissing} section={section} /> : null}
       <SectionTabs

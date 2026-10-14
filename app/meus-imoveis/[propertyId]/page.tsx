@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { LuArrowRight, LuChevronDown, LuCircleAlert, LuCircleCheck, LuEye, LuExternalLink, LuImage, LuPencil, LuPlus } from "react-icons/lu";
 import { OwnerDataNotice } from "@/components/owner/owner-notice";
 import { OwnerPage } from "@/components/owner/owner-page";
-import { PropertyStatusBadge } from "@/components/owner/property-status-badge";
+import { PropertyStatusBadge, RoomVerification } from "@/components/owner/property-status-badge";
 import { StatusBadge } from "@/components/owner/status-badge";
 import { PropertyStatusActions } from "@/components/owner/property-status-actions";
 import { RoomAvailabilityToggle } from "@/components/owner/room-availability-toggle";
@@ -38,7 +38,7 @@ function PropertySection({ title, editHref, children }: { title: string; editHre
       <Link
         href={editHref}
         aria-label={`Editar ${title}`}
-        className="-mr-2 inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg px-2 text-sm font-semibold text-(--blue-light) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
+        className="-mr-2 inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl px-2 text-sm font-semibold text-(--blue-light) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
       >
         <LuPencil aria-hidden="true" size={14} />
         Editar
@@ -119,6 +119,9 @@ function RoomRow({
             {complete ? <LuCircleCheck aria-hidden="true" size={14} /> : <LuCircleAlert aria-hidden="true" size={14} />}
             {complete ? "Anúncio completo" : `Anúncio ${room.completenessScore}% · ${nextStep}`}
           </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <RoomVerification status={room.verificationStatus} rejectedReason={room.verificationRejectedReason} />
+          </div>
         </div>
       </Link>
       <div className="flex items-center justify-between gap-4 border-t border-(--line) pt-3 @2xl:justify-end @2xl:border-0 @2xl:pt-0">
@@ -404,7 +407,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
                     <li key={criterion}>
                       <Link
                         href={hint.href}
-                        className="-mx-2 flex min-h-11 items-center justify-between gap-3 rounded-lg px-2 text-sm font-semibold text-(--blue-light) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
+                        className="-mx-2 flex min-h-11 items-center justify-between gap-3 rounded-xl px-2 text-sm font-semibold text-(--blue-light) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
                       >
                         {hint.label}
                         <LuArrowRight aria-hidden="true" size={14} className="shrink-0" />

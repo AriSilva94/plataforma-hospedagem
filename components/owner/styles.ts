@@ -4,13 +4,13 @@ export const fieldClassName =
 export const labelClassName = "block text-sm font-semibold text-(--gray)";
 
 export const primaryButtonClassName =
-  "inline-flex items-center justify-center gap-2 rounded-xl bg-(--blue) px-5 py-3 text-sm font-bold text-(--white) transition-colors hover:bg-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex items-center justify-center gap-2 rounded-2xl bg-(--blue) px-5 py-3 text-sm font-bold text-(--white) transition-colors hover:bg-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60";
 
 export const secondaryButtonClassName =
-  "inline-flex items-center justify-center gap-2 rounded-xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-(--white) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex items-center justify-center gap-2 rounded-2xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-(--white) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60";
 
 export const dangerButtonClassName =
-  "inline-flex items-center justify-center gap-2 rounded-xl border border-(--danger)/40 px-4 py-3 text-sm font-semibold text-(--danger) transition-colors hover:bg-(--danger)/12 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--danger) disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex items-center justify-center gap-2 rounded-2xl border border-(--danger)/40 px-4 py-3 text-sm font-semibold text-(--danger) transition-colors hover:bg-(--danger)/12 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--danger) disabled:cursor-not-allowed disabled:opacity-60";
 
 export const choiceClassName =
   "inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-(--line-strong) bg-(--navy) px-3.5 text-sm font-semibold text-(--white) transition-colors sm:min-h-9 hover:border-(--blue-light) has-checked:border-(--blue-light) has-checked:bg-(--blue)/14 has-focus-visible:ring-2 has-focus-visible:ring-(--blue-light)";

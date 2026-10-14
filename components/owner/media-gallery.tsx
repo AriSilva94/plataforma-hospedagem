@@ -129,7 +129,7 @@ const MediaTile = memo(function MediaTile({
             onBlur={(event) => {
               if (event.relatedTarget) actions.releaseKeyboard(item.id);
             }}
-            className="absolute right-2 top-2 flex size-11 cursor-grab touch-none items-center justify-center rounded-lg bg-(--black)/70 text-(--white) transition-colors hover:bg-(--black)/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-40 aria-pressed:bg-(--blue) sm:size-9"
+            className="absolute right-2 top-2 flex size-11 cursor-grab touch-none items-center justify-center rounded-xl bg-(--black)/70 text-(--white) transition-colors hover:bg-(--black)/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-40 aria-pressed:bg-(--blue) sm:size-9"
           >
             <LuGripVertical aria-hidden="true" size={18} />
           </button>
@@ -142,7 +142,7 @@ const MediaTile = memo(function MediaTile({
             aria-label={`Tornar capa: ${label}`}
             disabled={disabled}
             onClick={() => actions.makeCover(item.id)}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-xs font-semibold text-(--blue-light) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light) disabled:opacity-40 sm:min-h-9"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 text-xs font-semibold text-(--blue-light) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light) disabled:opacity-40 sm:min-h-9"
           >
             <LuStar aria-hidden="true" size={14} />
             Tornar capa
@@ -155,7 +155,7 @@ const MediaTile = memo(function MediaTile({
           aria-label={`Remover ${label}`}
           disabled={disabled}
           onClick={() => actions.remove(item)}
-          className="flex size-11 items-center justify-center rounded-lg text-(--danger) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light) disabled:opacity-40 sm:size-9"
+          className="flex size-11 items-center justify-center rounded-xl text-(--danger) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light) disabled:opacity-40 sm:size-9"
         >
           <LuTrash2 aria-hidden="true" size={16} />
         </button>

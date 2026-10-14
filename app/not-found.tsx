@@ -27,7 +27,7 @@ export default async function NotFound() {
           O endereço que você acessou não existe ou foi removido.
         </p>
         <Link
-          className="mt-8 inline-flex rounded-xl bg-(--blue) px-6 py-3 text-sm font-bold text-(--white) transition hover:bg-(--blue-light) focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-(--blue-pale)"
+          className="mt-8 inline-flex rounded-2xl bg-(--blue) px-6 py-3 text-sm font-bold text-(--white) transition hover:bg-(--blue-light) focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-(--blue-pale)"
           href="/"
         >
           Voltar ao início

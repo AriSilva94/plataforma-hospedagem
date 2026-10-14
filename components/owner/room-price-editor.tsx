@@ -52,7 +52,7 @@ export function RoomPriceEditor({ roomId, roomTitle, priceCents }: { roomId: str
         type="button"
         onClick={() => setOpen(true)}
         aria-label={`Alterar o valor da diária de ${roomTitle}, atualmente ${formatCents(priceCents)}`}
-        className="-mx-2 inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-lg font-extrabold text-(--white) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
+        className="-mx-2 inline-flex min-h-11 items-center gap-2 rounded-xl px-2 text-lg font-extrabold text-(--white) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
       >
         <span>
           {formatCents(priceCents)} <span className="text-sm font-semibold text-(--gray)">/ diária</span>

@@ -17,7 +17,7 @@ export function PageNotice({
         <h1 className="text-2xl font-extrabold">{title}</h1>
         <p className="mt-3 leading-relaxed text-(--gray)">{description}</p>
         <Link
-          className="mt-6 inline-flex rounded-xl bg-(--blue) px-5 py-3 text-sm font-bold text-(--white) transition hover:bg-(--blue-light)"
+          className="mt-6 inline-flex rounded-2xl bg-(--blue) px-5 py-3 text-sm font-bold text-(--white) transition hover:bg-(--blue-light)"
           href={actionHref}
         >
           {actionLabel}

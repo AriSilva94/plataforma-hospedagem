@@ -19,9 +19,9 @@ const weekdays = [
 ];
 
 const navigationButtonClassName =
-  "flex size-9 shrink-0 items-center justify-center rounded-lg text-(--gray) outline-hidden transition-colors hover:bg-(--white)/8 hover:text-(--white) focus-visible:ring-2 focus-visible:ring-(--blue-light) disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-(--gray)";
+  "flex size-9 shrink-0 items-center justify-center rounded-xl text-(--gray) outline-hidden transition-colors hover:bg-(--white)/8 hover:text-(--white) focus-visible:ring-2 focus-visible:ring-(--blue-light) disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-(--gray)";
 const headingButtonClassName =
-  "group/heading inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-bold capitalize outline-hidden transition-colors focus-visible:ring-2 focus-visible:ring-(--blue-light)";
+  "group/heading inline-flex items-center gap-1 rounded-xl px-2 py-1.5 text-sm font-bold capitalize outline-hidden transition-colors focus-visible:ring-2 focus-visible:ring-(--blue-light)";
 const monthHeadingClassName = `${headingButtonClassName} text-(--white) hover:bg-(--white)/8`;
 const yearHeadingClassName = `${headingButtonClassName} text-(--blue-soft) tabular-nums hover:bg-(--blue-tint)`;
 const headingChevronClassName = "opacity-60 transition-opacity group-hover/heading:opacity-100";
@@ -194,7 +194,7 @@ export function DatePicker({
           aria-haspopup="dialog"
           aria-expanded={isOpen}
           onClick={() => (isOpen ? close() : openCalendar())}
-          className="ml-1.5 flex size-9 shrink-0 items-center justify-center rounded-lg text-(--blue-light) outline-hidden transition-colors hover:bg-(--blue-tint) hover:text-(--blue-soft) focus-visible:bg-(--blue-tint) focus-visible:text-(--blue-soft) aria-expanded:bg-(--blue-tint) aria-expanded:text-(--blue-soft) disabled:cursor-not-allowed disabled:text-(--gray) disabled:opacity-60 disabled:hover:bg-transparent"
+          className="ml-1.5 flex size-9 shrink-0 items-center justify-center rounded-xl text-(--blue-light) outline-hidden transition-colors hover:bg-(--blue-tint) hover:text-(--blue-soft) focus-visible:bg-(--blue-tint) focus-visible:text-(--blue-soft) aria-expanded:bg-(--blue-tint) aria-expanded:text-(--blue-soft) disabled:cursor-not-allowed disabled:text-(--gray) disabled:opacity-60 disabled:hover:bg-transparent"
         >
           <LuCalendarDays aria-hidden="true" size={18} />
         </button>
@@ -357,7 +357,7 @@ export function DatePicker({
               <button
                 type="button"
                 onClick={() => select("")}
-                className="shrink-0 rounded-lg px-2.5 py-1.5 text-xs font-bold text-(--gray) outline-hidden transition-colors hover:bg-(--white)/8 hover:text-(--white) focus-visible:ring-2 focus-visible:ring-(--blue-light)"
+                className="shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-bold text-(--gray) outline-hidden transition-colors hover:bg-(--white)/8 hover:text-(--white) focus-visible:ring-2 focus-visible:ring-(--blue-light)"
               >
                 Limpar
               </button>

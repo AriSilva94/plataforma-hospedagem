@@ -23,7 +23,7 @@ export function PublishChecklist({ propertyId, missing }: { propertyId: string; 
               {pending ? (
                 <Link
                   href={setupStepHref(propertyId, stepForRequirement(requirement))}
-                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-(--white) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
+                  className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold text-(--white) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
                 >
                   <LuCircle aria-hidden="true" size={18} className="shrink-0 text-(--warning)" />
                   <span className="min-w-0 flex-1">
