@@ -12,7 +12,7 @@ const variantClassNames = {
   overlay:
     "flex size-8 items-center justify-center rounded-full bg-(--white) text-(--black) shadow-[0_2px_8px_color-mix(in_srgb,var(--shadow)_35%,transparent)] transition-colors hover:bg-(--white)/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) disabled:opacity-60",
   inline:
-    "inline-flex min-h-11 items-center gap-2 rounded-2xl border border-(--border-strong) px-4 text-sm font-semibold text-(--text-primary) transition-colors hover:border-(--favorite)/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) disabled:opacity-60",
+    "inline-flex min-h-11 items-center gap-2 rounded-2xl border border-(--favorite) px-4 text-sm font-semibold transition-colors text-(--favorite-text) hover:bg-(--favorite-soft) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) disabled:opacity-60",
 } as const;
 
 export function FavoriteButton({
