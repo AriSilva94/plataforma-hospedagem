@@ -37,7 +37,7 @@ const statCards: { key: keyof OwnerRoomsSummary; label: string; icon: IconType; 
 ];
 
 const toneClassNames = {
-  neutral: "bg-(--surface-raised) text-(--primary-text)",
+  neutral: "bg-(--primary-soft) text-(--primary-text)",
   success: "bg-(--success-soft) text-(--success)",
   warning: "bg-(--warning-soft) text-(--warning)",
   danger: "bg-(--error-soft) text-(--error)",
@@ -92,7 +92,7 @@ export function ProfileHub({
                 onClick={() => setActiveTab(tab.id)}
                 aria-current={active ? "true" : undefined}
                 className={`flex min-w-0 flex-1 flex-col items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-2.5 text-xs font-semibold transition-colors sm:text-sm ${
-                  active ? "bg-(--surface-raised) text-(--text-primary)" : "text-(--text-secondary) hover:text-(--text-primary)"
+                  active ? "bg-(--primary-soft) text-(--primary-text)" : "text-(--text-secondary) hover:text-(--text-primary)"
                 }`}
               >
                 <Icon aria-hidden="true" size={18} className={active ? "text-(--primary-text)" : undefined} />
@@ -146,7 +146,7 @@ export function ProfileHub({
             <h2 className="text-xl font-bold text-(--text-primary)">Coanfitrião</h2>
             <p className="mt-1 text-sm text-(--text-secondary)">Convide alguém para ajudar a administrar seus imóveis.</p>
             <div className="mt-6 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-(--border) p-10 text-center">
-              <span className="flex size-12 items-center justify-center rounded-xl bg-(--surface-raised) text-(--primary-text)">
+              <span className="flex size-12 items-center justify-center rounded-xl bg-(--primary-soft) text-(--primary-text)">
                 <LuUsers aria-hidden="true" size={24} />
               </span>
               <h3 className="text-lg font-bold text-(--text-primary)">Disponível em breve</h3>

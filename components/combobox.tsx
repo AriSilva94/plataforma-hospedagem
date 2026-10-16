@@ -253,7 +253,7 @@ export function Combobox({
             <button
               type="button"
               onClick={() => select("")}
-              className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-(--text-secondary) outline-hidden transition-colors hover:bg-(--text-primary)/8 hover:text-(--text-primary) focus-visible:bg-(--text-primary)/8 focus-visible:text-(--text-primary)"
+              className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-(--text-secondary) outline-hidden transition-colors hover:bg-(--primary-soft) hover:text-(--text-primary) focus-visible:bg-(--text-primary)/8 focus-visible:text-(--text-primary)"
             >
               Limpar seleção
             </button>

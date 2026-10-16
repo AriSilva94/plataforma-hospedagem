@@ -19,14 +19,14 @@ const weekdays = [
 ];
 
 const navigationButtonClassName =
-  "flex size-9 shrink-0 items-center justify-center rounded-xl text-(--text-secondary) outline-hidden transition-colors hover:bg-(--text-primary)/8 hover:text-(--text-primary) focus-visible:ring-2 focus-visible:ring-(--focus-ring) disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-(--text-secondary)";
+  "flex size-9 shrink-0 items-center justify-center rounded-xl text-(--text-secondary) outline-hidden transition-colors hover:bg-(--primary-soft) hover:text-(--text-primary) focus-visible:ring-2 focus-visible:ring-(--focus-ring) disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-(--text-secondary)";
 const headingButtonClassName =
   "group/heading inline-flex items-center gap-1 rounded-xl px-2 py-1.5 text-sm font-bold capitalize outline-hidden transition-colors focus-visible:ring-2 focus-visible:ring-(--focus-ring)";
-const monthHeadingClassName = `${headingButtonClassName} text-(--text-primary) hover:bg-(--text-primary)/8`;
+const monthHeadingClassName = `${headingButtonClassName} text-(--text-primary) hover:bg-(--primary-soft)`;
 const yearHeadingClassName = `${headingButtonClassName} text-(--primary-text) tabular-nums hover:bg-(--primary-soft)`;
 const headingChevronClassName = "opacity-60 transition-opacity group-hover/heading:opacity-100";
 const gridButtonClassName =
-  "rounded-lg text-sm font-semibold text-(--on-primary) outline-hidden transition-colors hover:bg-(--text-primary)/8 focus-visible:ring-2 focus-visible:ring-(--focus-ring) disabled:cursor-not-allowed disabled:text-(--text-secondary) disabled:opacity-35 disabled:hover:bg-transparent data-[selected=true]:bg-(--primary) data-[selected=true]:text-(--on-primary) data-[selected=true]:hover:bg-(--primary-hover)";
+  "rounded-lg text-sm font-semibold text-(--on-primary) outline-hidden transition-colors hover:bg-(--primary-soft) focus-visible:ring-2 focus-visible:ring-(--focus-ring) disabled:cursor-not-allowed disabled:text-(--text-secondary) disabled:opacity-35 disabled:hover:bg-transparent data-[selected=true]:bg-(--primary) data-[selected=true]:text-(--on-primary) data-[selected=true]:hover:bg-(--primary-hover)";
 
 function pad(value: number) {
   return String(value).padStart(2, "0");
@@ -357,7 +357,7 @@ export function DatePicker({
               <button
                 type="button"
                 onClick={() => select("")}
-                className="shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-bold text-(--text-secondary) outline-hidden transition-colors hover:bg-(--text-primary)/8 hover:text-(--text-primary) focus-visible:ring-2 focus-visible:ring-(--focus-ring)"
+                className="shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-bold text-(--text-secondary) outline-hidden transition-colors hover:bg-(--primary-soft) hover:text-(--text-primary) focus-visible:ring-2 focus-visible:ring-(--focus-ring)"
               >
                 Limpar
               </button>

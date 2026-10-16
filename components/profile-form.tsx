@@ -68,7 +68,7 @@ function VerificationStatus({
   return (
     <div className="flex flex-col gap-2 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:gap-4">
       <div className="flex min-w-0 items-center gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-(--surface-raised) text-(--primary-text)">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-(--primary-soft) text-(--primary-text)">
           <Icon aria-hidden="true" size={17} />
         </span>
         <div className="min-w-0">
@@ -110,7 +110,7 @@ function AccessProfileCard({
   return (
     <article className="flex h-full flex-col rounded-2xl border border-(--border) bg-(--surface) p-5 sm:p-6">
       <div className="flex items-start justify-between gap-3">
-        <span className="flex size-11 items-center justify-center rounded-xl bg-(--surface-raised) text-(--primary-text)">
+        <span className="flex size-11 items-center justify-center rounded-xl bg-(--primary-soft) text-(--primary-text)">
           <Icon aria-hidden="true" size={22} />
         </span>
         {active ? (
@@ -138,7 +138,7 @@ function AccessProfileCard({
         {active && manageHref ? (
           <Link
             href={manageHref}
-            className="flex w-full justify-center rounded-2xl border border-(--border-strong) px-4 py-3 text-sm font-semibold text-(--text-primary) transition-colors hover:bg-(--text-primary)/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
+            className="flex w-full justify-center rounded-2xl border border-(--border-strong) px-4 py-3 text-sm font-semibold text-(--text-primary) transition-colors hover:bg-(--primary-soft) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
           >
             Gerenciar imóveis
           </Link>
@@ -320,7 +320,7 @@ export function ProfileForm({ user, onUserChange }: { user: CurrentUser; onUserC
         Use a plataforma como hóspede, proprietário ou nos dois perfis.
       </p>
       {user.roles.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-(--primary) bg-(--surface-raised) p-5 sm:p-6">
+        <div className="mt-6 rounded-2xl border border-(--primary-border) bg-(--primary-soft) p-5 sm:p-6">
           <h3 className="text-lg font-bold text-(--text-primary)">
             Escolha como quer usar a plataforma
           </h3>
@@ -370,7 +370,7 @@ export function ProfileForm({ user, onUserChange }: { user: CurrentUser; onUserC
           </div>
           <Link
             href="/admin"
-            className="inline-flex shrink-0 items-center justify-center rounded-2xl border border-(--border-strong) px-4 py-3 text-sm font-semibold text-(--text-primary) transition-colors hover:bg-(--text-primary)/5"
+            className="inline-flex shrink-0 items-center justify-center rounded-2xl border border-(--border-strong) px-4 py-3 text-sm font-semibold text-(--text-primary) transition-colors hover:bg-(--primary-soft)"
           >
             Abrir administração
           </Link>

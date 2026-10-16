@@ -113,7 +113,7 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
               <>
                 <Link
                   href="/login"
-                  className="hidden rounded-2xl border border-(--border-strong) px-4.5 py-2.5 text-[13px] font-semibold text-(--text-primary) transition-colors hover:bg-(--text-primary)/5 md:block"
+                  className="hidden rounded-2xl border border-(--border-strong) px-4.5 py-2.5 text-[13px] font-semibold text-(--text-primary) transition-colors hover:bg-(--primary-soft) md:block"
                 >
                   Entrar
                 </Link>

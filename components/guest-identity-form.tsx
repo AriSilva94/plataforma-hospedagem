@@ -82,7 +82,7 @@ export function GuestIdentityForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="shrink-0 rounded-2xl border border-(--border-strong) px-4 py-3 text-sm font-semibold text-(--text-primary) transition-colors hover:bg-(--text-primary)/5 disabled:cursor-not-allowed disabled:opacity-60"
+          className="shrink-0 rounded-2xl border border-(--border-strong) px-4 py-3 text-sm font-semibold text-(--text-primary) transition-colors hover:bg-(--primary-soft) disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? "Salvando..." : "Salvar"}
         </button>

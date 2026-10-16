@@ -40,7 +40,7 @@ function PropertySection({ title, editHref, children }: { title: string; editHre
       <Link
         href={editHref}
         aria-label={`Editar ${title}`}
-        className="-mr-2 inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl px-2 text-sm font-semibold text-(--primary-text) transition-colors hover:bg-(--text-primary)/5 focus-visible:outline-2 focus-visible:outline-(--focus-ring)"
+        className="-mr-2 inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl px-2 text-sm font-semibold text-(--primary-text) transition-colors hover:bg-(--primary-soft) focus-visible:outline-2 focus-visible:outline-(--focus-ring)"
       >
         <LuPencil aria-hidden="true" size={14} />
         Editar
@@ -416,7 +416,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
                     <li key={criterion}>
                       <Link
                         href={hint.href}
-                        className="-mx-2 flex min-h-11 items-center justify-between gap-3 rounded-xl px-2 text-sm font-semibold text-(--primary-text) transition-colors hover:bg-(--text-primary)/5 focus-visible:outline-2 focus-visible:outline-(--focus-ring)"
+                        className="-mx-2 flex min-h-11 items-center justify-between gap-3 rounded-xl px-2 text-sm font-semibold text-(--primary-text) transition-colors hover:bg-(--primary-soft) focus-visible:outline-2 focus-visible:outline-(--focus-ring)"
                       >
                         {hint.label}
                         <LuArrowRight aria-hidden="true" size={14} className="shrink-0" />

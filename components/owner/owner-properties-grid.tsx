@@ -17,7 +17,7 @@ export function OwnerPropertiesGrid({ properties }: { properties: PropertySummar
   if (properties.length === 0) {
     return (
       <section className="mt-6 flex flex-col items-start gap-4 rounded-2xl border border-dashed border-(--border) bg-(--surface) p-6 sm:p-10">
-        <span className="flex size-12 items-center justify-center rounded-xl bg-(--surface-raised) text-(--primary-text)">
+        <span className="flex size-12 items-center justify-center rounded-xl bg-(--primary-soft) text-(--primary-text)">
           <LuHousePlus aria-hidden="true" size={24} />
         </span>
         <div>

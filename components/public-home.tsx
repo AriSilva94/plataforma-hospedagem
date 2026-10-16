@@ -45,7 +45,7 @@ const ownerBenefits = [
 
 const sectionShell = "mx-auto w-full max-w-360 px-6 md:px-10 lg:px-12";
 const primaryAction = "inline-flex min-h-12 items-center justify-center rounded-2xl bg-(--primary) px-6 text-sm font-bold text-(--on-primary) transition-colors hover:bg-(--primary-hover) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)";
-const secondaryAction = "inline-flex min-h-12 items-center justify-center rounded-2xl border border-(--border-strong) px-6 text-sm font-semibold text-(--text-primary) transition-colors hover:bg-(--text-primary)/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)";
+const secondaryAction = "inline-flex min-h-12 items-center justify-center rounded-2xl border border-(--border-strong) px-6 text-sm font-semibold text-(--text-primary) transition-colors hover:bg-(--primary-soft) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)";
 
 export function PublicHome({
   user,
@@ -85,7 +85,7 @@ export function PublicHome({
               <a href="#todos" className="inline-flex min-h-13 items-center justify-center rounded-2xl bg-(--primary) px-7 text-base font-bold text-(--on-primary) transition-colors hover:bg-(--primary-hover) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)">
                 Ver quartos disponíveis
               </a>
-              <a href="#proprietarios" className="inline-flex min-h-13 items-center justify-center rounded-2xl border border-(--border-strong) px-7 text-base font-semibold text-(--text-primary) transition-colors hover:bg-(--text-primary)/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)">
+              <a href="#proprietarios" className="inline-flex min-h-13 items-center justify-center rounded-2xl border border-(--border-strong) px-7 text-base font-semibold text-(--text-primary) transition-colors hover:bg-(--primary-soft) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)">
                 Quero anunciar meu espaço
               </a>
             </div>
@@ -107,7 +107,7 @@ export function PublicHome({
         </section>
 
         <section id="proprietarios" aria-labelledby="proprietarios-titulo" className={`${sectionShell} scroll-mt-24`}>
-          <div className="grid overflow-hidden rounded-[1.75rem] border border-(--border) bg-(--surface) lg:grid-cols-[minmax(0,1.15fr)_minmax(0,.85fr)]">
+          <div className="grid overflow-hidden rounded-[1.75rem] border border-(--primary-border) bg-(--primary-soft) lg:grid-cols-[minmax(0,1.15fr)_minmax(0,.85fr)]">
             <div className="px-6 py-10 md:px-10 lg:px-14 lg:py-16">
               <h2 id="proprietarios-titulo" className="max-w-xl text-balance text-3xl font-extrabold leading-[1.1] tracking-[-0.02em] text-(--text-primary) md:text-5xl">Anuncie o imóvel. Alugue cada quarto do seu jeito.</h2>
               <p className="mt-5 max-w-120 text-lg leading-relaxed text-(--text-secondary)">Um único anúncio para o imóvel, com quartos e suítes que você gerencia de forma independente.</p>

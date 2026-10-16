@@ -142,7 +142,7 @@ const MediaTile = memo(function MediaTile({
             aria-label={`Tornar capa: ${label}`}
             disabled={disabled}
             onClick={() => actions.makeCover(item.id)}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 text-xs font-semibold text-(--primary-text) transition-colors hover:bg-(--text-primary)/5 focus-visible:outline-2 focus-visible:outline-(--focus-ring) disabled:opacity-40 sm:min-h-9"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 text-xs font-semibold text-(--primary-text) transition-colors hover:bg-(--primary-soft) focus-visible:outline-2 focus-visible:outline-(--focus-ring) disabled:opacity-40 sm:min-h-9"
           >
             <LuStar aria-hidden="true" size={14} />
             Tornar capa
@@ -155,7 +155,7 @@ const MediaTile = memo(function MediaTile({
           aria-label={`Remover ${label}`}
           disabled={disabled}
           onClick={() => actions.remove(item)}
-          className="flex size-11 items-center justify-center rounded-xl text-(--error) transition-colors hover:bg-(--text-primary)/5 focus-visible:outline-2 focus-visible:outline-(--focus-ring) disabled:opacity-40 sm:size-9"
+          className="flex size-11 items-center justify-center rounded-xl text-(--error) transition-colors hover:bg-(--primary-soft) focus-visible:outline-2 focus-visible:outline-(--focus-ring) disabled:opacity-40 sm:size-9"
         >
           <LuTrash2 aria-hidden="true" size={16} />
         </button>

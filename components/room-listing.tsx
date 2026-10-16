@@ -79,7 +79,7 @@ export function RoomListing({ initial, favoriteRoomIds, signedIn }: { initial: P
         <div className="mt-6 flex flex-col items-center gap-3">
           <p role="alert" className="text-center text-sm font-semibold text-(--error)">{error}</p>
           {nextCursor ? (
-            <button type="button" onClick={() => void loadMore(nextCursor)} className="min-h-10 rounded-2xl border border-(--border-strong) px-5 text-sm font-semibold text-(--text-primary) transition-colors hover:bg-(--text-primary)/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)">
+            <button type="button" onClick={() => void loadMore(nextCursor)} className="min-h-10 rounded-2xl border border-(--border-strong) px-5 text-sm font-semibold text-(--text-primary) transition-colors hover:bg-(--primary-soft) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)">
               Tentar novamente
             </button>
           ) : null}
