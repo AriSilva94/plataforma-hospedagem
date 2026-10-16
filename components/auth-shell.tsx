@@ -32,7 +32,7 @@ export function AuthShell({ title, description, links, children }: AuthShellProp
             <BrandMark href="/" size="md" />
             <div className="auth-scene-copy max-w-sm">
               <h1 className="auth-scene-title">Seu próximo lugar começa aqui.</h1>
-              <p className="mt-4 max-w-72 text-sm leading-6 text-(--text-soft) sm:text-base">
+              <p className="mt-4 max-w-72 text-sm leading-6 text-(--text-primary) sm:text-base">
                 Encontre estadias ou cuide dos seus espaços com segurança e discrição.
               </p>
             </div>
@@ -41,10 +41,10 @@ export function AuthShell({ title, description, links, children }: AuthShellProp
         <section className="auth-panel">
           <div className="auth-card">
             <div className="auth-emblem" aria-hidden="true">D</div>
-            <h2 className="mt-5 font-serif text-3xl tracking-[-0.04em] text-(--white)">
+            <h2 className="mt-5 font-serif text-3xl tracking-[-0.04em] text-(--text-primary)">
               {title}
             </h2>
-            <p className="mt-2 leading-relaxed text-(--gray)">{description}</p>
+            <p className="mt-2 leading-relaxed text-(--text-secondary)">{description}</p>
             {children}
             <div className="auth-divider">ou continue com</div>
             <div className="flex justify-center">
@@ -56,7 +56,7 @@ export function AuthShell({ title, description, links, children }: AuthShellProp
                 <FcGoogle aria-hidden="true" size={24} />
               </a>
             </div>
-            <nav className="mt-5 flex flex-col items-center gap-2 text-center text-sm font-semibold text-(--blue-light)">
+            <nav className="mt-5 flex flex-col items-center gap-2 text-center text-sm font-semibold text-(--primary-text)">
               {links.map((link) => (
                 <Link key={link.href} href={link.href} className="auth-link">
                   {link.label}

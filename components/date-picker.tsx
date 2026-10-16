@@ -19,14 +19,14 @@ const weekdays = [
 ];
 
 const navigationButtonClassName =
-  "flex size-9 shrink-0 items-center justify-center rounded-xl text-(--gray) outline-hidden transition-colors hover:bg-(--white)/8 hover:text-(--white) focus-visible:ring-2 focus-visible:ring-(--blue-light) disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-(--gray)";
+  "flex size-9 shrink-0 items-center justify-center rounded-xl text-(--text-secondary) outline-hidden transition-colors hover:bg-(--text-primary)/8 hover:text-(--text-primary) focus-visible:ring-2 focus-visible:ring-(--focus-ring) disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-(--text-secondary)";
 const headingButtonClassName =
-  "group/heading inline-flex items-center gap-1 rounded-xl px-2 py-1.5 text-sm font-bold capitalize outline-hidden transition-colors focus-visible:ring-2 focus-visible:ring-(--blue-light)";
-const monthHeadingClassName = `${headingButtonClassName} text-(--white) hover:bg-(--white)/8`;
-const yearHeadingClassName = `${headingButtonClassName} text-(--blue-soft) tabular-nums hover:bg-(--blue-tint)`;
+  "group/heading inline-flex items-center gap-1 rounded-xl px-2 py-1.5 text-sm font-bold capitalize outline-hidden transition-colors focus-visible:ring-2 focus-visible:ring-(--focus-ring)";
+const monthHeadingClassName = `${headingButtonClassName} text-(--text-primary) hover:bg-(--text-primary)/8`;
+const yearHeadingClassName = `${headingButtonClassName} text-(--primary-text) tabular-nums hover:bg-(--primary-soft)`;
 const headingChevronClassName = "opacity-60 transition-opacity group-hover/heading:opacity-100";
 const gridButtonClassName =
-  "rounded-lg text-sm font-semibold text-(--white) outline-hidden transition-colors hover:bg-(--white)/8 focus-visible:ring-2 focus-visible:ring-(--blue-light) disabled:cursor-not-allowed disabled:text-(--gray) disabled:opacity-35 disabled:hover:bg-transparent data-[selected=true]:bg-(--blue) data-[selected=true]:text-(--white) data-[selected=true]:hover:bg-(--blue-light)";
+  "rounded-lg text-sm font-semibold text-(--on-primary) outline-hidden transition-colors hover:bg-(--text-primary)/8 focus-visible:ring-2 focus-visible:ring-(--focus-ring) disabled:cursor-not-allowed disabled:text-(--text-secondary) disabled:opacity-35 disabled:hover:bg-transparent data-[selected=true]:bg-(--primary) data-[selected=true]:text-(--on-primary) data-[selected=true]:hover:bg-(--primary-hover)";
 
 function pad(value: number) {
   return String(value).padStart(2, "0");
@@ -184,7 +184,7 @@ export function DatePicker({
         data-open={isOpen}
         data-invalid={invalid}
         data-disabled={disabled}
-        className="group flex items-center rounded-xl border border-(--line-strong) bg-(--navy) transition-colors hover:border-(--gray) focus-within:border-(--blue-light) focus-within:ring-2 focus-within:ring-(--blue-light) data-[disabled=true]:cursor-not-allowed data-[disabled=true]:border-(--line) data-[disabled=true]:bg-(--surface) data-[invalid=true]:border-(--danger) data-[invalid=true]:focus-within:ring-(--danger) data-[open=true]:border-(--blue-light)"
+        className="group flex items-center rounded-xl border border-(--border-strong) bg-(--background) transition-colors hover:border-(--text-secondary) focus-within:border-(--primary) focus-within:ring-2 focus-within:ring-(--focus-ring) data-[disabled=true]:cursor-not-allowed data-[disabled=true]:border-(--border) data-[disabled=true]:bg-(--surface) data-[invalid=true]:border-(--error) data-[invalid=true]:focus-within:ring-(--error) data-[open=true]:border-(--primary)"
       >
         <button
           ref={anchorRef}
@@ -194,7 +194,7 @@ export function DatePicker({
           aria-haspopup="dialog"
           aria-expanded={isOpen}
           onClick={() => (isOpen ? close() : openCalendar())}
-          className="ml-1.5 flex size-9 shrink-0 items-center justify-center rounded-xl text-(--blue-light) outline-hidden transition-colors hover:bg-(--blue-tint) hover:text-(--blue-soft) focus-visible:bg-(--blue-tint) focus-visible:text-(--blue-soft) aria-expanded:bg-(--blue-tint) aria-expanded:text-(--blue-soft) disabled:cursor-not-allowed disabled:text-(--gray) disabled:opacity-60 disabled:hover:bg-transparent"
+          className="ml-1.5 flex size-9 shrink-0 items-center justify-center rounded-xl text-(--primary-text) outline-hidden transition-colors hover:bg-(--primary-soft) hover:text-(--primary-text) focus-visible:bg-(--primary-soft) focus-visible:text-(--primary-text) aria-expanded:bg-(--primary-soft) aria-expanded:text-(--primary-text) disabled:cursor-not-allowed disabled:text-(--text-secondary) disabled:opacity-60 disabled:hover:bg-transparent"
         >
           <LuCalendarDays aria-hidden="true" size={18} />
         </button>
@@ -227,7 +227,7 @@ export function DatePicker({
             if (!isOpen) openCalendar();
           }}
           onBlur={onBlur}
-          className="min-w-0 flex-1 rounded-r-xl bg-transparent py-3 pr-4 pl-0.5 text-(--white) tabular-nums caret-(--blue-light) outline-hidden placeholder:text-(--gray) disabled:cursor-not-allowed disabled:text-(--gray)"
+          className="min-w-0 flex-1 rounded-r-xl bg-transparent py-3 pr-4 pl-0.5 text-(--text-primary) tabular-nums caret-(--primary) outline-hidden placeholder:text-(--text-secondary) disabled:cursor-not-allowed disabled:text-(--text-secondary)"
         />
       </div>
 
@@ -250,7 +250,7 @@ export function DatePicker({
               </button>
             ) : null}
             {view === "years" ? (
-              <span className="px-2 py-1.5 text-sm font-bold text-(--blue-soft)">Selecione o ano</span>
+              <span className="px-2 py-1.5 text-sm font-bold text-(--primary-text)">Selecione o ano</span>
             ) : (
               <button type="button" onClick={() => setView("years")} className={yearHeadingClassName}>
                 {cursor.year}
@@ -273,7 +273,7 @@ export function DatePicker({
           <div key={`${cursor.year}-${cursor.month}`} className="calendar-view mt-2" onKeyDown={handleDayKeyDown}>
             <div className="grid grid-cols-7" aria-hidden="true">
               {weekdays.map((weekday) => (
-                <span key={weekday.name} className="flex h-8 items-center justify-center text-xs font-bold text-(--gray)">
+                <span key={weekday.name} className="flex h-8 items-center justify-center text-xs font-bold text-(--text-secondary)">
                   {weekday.short}
                 </span>
               ))}
@@ -344,10 +344,10 @@ export function DatePicker({
         ) : null}
 
         {hint || value ? (
-          <div className="mt-3 flex min-h-9 items-center justify-between gap-3 border-t border-(--line) pt-3">
+          <div className="mt-3 flex min-h-9 items-center justify-between gap-3 border-t border-(--border) pt-3">
             {hint ? (
-              <p className="flex min-w-0 items-center gap-2 rounded-lg bg-(--blue-tint) px-2.5 py-1.5 text-xs leading-snug font-semibold text-(--white)">
-                <LuInfo aria-hidden="true" size={14} className="shrink-0 text-(--blue-soft)" />
+              <p className="flex min-w-0 items-center gap-2 rounded-lg bg-(--primary-soft) px-2.5 py-1.5 text-xs leading-snug font-semibold text-(--text-primary)">
+                <LuInfo aria-hidden="true" size={14} className="shrink-0 text-(--primary-text)" />
                 {hint}
               </p>
             ) : (
@@ -357,7 +357,7 @@ export function DatePicker({
               <button
                 type="button"
                 onClick={() => select("")}
-                className="shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-bold text-(--gray) outline-hidden transition-colors hover:bg-(--white)/8 hover:text-(--white) focus-visible:ring-2 focus-visible:ring-(--blue-light)"
+                className="shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-bold text-(--text-secondary) outline-hidden transition-colors hover:bg-(--text-primary)/8 hover:text-(--text-primary) focus-visible:ring-2 focus-visible:ring-(--focus-ring)"
               >
                 Limpar
               </button>

@@ -27,19 +27,19 @@ export function OwnerPage({
         {back ? (
           <Link
             href={back.href}
-            className="inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-semibold text-(--gray) transition-colors hover:text-(--white) focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--blue-light)"
+            className="inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-semibold text-(--text-secondary) transition-colors hover:text-(--text-primary) focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--focus-ring)"
           >
             <LuArrowLeft aria-hidden="true" size={16} />
             {back.label}
           </Link>
         ) : null}
-        <header className={`mt-1 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6 ${divider ? "border-b border-(--line) pb-5" : ""}`}>
+        <header className={`mt-1 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6 ${divider ? "border-b border-(--border) pb-5" : ""}`}>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-              <h1 className="wrap-break-word text-2xl font-extrabold tracking-tight text-(--white) sm:text-3xl">{title}</h1>
+              <h1 className="wrap-break-word text-2xl font-extrabold tracking-tight text-(--text-primary) sm:text-3xl">{title}</h1>
               {badge}
             </div>
-            {description ? <p className="mt-1.5 max-w-prose text-sm leading-relaxed text-(--gray)">{description}</p> : null}
+            {description ? <p className="mt-1.5 max-w-prose text-sm leading-relaxed text-(--text-secondary)">{description}</p> : null}
           </div>
           {actions ? <div className="flex shrink-0 flex-wrap gap-3">{actions}</div> : null}
         </header>

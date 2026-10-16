@@ -34,13 +34,13 @@ function PropertySection({ title, editHref, children }: { title: string; editHre
   return (
     <section className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
       <div className="min-w-0">
-        <h3 className="text-sm font-bold text-(--white)">{title}</h3>
-        <div className="mt-0.5 text-sm text-(--gray)">{children}</div>
+        <h3 className="text-sm font-bold text-(--text-primary)">{title}</h3>
+        <div className="mt-0.5 text-sm text-(--text-secondary)">{children}</div>
       </div>
       <Link
         href={editHref}
         aria-label={`Editar ${title}`}
-        className="-mr-2 inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl px-2 text-sm font-semibold text-(--blue-light) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
+        className="-mr-2 inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl px-2 text-sm font-semibold text-(--primary-text) transition-colors hover:bg-(--text-primary)/5 focus-visible:outline-2 focus-visible:outline-(--focus-ring)"
       >
         <LuPencil aria-hidden="true" size={14} />
         Editar
@@ -100,7 +100,7 @@ function RoomRow({
     <li className="flex flex-col gap-3 p-4 @2xl:flex-row @2xl:items-center @2xl:gap-6 @2xl:px-5">
       <Link
         href={roomHref}
-        className="group flex min-w-0 flex-1 items-center gap-4 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--blue-light)"
+        className="group flex min-w-0 flex-1 items-center gap-4 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--focus-ring)"
       >
         <div
           className={`relative size-20 shrink-0 overflow-hidden rounded-xl bg-(--surface-raised) ${room.status === "AVAILABLE" ? "" : "opacity-50 grayscale"}`}
@@ -108,17 +108,17 @@ function RoomRow({
           {room.coverUrl ? (
             <Image src={room.coverUrl} alt="" fill sizes="80px" className="object-cover" />
           ) : (
-            <div className="flex size-full items-center justify-center text-(--gray)">
+            <div className="flex size-full items-center justify-center text-(--text-secondary)">
               <LuImage aria-hidden="true" size={22} />
             </div>
           )}
         </div>
         <div className="min-w-0">
-          <h3 className="min-w-0 wrap-break-word font-bold text-(--white) group-hover:text-(--blue-light)">{room.title}</h3>
-          <p className="mt-1 text-sm text-(--gray)">
+          <h3 className="min-w-0 wrap-break-word font-bold text-(--text-primary) group-hover:text-(--primary-text)">{room.title}</h3>
+          <p className="mt-1 text-sm text-(--text-secondary)">
             {room.capacity === 1 ? "1 pessoa" : `${room.capacity} pessoas`} · Banheiro {bathroomTypeLabels[room.bathroomType].toLowerCase()}
           </p>
-          <p className="mt-0.5 truncate text-xs text-(--gray)">{room.acceptedAudiences.map((audience) => genderIdentityLabels[audience]).join(", ")}</p>
+          <p className="mt-0.5 truncate text-xs text-(--text-secondary)">{room.acceptedAudiences.map((audience) => genderIdentityLabels[audience]).join(", ")}</p>
           <p className={`mt-1.5 flex items-center gap-1.5 text-xs font-semibold ${complete ? "text-(--success)" : "text-(--warning)"}`}>
             {complete ? <LuCircleCheck aria-hidden="true" size={14} /> : <LuCircleAlert aria-hidden="true" size={14} />}
             {complete ? "Anúncio completo" : `Anúncio ${room.completenessScore}% · ${nextStep}`}
@@ -129,9 +129,9 @@ function RoomRow({
           </div>
         </div>
       </Link>
-      <div className="flex items-center justify-between gap-4 border-t border-(--line) pt-3 @2xl:justify-end @2xl:border-0 @2xl:pt-0">
+      <div className="flex items-center justify-between gap-4 border-t border-(--border) pt-3 @2xl:justify-end @2xl:border-0 @2xl:pt-0">
         {room.status === "INACTIVE" ? (
-          <p className="text-lg font-extrabold text-(--gray)">
+          <p className="text-lg font-extrabold text-(--text-secondary)">
             {formatCents(room.priceCents)} <span className="text-sm font-semibold">/ diária</span>
           </p>
         ) : (
@@ -142,7 +142,7 @@ function RoomRow({
             <Link
               href={roomHref}
               aria-label={`Abrir ${room.title} para reativar`}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg text-sm font-semibold text-(--blue-light) underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-(--blue-light)"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg text-sm font-semibold text-(--primary-text) underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-(--focus-ring)"
             >
               Abrir para reativar
               <LuArrowRight aria-hidden="true" size={14} />
@@ -163,7 +163,7 @@ function RoomRow({
   );
 }
 
-const roomListClassName = "divide-y divide-(--line) overflow-hidden rounded-2xl border border-(--line-strong) bg-(--surface)";
+const roomListClassName = "divide-y divide-(--border) overflow-hidden rounded-2xl border border-(--border) bg-(--surface)";
 
 export default async function PropertyDetailsPage({ params, searchParams }: PageProps<"/meus-imoveis/[propertyId]">) {
   const [{ propertyId }, { publicado, quartos }] = await Promise.all([params, searchParams]);
@@ -235,15 +235,15 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
       {property.status === "ACTIVE" && publicado === "1" ? (
         <section
           aria-labelledby="published-heading"
-          className="mt-6 flex flex-col gap-4 rounded-2xl border border-(--success)/38 bg-(--success)/10 p-5 sm:p-6"
+          className="mt-6 flex flex-col gap-4 rounded-2xl border border-(--success)/38 bg-(--success-soft) p-5 sm:p-6"
         >
           <div className="flex items-start gap-3">
             <LuCircleCheck aria-hidden="true" size={24} className="mt-0.5 shrink-0 text-(--success)" />
             <div>
-              <h2 id="published-heading" className="text-lg font-bold text-(--white)">
+              <h2 id="published-heading" className="text-lg font-bold text-(--text-primary)">
                 Imóvel publicado
               </h2>
-              <p className="mt-1 text-sm leading-relaxed text-(--gray)">
+              <p className="mt-1 text-sm leading-relaxed text-(--text-secondary)">
                 Ele aparece para os hóspedes enquanto tiver um quarto reservável. Você pode pausá-lo a qualquer momento.
               </p>
             </div>
@@ -260,12 +260,12 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
       ) : null}
 
       {property.status === "DRAFT" ? (
-        <section aria-labelledby="draft-heading" className="mt-6 rounded-2xl border border-(--line-strong) bg-(--surface-raised) p-4 sm:p-5">
+        <section aria-labelledby="draft-heading" className="mt-6 rounded-2xl border border-(--border) bg-(--surface-raised) p-4 sm:p-5">
           <div>
-            <h2 id="draft-heading" className="font-bold text-(--white)">
+            <h2 id="draft-heading" className="font-bold text-(--text-primary)">
               {nextRequirement ? "Falta pouco para publicar" : "Tudo pronto para publicar"}
             </h2>
-            <p className="mt-1 text-sm text-(--gray)">
+            <p className="mt-1 text-sm text-(--text-secondary)">
               {publishRequirements.length - property.missingRequirements.length} de {publishRequirements.length} itens concluídos
               {nextRequirement ? ` · Próximo: ${requirementLabels[nextRequirement]}` : " · Revise e publique quando quiser."}
             </p>
@@ -280,11 +280,11 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
               <h2
                 id="rooms-heading"
                 tabIndex={-1}
-                className="rounded-lg text-xl font-bold text-(--white) focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--blue-light)"
+                className="rounded-lg text-xl font-bold text-(--text-primary) focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--focus-ring)"
               >
-                Quartos <span className="font-semibold text-(--gray)">({listedRooms.length})</span>
+                Quartos <span className="font-semibold text-(--text-secondary)">({listedRooms.length})</span>
               </h2>
-              <p className="mt-1 text-sm text-(--gray)">Pause, ajuste o valor ou abra o quarto para editar os detalhes e as fotos.</p>
+              <p className="mt-1 text-sm text-(--text-secondary)">Pause, ajuste o valor ou abra o quarto para editar os detalhes e as fotos.</p>
             </div>
             <Link href={`/meus-imoveis/${property.id}/quartos/novo`} className={listedRooms.length > 0 ? secondaryButtonClassName : primaryButtonClassName}>
               <LuPlus aria-hidden="true" size={17} />
@@ -293,14 +293,14 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
           </div>
 
           {warning ? (
-            <p className="mt-4 flex items-start gap-3 rounded-2xl border border-(--warning)/38 bg-(--warning)/10 p-4 text-sm leading-relaxed text-(--white)">
+            <p className="mt-4 flex items-start gap-3 rounded-2xl border border-(--warning)/38 bg-(--warning-soft) p-4 text-sm leading-relaxed text-(--text-primary)">
               <LuCircleAlert aria-hidden="true" size={18} className="mt-0.5 shrink-0 text-(--warning)" />
               {warning}
             </p>
           ) : null}
 
           {listedRooms.length === 0 ? (
-            <p className="mt-4 rounded-2xl border border-dashed border-(--line-strong) p-6 text-sm text-(--gray)">
+            <p className="mt-4 rounded-2xl border border-dashed border-(--border) p-6 text-sm text-(--text-secondary)">
               {archivedRooms.length > 0
                 ? "Nenhum quarto ativo. Reative um quarto arquivado ou adicione um novo."
                 : "Nenhum quarto cadastrado. Adicione os quartos e suítes que poderão ser reservados."}
@@ -317,12 +317,12 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
                         href={tab.value ? `/meus-imoveis/${property.id}?quartos=${tab.value}` : `/meus-imoveis/${property.id}`}
                         scroll={false}
                         aria-current={active ? "page" : undefined}
-                        className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) ${
-                          active ? "border-(--blue-light) bg-(--blue)/14 text-(--white)" : "border-(--line-strong) text-(--gray) hover:text-(--white)"
+                        className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) ${
+                          active ? "border-(--primary) bg-(--primary-soft) text-(--text-primary)" : "border-(--border-strong) text-(--text-secondary) hover:text-(--text-primary)"
                         }`}
                       >
                         {tab.label}
-                        <span className="text-xs text-(--gray)">{tab.count}</span>
+                        <span className="text-xs text-(--text-secondary)">{tab.count}</span>
                       </Link>
                     );
                   })}
@@ -346,7 +346,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
 
           {archivedRooms.length > 0 ? (
             <details open={listedRooms.length === 0} className="group mt-4">
-              <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg text-sm font-semibold text-(--gray) transition-colors hover:text-(--white) focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--blue-light) [&::-webkit-details-marker]:hidden">
+              <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg text-sm font-semibold text-(--text-secondary) transition-colors hover:text-(--text-primary) focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--focus-ring) [&::-webkit-details-marker]:hidden">
                 <LuChevronDown aria-hidden="true" size={16} className="transition-transform group-open:rotate-180" />
                 Arquivados ({archivedRooms.length})
               </summary>
@@ -361,7 +361,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
 
         <aside aria-labelledby="property-heading" className={`${cardClassName} lg:sticky lg:top-24`}>
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 id="property-heading" className="font-bold text-(--white)">
+            <h2 id="property-heading" className="font-bold text-(--text-primary)">
               O imóvel
             </h2>
             {isMotel(property.type) ? <MotelTag /> : null}
@@ -371,7 +371,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
               <Image src={cover.url} alt="Foto de capa do imóvel" fill sizes="320px" className="object-cover" />
             </div>
           ) : null}
-          <div className="mt-3 divide-y divide-(--line)">
+          <div className="mt-3 divide-y divide-(--border)">
             <PropertySection title="Fotos e vídeos" editHref={editHref("midia")}>
               <p>
                 {images.length === 1 ? "1 foto" : `${images.length} fotos`}
@@ -386,11 +386,11 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
 
             <PropertySection title="Localização" editHref={editHref("localizacao")}>
               <p className="line-clamp-2">
-                <span className="font-semibold text-(--white)">Pública: </span>
+                <span className="font-semibold text-(--text-primary)">Pública: </span>
                 {formatLocation(property)}
               </p>
               <p className="line-clamp-2">
-                <span className="font-semibold text-(--white)">Só você vê: </span>
+                <span className="font-semibold text-(--text-primary)">Só você vê: </span>
                 {address ?? "endereço não informado"}
               </p>
             </PropertySection>
@@ -405,7 +405,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
           </div>
           {firstRoom && propertyMissing.length > 0 ? (
             <section aria-labelledby="property-completeness-heading" className="mt-4 rounded-xl bg-(--surface-raised) p-4">
-              <h3 id="property-completeness-heading" className="flex items-center gap-2 text-sm font-bold text-(--white)">
+              <h3 id="property-completeness-heading" className="flex items-center gap-2 text-sm font-bold text-(--text-primary)">
                 <LuCircleAlert aria-hidden="true" size={16} className="shrink-0 text-(--warning)" />
                 Para completar os anúncios
               </h3>
@@ -416,7 +416,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
                     <li key={criterion}>
                       <Link
                         href={hint.href}
-                        className="-mx-2 flex min-h-11 items-center justify-between gap-3 rounded-xl px-2 text-sm font-semibold text-(--blue-light) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
+                        className="-mx-2 flex min-h-11 items-center justify-between gap-3 rounded-xl px-2 text-sm font-semibold text-(--primary-text) transition-colors hover:bg-(--text-primary)/5 focus-visible:outline-2 focus-visible:outline-(--focus-ring)"
                       >
                         {hint.label}
                         <LuArrowRight aria-hidden="true" size={14} className="shrink-0" />

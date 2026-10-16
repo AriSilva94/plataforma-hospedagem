@@ -32,7 +32,7 @@ import { brazilianStates } from "@/lib/properties";
 import { CurrentUser, formatPhone, parseCurrentUser } from "@/lib/user";
 
 const secondaryDisabledButtonClassName =
-  "rounded-2xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-(--gray) disabled:cursor-not-allowed";
+  "rounded-2xl border border-(--border-strong) px-4 py-3 text-sm font-semibold text-(--text-secondary) disabled:cursor-not-allowed";
 
 const verificationStates = {
   verified: { label: "Verificado", className: "text-(--success)" },
@@ -68,12 +68,12 @@ function VerificationStatus({
   return (
     <div className="flex flex-col gap-2 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:gap-4">
       <div className="flex min-w-0 items-center gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-(--surface-raised) text-(--blue-light)">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-(--surface-raised) text-(--primary-text)">
           <Icon aria-hidden="true" size={17} />
         </span>
         <div className="min-w-0">
-          <p className="font-semibold text-(--white)">{label}</p>
-          <p className="wrap-break-word text-sm text-(--gray)">{detail}</p>
+          <p className="font-semibold text-(--text-primary)">{label}</p>
+          <p className="wrap-break-word text-sm text-(--text-secondary)">{detail}</p>
         </div>
       </div>
       <div className="ml-12 flex flex-wrap items-center gap-x-4 gap-y-2 sm:ml-auto sm:shrink-0 sm:justify-end">
@@ -108,29 +108,29 @@ function AccessProfileCard({
   manageHref?: string;
 }) {
   return (
-    <article className="flex h-full flex-col rounded-2xl border border-(--line-strong) bg-(--surface) p-5 sm:p-6">
+    <article className="flex h-full flex-col rounded-2xl border border-(--border) bg-(--surface) p-5 sm:p-6">
       <div className="flex items-start justify-between gap-3">
-        <span className="flex size-11 items-center justify-center rounded-xl bg-(--surface-raised) text-(--blue-light)">
+        <span className="flex size-11 items-center justify-center rounded-xl bg-(--surface-raised) text-(--primary-text)">
           <Icon aria-hidden="true" size={22} />
         </span>
         {active ? (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-(--success)/12 px-3 py-1.5 text-xs font-semibold text-(--success)">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-(--success-soft) px-3 py-1.5 text-xs font-semibold text-(--success)">
             <LuBadgeCheck aria-hidden="true" size={15} /> Perfil ativo
           </span>
         ) : (
-          <span className="rounded-full bg-(--surface-raised) px-3 py-1.5 text-xs font-semibold text-(--gray)">
+          <span className="rounded-full bg-(--surface-raised) px-3 py-1.5 text-xs font-semibold text-(--text-secondary)">
             Ainda não adicionado
           </span>
         )}
       </div>
-      <h3 className="mt-5 text-lg font-bold text-(--white)">{title}</h3>
-      <p className="mt-1 text-sm leading-relaxed text-(--gray)">
+      <h3 className="mt-5 text-lg font-bold text-(--text-primary)">{title}</h3>
+      <p className="mt-1 text-sm leading-relaxed text-(--text-secondary)">
         {description}
       </p>
       {active && details ? (
         details
       ) : (
-        <p className="mt-5 border-t border-(--line) pt-4 text-xs text-(--gray)">
+        <p className="mt-5 border-t border-(--border) pt-4 text-xs text-(--text-secondary)">
           Informações deste perfil disponíveis em breve.
         </p>
       )}
@@ -138,7 +138,7 @@ function AccessProfileCard({
         {active && manageHref ? (
           <Link
             href={manageHref}
-            className="flex w-full justify-center rounded-2xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-(--white) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
+            className="flex w-full justify-center rounded-2xl border border-(--border-strong) px-4 py-3 text-sm font-semibold text-(--text-primary) transition-colors hover:bg-(--text-primary)/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
           >
             Gerenciar imóveis
           </Link>
@@ -155,7 +155,7 @@ function AccessProfileCard({
             type="button"
             disabled={pending}
             onClick={onAdd}
-            className="w-full rounded-2xl bg-(--blue) px-4 py-3 text-sm font-bold text-(--white) transition-colors hover:bg-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-2xl bg-(--primary) px-4 py-3 text-sm font-bold text-(--on-primary) transition-colors hover:bg-(--primary-hover) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isAdding
               ? "Adicionando perfil..."
@@ -311,20 +311,20 @@ export function ProfileForm({ user, onUserChange }: { user: CurrentUser; onUserC
   const accessSection = (
     <section
       aria-labelledby="access-heading"
-      className="border-t border-(--line) py-8 sm:py-10"
+      className="border-t border-(--border) py-8 sm:py-10"
     >
-      <h2 id="access-heading" className="text-xl font-bold text-(--white)">
+      <h2 id="access-heading" className="text-xl font-bold text-(--text-primary)">
         Perfis de acesso
       </h2>
-      <p className="mt-1 text-sm text-(--gray)">
+      <p className="mt-1 text-sm text-(--text-secondary)">
         Use a plataforma como hóspede, proprietário ou nos dois perfis.
       </p>
       {user.roles.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-(--blue-light) bg-(--surface-raised) p-5 sm:p-6">
-          <h3 className="text-lg font-bold text-(--white)">
+        <div className="mt-6 rounded-2xl border border-(--primary) bg-(--surface-raised) p-5 sm:p-6">
+          <h3 className="text-lg font-bold text-(--text-primary)">
             Escolha como quer usar a plataforma
           </h3>
-          <p className="mt-2 max-w-prose text-sm leading-relaxed text-(--gray)">
+          <p className="mt-2 max-w-prose text-sm leading-relaxed text-(--text-secondary)">
             Adicione um perfil para começar. Você também pode atualizar seus
             dados pessoais e escolher depois.
           </p>
@@ -358,19 +358,19 @@ export function ProfileForm({ user, onUserChange }: { user: CurrentUser; onUserC
         />
       </div>
       {isAdmin(user) ? (
-        <div className="mt-4 flex flex-col gap-4 rounded-2xl border border-(--success)/38 bg-(--success)/10 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-4 flex flex-col gap-4 rounded-2xl border border-(--success)/38 bg-(--success-soft) p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
             <LuShieldCheck aria-hidden="true" size={22} className="mt-0.5 shrink-0 text-(--success)" />
             <div>
-              <h3 className="font-bold text-(--white)">Administrador</h3>
-              <p className="mt-1 text-sm text-(--gray)">
+              <h3 className="font-bold text-(--text-primary)">Administrador</h3>
+              <p className="mt-1 text-sm text-(--text-secondary)">
                 Você tem acesso à administração da plataforma.
               </p>
             </div>
           </div>
           <Link
             href="/admin"
-            className="inline-flex shrink-0 items-center justify-center rounded-2xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-(--white) transition-colors hover:bg-(--white)/5"
+            className="inline-flex shrink-0 items-center justify-center rounded-2xl border border-(--border-strong) px-4 py-3 text-sm font-semibold text-(--text-primary) transition-colors hover:bg-(--text-primary)/5"
           >
             Abrir administração
           </Link>
@@ -392,12 +392,12 @@ export function ProfileForm({ user, onUserChange }: { user: CurrentUser; onUserC
   return (
     <div>
       <div className="mx-auto max-w-4xl">
-        <div className="flex flex-wrap items-center gap-3 border-b border-(--line) pb-8">
+        <div className="flex flex-wrap items-center gap-3 border-b border-(--border) pb-8">
           <span
             className={`inline-flex w-fit items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold ${
               user.emailVerified
-                ? "border-(--success)/38 bg-(--success)/10 text-(--success)"
-                : "border-(--info)/38 bg-(--info)/10 text-(--info)"
+                ? "border-(--success)/38 bg-(--success-soft) text-(--success)"
+                : "border-(--info)/38 bg-(--info-soft) text-(--info)"
             }`}
           >
             <EmailStatusIcon aria-hidden="true" size={15} />
@@ -413,11 +413,11 @@ export function ProfileForm({ user, onUserChange }: { user: CurrentUser; onUserC
         >
           <h2
             id="personal-data-heading"
-            className="text-xl font-bold text-(--white)"
+            className="text-xl font-bold text-(--text-primary)"
           >
             Dados pessoais
           </h2>
-          <p className="mt-1 text-sm text-(--gray)">
+          <p className="mt-1 text-sm text-(--text-secondary)">
             Mantenha as informações da sua conta atualizadas.
           </p>
           <form
@@ -450,7 +450,7 @@ export function ProfileForm({ user, onUserChange }: { user: CurrentUser; onUserC
                   value={user.email}
                   aria-describedby="profile-email-hint"
                 />
-                <p id="profile-email-hint" className="mt-2 text-xs leading-relaxed text-(--gray)">
+                <p id="profile-email-hint" className="mt-2 text-xs leading-relaxed text-(--text-secondary)">
                   O e-mail identifica sua conta e não pode ser alterado.
                 </p>
               </div>
@@ -500,7 +500,7 @@ export function ProfileForm({ user, onUserChange }: { user: CurrentUser; onUserC
               </div>
               <ProfileLocationFields control={control} setValue={setValue} disabled={isSaving} labelClassName={fieldLabelClassName} />
             </div>
-            <p className="mt-5 text-xs leading-relaxed text-(--gray)">
+            <p className="mt-5 text-xs leading-relaxed text-(--text-secondary)">
               Telefone, data de nascimento, cidade e estado são obrigatórios
               para anunciar um imóvel. É necessário ter pelo menos 18 anos.
             </p>
@@ -516,7 +516,7 @@ export function ProfileForm({ user, onUserChange }: { user: CurrentUser; onUserC
             ) : null}
             <button
               disabled={isSaving || Boolean(profilePendingRole)}
-              className="mt-6 rounded-2xl bg-(--blue) px-5 py-3 text-sm font-bold text-(--white) transition-colors hover:bg-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-6 rounded-2xl bg-(--primary) px-5 py-3 text-sm font-bold text-(--on-primary) transition-colors hover:bg-(--primary-hover) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) disabled:cursor-not-allowed disabled:opacity-60"
               type="submit"
             >
               {isSaving ? "Salvando..." : "Salvar dados"}
@@ -526,20 +526,20 @@ export function ProfileForm({ user, onUserChange }: { user: CurrentUser; onUserC
 
         <section
           aria-labelledby="verification-heading"
-          className="border-t border-(--line) py-8 sm:py-10"
+          className="border-t border-(--border) py-8 sm:py-10"
         >
           <h2
             id="verification-heading"
-            className="text-xl font-bold text-(--white)"
+            className="text-xl font-bold text-(--text-primary)"
           >
             Verificação
           </h2>
-          <p className="mt-1 text-sm text-(--gray)">
+          <p className="mt-1 text-sm text-(--text-secondary)">
             {user.emailVerified
               ? "Seu e-mail está verificado."
               : "O e-mail está cadastrado, mas ainda não foi verificado."}
           </p>
-          <div className="mt-6 divide-y divide-(--line)">
+          <div className="mt-6 divide-y divide-(--border)">
             <VerificationStatus
               label="E-mail"
               detail={user.email}
@@ -551,7 +551,7 @@ export function ProfileForm({ user, onUserChange }: { user: CurrentUser; onUserC
                     type="button"
                     disabled={isSendingVerification}
                     onClick={sendVerification}
-                    className="rounded-xl border border-(--line-strong) px-3 py-2 text-xs font-bold text-(--white) transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-xl border border-(--border-strong) px-3 py-2 text-xs font-bold text-(--text-primary) transition-colors hover:border-(--primary) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isSendingVerification ? "Enviando..." : "Enviar link de confirmação"}
                   </button>
@@ -587,22 +587,22 @@ export function ProfileForm({ user, onUserChange }: { user: CurrentUser; onUserC
 
         <section
           aria-labelledby="security-heading"
-          className="border-t border-(--line) py-8 sm:py-10"
+          className="border-t border-(--border) py-8 sm:py-10"
         >
           <div className="flex items-start gap-3">
             <LuLockKeyhole
               aria-hidden="true"
-              className="mt-1 shrink-0 text-(--blue-light)"
+              className="mt-1 shrink-0 text-(--primary-text)"
               size={20}
             />
             <div>
               <h2
                 id="security-heading"
-                className="text-xl font-bold text-(--white)"
+                className="text-xl font-bold text-(--text-primary)"
               >
                 Segurança
               </h2>
-              <p className="mt-1 text-sm text-(--gray)">
+              <p className="mt-1 text-sm text-(--text-secondary)">
                 Opções de proteção da sua conta.
               </p>
             </div>
@@ -612,12 +612,12 @@ export function ProfileForm({ user, onUserChange }: { user: CurrentUser; onUserC
 
         <section
           aria-labelledby="account-heading"
-          className="border-t border-(--line) pt-8 sm:pt-10"
+          className="border-t border-(--border) pt-8 sm:pt-10"
         >
-          <h2 id="account-heading" className="text-xl font-bold text-(--white)">
+          <h2 id="account-heading" className="text-xl font-bold text-(--text-primary)">
             Conta
           </h2>
-          <p className="mt-1 text-sm text-(--gray)">
+          <p className="mt-1 text-sm text-(--text-secondary)">
             Gerencie o status da sua conta.
           </p>
           <DeactivateAccount hasPassword={user.hasPassword} />

@@ -44,11 +44,11 @@ export function GuestIdentityForm({
   }
 
   return (
-    <form noValidate onSubmit={handleSubmit(save)} className="mt-5 border-t border-(--line) pt-4">
-      <label id="guest-gender-identity-label" htmlFor="guest-gender-identity" className="block text-sm font-semibold text-(--gray)">
+    <form noValidate onSubmit={handleSubmit(save)} className="mt-5 border-t border-(--border) pt-4">
+      <label id="guest-gender-identity-label" htmlFor="guest-gender-identity" className="block text-sm font-semibold text-(--text-secondary)">
         Você se identifica como
       </label>
-      <p className="mt-1 text-xs leading-relaxed text-(--gray)">
+      <p className="mt-1 text-xs leading-relaxed text-(--text-secondary)">
         Usado apenas para mostrar quartos compatíveis. Não é exibido a proprietários. Será exigido antes de reservar.
       </p>
       <div className="mt-3 flex flex-col gap-2 sm:flex-row">
@@ -82,7 +82,7 @@ export function GuestIdentityForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="shrink-0 rounded-2xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-(--white) transition-colors hover:bg-(--white)/5 disabled:cursor-not-allowed disabled:opacity-60"
+          className="shrink-0 rounded-2xl border border-(--border-strong) px-4 py-3 text-sm font-semibold text-(--text-primary) transition-colors hover:bg-(--text-primary)/5 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? "Salvando..." : "Salvar"}
         </button>

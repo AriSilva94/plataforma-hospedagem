@@ -38,7 +38,7 @@ export function AvatarUploader({
       {avatarUrl ? (
         <Image src={avatarUrl} alt="" fill sizes="72px" className="rounded-full object-cover" />
       ) : (
-        <div className="flex size-full items-center justify-center rounded-full bg-(--blue) text-2xl font-extrabold text-(--white)">
+        <div className="flex size-full items-center justify-center rounded-full bg-(--primary) text-2xl font-extrabold text-(--on-primary)">
           {name.slice(0, 1).toUpperCase()}
         </div>
       )}
@@ -47,7 +47,7 @@ export function AvatarUploader({
         disabled={pending}
         onClick={() => inputRef.current?.click()}
         aria-label="Alterar foto de perfil"
-        className="absolute -bottom-1 -right-1 flex size-7 items-center justify-center rounded-full border-2 border-(--navy) bg-(--surface-raised) text-(--white) transition-colors hover:bg-(--surface-high) disabled:cursor-not-allowed disabled:opacity-60"
+        className="absolute -bottom-1 -right-1 flex size-7 items-center justify-center rounded-full border-2 border-(--background) bg-(--surface-raised) text-(--text-primary) transition-colors hover:bg-(--surface-raised) disabled:cursor-not-allowed disabled:opacity-60"
       >
         <LuCamera aria-hidden="true" size={13} />
       </button>
@@ -63,7 +63,7 @@ export function AvatarUploader({
         }}
       />
       {error ? (
-        <p role="alert" className="absolute top-full mt-1 w-40 text-xs font-semibold text-(--danger-soft)">
+        <p role="alert" className="absolute top-full mt-1 w-40 text-xs font-semibold text-(--error)">
           {error}
         </p>
       ) : null}

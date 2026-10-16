@@ -7,7 +7,7 @@ import { RoomCard } from "@/components/room-card";
 import type { PublicRoomCard } from "@/lib/properties";
 
 const arrowClassName =
-  "absolute top-[30%] z-10 hidden size-11 items-center justify-center rounded-full bg-(--white) text-(--navy) shadow-[0_10px_24px_color-mix(in_srgb,var(--black)_40%,transparent)] transition-colors hover:bg-(--blue-pale) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) md:flex";
+  "absolute top-[30%] z-10 hidden size-11 items-center justify-center rounded-full bg-(--white) text-(--black) shadow-[0_10px_24px_color-mix(in_srgb,var(--shadow)_40%,transparent)] transition-colors hover:bg-(--white)/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) md:flex";
 
 export function FeaturedRooms({
   rooms,

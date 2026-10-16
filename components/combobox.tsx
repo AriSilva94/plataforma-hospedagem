@@ -33,7 +33,7 @@ function HighlightedLabel({ label, query }: { label: string; query: string }) {
   return (
     <>
       {label.slice(0, start)}
-      <mark className="bg-transparent font-bold text-(--blue-soft)">{label.slice(start, start + term.length)}</mark>
+      <mark className="bg-transparent font-bold text-(--primary-text)">{label.slice(start, start + term.length)}</mark>
       {label.slice(start + term.length)}
     </>
   );
@@ -154,32 +154,32 @@ export function Combobox({
           }
         }}
         onBlur={onBlur}
-        className={`group flex w-full items-center gap-3 rounded-xl border border-(--line-strong) bg-(--navy) text-left text-(--white) ${
+        className={`group flex w-full items-center gap-3 rounded-xl border border-(--border-strong) bg-(--background) text-left text-(--text-primary) ${
           size === "compact" ? "px-3.5 py-2.5 text-base sm:text-sm" : "px-4 py-3"
-        } outline-hidden transition-colors hover:border-(--gray) focus-visible:border-(--blue-light) focus-visible:ring-2 focus-visible:ring-(--blue-light) disabled:cursor-not-allowed disabled:border-(--line) disabled:bg-(--surface) disabled:hover:border-(--line) data-[invalid=true]:border-(--danger) data-[invalid=true]:focus-visible:ring-(--danger) data-[open=true]:border-(--blue-light)`}
+        } outline-hidden transition-colors hover:border-(--text-secondary) focus-visible:border-(--primary) focus-visible:ring-2 focus-visible:ring-(--focus-ring) disabled:cursor-not-allowed disabled:border-(--border) disabled:bg-(--surface) disabled:hover:border-(--border) data-[invalid=true]:border-(--error) data-[invalid=true]:focus-visible:ring-(--error) data-[open=true]:border-(--primary)`}
       >
         {Icon ? (
           <Icon
             aria-hidden="true"
             size={18}
-            className="-mr-0.5 shrink-0 text-(--blue-light) transition-colors group-focus-visible:text-(--blue-soft) group-disabled:text-(--gray) group-disabled:opacity-60 group-data-[open=true]:text-(--blue-soft)"
+            className="-mr-0.5 shrink-0 text-(--primary-text) transition-colors group-focus-visible:text-(--primary-text) group-disabled:text-(--text-secondary) group-disabled:opacity-60 group-data-[open=true]:text-(--primary-text)"
           />
         ) : null}
-        <span id={valueId} className={`min-w-0 flex-1 truncate ${selected ? "" : "text-(--gray)"}`}>
+        <span id={valueId} className={`min-w-0 flex-1 truncate ${selected ? "" : "text-(--text-secondary)"}`}>
           {selected ? selected.label : placeholder}
         </span>
         {selected?.detail ? (
-          <span className="shrink-0 rounded-md bg-(--blue-tint) px-1.5 py-0.5 text-[0.6875rem] leading-4 font-bold tracking-wider text-(--blue-soft) ring-1 ring-(--blue-tint-line) ring-inset">
+          <span className="shrink-0 rounded-md bg-(--primary-soft) px-1.5 py-0.5 text-[0.6875rem] leading-4 font-bold tracking-wider text-(--primary-text) ring-1 ring-(--primary)/35 ring-inset">
             {selected.detail}
           </span>
         ) : null}
         {loading ? (
-          <LuLoaderCircle aria-hidden="true" size={18} className="shrink-0 animate-spin text-(--gray) motion-reduce:animate-none" />
+          <LuLoaderCircle aria-hidden="true" size={18} className="shrink-0 animate-spin text-(--text-secondary) motion-reduce:animate-none" />
         ) : (
           <LuChevronDown
             aria-hidden="true"
             size={18}
-            className="shrink-0 text-(--gray) transition-transform duration-200 ease-out group-data-[open=true]:rotate-180 group-data-[open=true]:text-(--blue-light) motion-reduce:transition-none"
+            className="shrink-0 text-(--text-secondary) transition-transform duration-200 ease-out group-data-[open=true]:rotate-180 group-data-[open=true]:text-(--primary-text) motion-reduce:transition-none"
           />
         )}
       </button>
@@ -187,8 +187,8 @@ export function Combobox({
       {name ? <input type="hidden" name={name} value={value} /> : null}
 
       <div {...panelProps} data-align={align} className="field-popover w-full min-w-56 overflow-hidden">
-        <div className="flex items-center gap-2.5 border-b border-(--line) px-3.5">
-          <LuSearch aria-hidden="true" size={16} className="shrink-0 text-(--gray)" />
+        <div className="flex items-center gap-2.5 border-b border-(--border) px-3.5">
+          <LuSearch aria-hidden="true" size={16} className="shrink-0 text-(--text-secondary)" />
           <input
             ref={searchRef}
             type="text"
@@ -209,7 +209,7 @@ export function Combobox({
               setActiveIndex(0);
             }}
             onKeyDown={handleSearchKeyDown}
-            className="w-full bg-transparent py-3 text-base text-(--white) caret-(--blue-light) outline-hidden placeholder:text-(--gray) sm:text-sm"
+            className="w-full bg-transparent py-3 text-base text-(--text-primary) caret-(--primary) outline-hidden placeholder:text-(--text-secondary) sm:text-sm"
           />
         </div>
         <ul ref={listRef} id={listId} role="listbox" aria-labelledby={labelId} className="field-scroll max-h-60 overflow-y-auto p-1.5">
@@ -224,7 +224,7 @@ export function Combobox({
                 data-active={index === activeIndex}
                 onPointerMove={() => setActiveIndex(index)}
                 onClick={() => select(option.value)}
-                className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 text-sm text-(--white) data-[active=true]:bg-(--white)/8 aria-selected:font-semibold aria-selected:text-(--white) sm:min-h-10"
+                className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 text-sm text-(--text-primary) data-[active=true]:bg-(--text-primary)/8 aria-selected:font-semibold aria-selected:text-(--text-primary) sm:min-h-10"
               >
                 <span className="min-w-0 flex-1 truncate">
                   <HighlightedLabel label={option.label} query={query} />
@@ -232,28 +232,28 @@ export function Combobox({
                 {option.detail ? (
                   <span
                     className={`shrink-0 rounded-md px-1.5 py-0.5 text-[0.6875rem] leading-4 font-bold tracking-wider ring-1 ring-inset ${
-                      isSelected ? "bg-(--blue-tint) text-(--blue-soft) ring-(--blue-tint-line)" : "bg-(--white)/5 text-(--gray) ring-(--line)"
+                      isSelected ? "bg-(--primary-soft) text-(--primary-text) ring-(--primary)/35" : "bg-(--text-primary)/5 text-(--text-secondary) ring-(--border)"
                     }`}
                   >
                     {option.detail}
                   </span>
                 ) : null}
-                <LuCheck aria-hidden="true" size={16} className={`shrink-0 text-(--blue-soft) ${isSelected ? "" : "invisible"}`} />
+                <LuCheck aria-hidden="true" size={16} className={`shrink-0 text-(--primary-text) ${isSelected ? "" : "invisible"}`} />
               </li>
             );
           })}
           {filtered.length === 0 ? (
-            <li role="presentation" className="px-3 py-6 text-center text-sm text-(--gray)">
+            <li role="presentation" className="px-3 py-6 text-center text-sm text-(--text-secondary)">
               {emptyMessage}
             </li>
           ) : null}
         </ul>
         {selected && clearable ? (
-          <div className="border-t border-(--line) p-1.5">
+          <div className="border-t border-(--border) p-1.5">
             <button
               type="button"
               onClick={() => select("")}
-              className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-(--gray) outline-hidden transition-colors hover:bg-(--white)/8 hover:text-(--white) focus-visible:bg-(--white)/8 focus-visible:text-(--white)"
+              className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-(--text-secondary) outline-hidden transition-colors hover:bg-(--text-primary)/8 hover:text-(--text-primary) focus-visible:bg-(--text-primary)/8 focus-visible:text-(--text-primary)"
             >
               Limpar seleção
             </button>

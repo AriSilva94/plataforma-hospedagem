@@ -18,7 +18,7 @@ export function AdminPagination({ path, params, page, total }: { path: string; p
       ) : (
         <span />
       )}
-      <span className="text-sm text-(--gray)">
+      <span className="text-sm text-(--text-secondary)">
         Página {page} de {pageCount}
       </span>
       {page < pageCount ? (
@@ -35,11 +35,11 @@ export function AdminPagination({ path, params, page, total }: { path: string; p
 export function AdminList({ total, singular, plural, emptyMessage, children }: { total: number; singular: string; plural: string; emptyMessage: string; children: ReactNode }) {
   return (
     <>
-      <p className="mt-6 text-sm text-(--gray)" aria-live="polite">
+      <p className="mt-6 text-sm text-(--text-secondary)" aria-live="polite">
         {total === 1 ? `1 ${singular}` : `${total} ${plural}`}
       </p>
       {total === 0 ? (
-        <p className="mt-4 rounded-2xl border border-dashed border-(--line-strong) p-6 text-sm text-(--gray)">{emptyMessage}</p>
+        <p className="mt-4 rounded-2xl border border-dashed border-(--border) p-6 text-sm text-(--text-secondary)">{emptyMessage}</p>
       ) : (
         <ul className="mt-4 flex flex-col gap-3">{children}</ul>
       )}

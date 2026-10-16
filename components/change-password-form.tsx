@@ -53,7 +53,7 @@ export function ChangePasswordForm({ hasPassword }: { hasPassword: boolean }) {
   if (!hasPassword) {
     return (
       <div className="mt-5">
-        <p className="max-w-prose text-sm leading-relaxed text-(--gray)">
+        <p className="max-w-prose text-sm leading-relaxed text-(--text-secondary)">
           Sua conta ainda não tem senha. Você pode definir uma pelo link enviado ao seu e-mail.
         </p>
         <Link href="/recuperar-senha" className={`mt-4 ${secondaryButtonClassName}`}>
@@ -110,7 +110,7 @@ export function ChangePasswordForm({ hasPassword }: { hasPassword: boolean }) {
               {fieldError ? (
                 <FieldError id={errorId} message={fieldError} />
               ) : hint ? (
-                <p id={hintId} className="mt-2 text-xs leading-relaxed text-(--gray)">{hint}</p>
+                <p id={hintId} className="mt-2 text-xs leading-relaxed text-(--text-secondary)">{hint}</p>
               ) : null}
             </div>
           );
@@ -120,11 +120,11 @@ export function ChangePasswordForm({ hasPassword }: { hasPassword: boolean }) {
         type="button"
         aria-pressed={isPasswordVisible}
         onClick={() => setIsPasswordVisible((visible) => !visible)}
-        className="mt-3 rounded-sm text-xs font-semibold text-(--blue-light) hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
+        className="mt-3 rounded-sm text-xs font-semibold text-(--primary-text) hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
       >
         {isPasswordVisible ? "Ocultar senhas" : "Mostrar senhas"}
       </button>
-      <p className="mt-4 text-xs leading-relaxed text-(--gray)">
+      <p className="mt-4 text-xs leading-relaxed text-(--text-secondary)">
         Ao alterar a senha, os outros dispositivos conectados à sua conta serão desconectados.
       </p>
       {error ? (

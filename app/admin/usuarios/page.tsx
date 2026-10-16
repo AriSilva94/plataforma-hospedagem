@@ -35,11 +35,11 @@ export default async function AdminUsersPage({ searchParams }: PageProps<"/admin
           <li key={user.id} className={`${cardClassName} flex flex-col gap-3 md:flex-row md:items-center md:justify-between`}>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="wrap-break-word font-bold text-(--white)">{user.name}</h2>
+                <h2 className="wrap-break-word font-bold text-(--text-primary)">{user.name}</h2>
                 <StatusBadge tone={user.status === "ACTIVE" ? "success" : "warning"}>{userStatusLabels[user.status]}</StatusBadge>
               </div>
-              <p className="mt-1 break-all text-sm text-(--gray)">{user.email}</p>
-              <p className="mt-2 text-sm text-(--gray)">
+              <p className="mt-1 break-all text-sm text-(--text-secondary)">{user.email}</p>
+              <p className="mt-2 text-sm text-(--text-secondary)">
                 Desde {formatDate(user.createdAt)}
                 {user.roles.includes("OWNER") ? ` · ${user.propertyCount} ${user.propertyCount === 1 ? "imóvel" : "imóveis"}` : ""}
               </p>

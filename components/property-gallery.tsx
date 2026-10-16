@@ -25,7 +25,7 @@ function PhotoButton({
       type="button"
       onClick={onOpen}
       aria-label={`Ampliar ${photo.alt}`}
-      className={`group relative block overflow-hidden bg-(--surface-raised) focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--blue-light) ${className}`}
+      className={`group relative block overflow-hidden bg-(--surface-raised) focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--focus-ring) ${className}`}
     >
       <Image
         src={photo.url}
@@ -42,7 +42,7 @@ function PhotoButton({
 
 function EmptyPhoto({ className }: { className: string }) {
   return (
-    <div className={`flex items-center justify-center bg-(--surface-raised) text-(--gray) ${className}`}>
+    <div className={`flex items-center justify-center bg-(--surface-raised) text-(--text-secondary) ${className}`}>
       <LuImage aria-hidden="true" size={28} />
     </div>
   );
@@ -73,7 +73,7 @@ export function PropertyPhotoGrid({ title, photos }: { title: string; photos: Vi
         <button
           type="button"
           onClick={() => setViewing(0)}
-          className="absolute right-3 bottom-3 inline-flex min-h-11 items-center gap-2 rounded-2xl bg-(--black)/70 px-4 text-sm font-semibold text-(--white) transition-colors hover:bg-(--black)/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
+          className="absolute right-3 bottom-3 inline-flex min-h-11 items-center gap-2 rounded-2xl bg-(--black)/70 px-4 text-sm font-semibold text-(--white) transition-colors hover:bg-(--black)/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
         >
           <LuImages aria-hidden="true" size={16} />
           Ver as {photos.length} fotos

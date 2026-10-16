@@ -1,36 +1,37 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: dark;
+  --white: #ffffff;
   --black: #000000;
-  --navy-deep: #020b1a;
-  --navy: #031128;
-  --surface: #0f1f39;
-  --surface-raised: #12274a;
-  --surface-high: #183259;
-  --blue-deep: #0b3a8f;
-  --blue: #0b63e3;
-  --blue-light: #3a83f0;
-  --blue-soft: #8ab4ff;
-  --blue-pale: #b6d1ff;
-  --blue-tint: color-mix(in srgb, var(--blue-light) 14%, transparent);
-  --blue-tint-line: color-mix(in srgb, var(--blue-light) 34%, transparent);
-  --white: #f4f6f8;
-  --text-soft: #d5dfed;
-  --gray: #b2bbc8;
-  --ink-muted: #3a4a63;
-  --ink-subtle: #8695ab;
-  --line: color-mix(in srgb, var(--gray) 14%, transparent);
-  --line-strong: color-mix(in srgb, var(--gray) 26%, transparent);
-  --success: #2fbf87;
-  --success-soft: #7be0b6;
-  --success-deep: #0b5c3d;
-  --warning: #e8b13a;
-  --warning-deep: #7a4d0d;
-  --info: #c8b6ff;
-  --info-deep: #3d2f7a;
-  --danger: #e5624b;
-  --danger-soft: #ff9b8a;
-  --danger-pale: #ffd3c9;
+  --shadow: #000000;
+  --background: #121316;
+  --surface: #1d1f23;
+  --surface-raised: #282b30;
+  --border: #383b42;
+  --border-strong: #6b6f78;
+  --text-primary: #f4f4f5;
+  --text-secondary: #a5a8b0;
+  --primary: #2f6cdd;
+  --primary-hover: #2c66d1;
+  --primary-text: #73a7f7;
+  --primary-soft: #212d45;
+  --on-primary: #ffffff;
+  --focus-ring: #73a7f7;
+  --success: #49b88a;
+  --success-soft: #233431;
+  --warning: #e3a44d;
+  --warning-soft: #393229;
+  --error: #e57373;
+  --error-soft: #392b2e;
+  --info: #73a7f7;
+  --info-soft: #293241;
+  --lavender: #b8a1d9;
+  --lavender-soft: #30283c;
+  --champagne: #d4b68a;
+  --champagne-soft: #362e25;
+  --terracotta: #d99580;
+  --terracotta-soft: #392a27;
 }
 
 @theme inline {
@@ -46,8 +47,8 @@
 }
 
 body {
-  background: var(--navy);
-  color: var(--white);
+  background: var(--background);
+  color: var(--text-primary);
   font-family: var(--font-jakarta), system-ui, sans-serif;
 }
 
@@ -66,8 +67,8 @@ body.scroll-locked {
 }
 
 ::selection {
-  background: var(--blue);
-  color: var(--white);
+  background: var(--primary);
+  color: var(--on-primary);
 }
 
 .auth-shell {
@@ -79,9 +80,7 @@ body.scroll-locked {
   min-height: 0;
   overflow: hidden;
   padding: clamp(1rem, 4vw, 3rem);
-  background:
-    radial-gradient(circle at 78% 12%, color-mix(in srgb, var(--blue-light) 16%, transparent), transparent 23%),
-    linear-gradient(135deg, var(--navy-deep), var(--navy) 58%, var(--surface));
+  background: var(--background);
 }
 
 .auth-frame {
@@ -92,7 +91,7 @@ body.scroll-locked {
   overflow: hidden;
   border-radius: 1.75rem;
   background: var(--surface);
-  box-shadow: 0 2.5rem 6rem color-mix(in srgb, var(--black) 45%, transparent);
+  box-shadow: 0 2.5rem 6rem color-mix(in srgb, var(--shadow) 45%, transparent);
 }
 
 .auth-scene {
@@ -100,7 +99,7 @@ body.scroll-locked {
   min-height: 22rem;
   overflow: hidden;
   padding: 2rem;
-  background: var(--navy);
+  background: var(--background);
 }
 
 .auth-room-image {
@@ -114,7 +113,7 @@ body.scroll-locked {
   inset: 0;
   content: "";
   pointer-events: none;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--navy) 88%, transparent), color-mix(in srgb, var(--navy) 22%, transparent) 72%), linear-gradient(0deg, color-mix(in srgb, var(--navy) 82%, transparent), transparent 60%);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--background) 88%, transparent), color-mix(in srgb, var(--background) 22%, transparent) 72%), linear-gradient(0deg, color-mix(in srgb, var(--background) 82%, transparent), transparent 60%);
 }
 
 .auth-scene-content {
@@ -127,7 +126,7 @@ body.scroll-locked {
 }
 
 .auth-scene-title {
-  color: var(--white);
+  color: var(--text-primary);
   font-size: clamp(2.5rem, 5.5vw, 3.75rem);
   font-weight: 400;
   line-height: 0.94;
@@ -138,15 +137,15 @@ body.scroll-locked {
   display: grid;
   place-items: center;
   padding: 1.5rem;
-  background: radial-gradient(circle at 70% 14%, color-mix(in srgb, var(--blue-light) 24%, transparent), transparent 28%), linear-gradient(150deg, var(--surface-raised), var(--surface));
+  background: var(--surface);
 }
 
 .auth-card {
   width: min(100%, 25rem);
   padding: 1.5rem;
   border-radius: 1rem;
-  background: linear-gradient(148deg, color-mix(in srgb, var(--surface-high) 96%, transparent), color-mix(in srgb, var(--surface) 94%, transparent));
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--blue-pale) 10%, transparent), 0 1.9rem 4.4rem color-mix(in srgb, var(--black) 32%, transparent);
+  background: var(--surface-raised);
+  box-shadow: inset 0 0 0 1px var(--border), 0 1.9rem 4.4rem color-mix(in srgb, var(--shadow) 32%, transparent);
 }
 
 .auth-emblem {
@@ -155,9 +154,9 @@ body.scroll-locked {
   height: 3.15rem;
   place-items: center;
   border-radius: 9999px;
-  background: radial-gradient(circle at 38% 31%, var(--blue-light), var(--surface-high));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--blue-soft) 24%, transparent), 0 0.6rem 1.5rem color-mix(in srgb, var(--black) 20%, transparent);
-  color: var(--text-soft);
+  background: var(--primary-soft);
+  box-shadow: inset 0 0 0 1px var(--border);
+  color: var(--primary-text);
   font-size: 1.35rem;
 }
 
@@ -168,24 +167,24 @@ body.scroll-locked {
   margin-top: 0.45rem;
   padding: 0 0.9rem;
   border-radius: 0.8rem;
-  background: color-mix(in srgb, var(--navy) 58%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--blue-soft) 14%, transparent), inset 0 0.5rem 1.25rem color-mix(in srgb, var(--black) 12%, transparent);
-  color: var(--blue-soft);
+  background: var(--background);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  color: var(--text-secondary);
   transition: box-shadow 180ms ease, color 180ms ease;
 }
 
 .auth-input-wrap:focus-within {
-  box-shadow: inset 0 0 0 1px var(--blue-light), 0 0 0 0.2rem color-mix(in srgb, var(--blue-light) 22%, transparent);
-  color: var(--blue-pale);
+  box-shadow: inset 0 0 0 1px var(--focus-ring), 0 0 0 0.2rem color-mix(in srgb, var(--focus-ring) 28%, transparent);
+  color: var(--primary-text);
 }
 
 .auth-input-wrap:has(input[aria-invalid="true"]) {
-  box-shadow: inset 0 0 0 1px var(--danger);
-  color: var(--danger-soft);
+  box-shadow: inset 0 0 0 1px var(--error);
+  color: var(--error);
 }
 
 .auth-input-wrap:has(input[aria-invalid="true"]):focus-within {
-  box-shadow: inset 0 0 0 1px var(--danger), 0 0 0 0.2rem color-mix(in srgb, var(--danger) 24%, transparent);
+  box-shadow: inset 0 0 0 1px var(--error), 0 0 0 0.2rem color-mix(in srgb, var(--error) 24%, transparent);
 }
 
 .auth-field-error {
@@ -193,7 +192,7 @@ body.scroll-locked {
   align-items: flex-start;
   gap: 0.4rem;
   margin-top: 0.4rem;
-  color: var(--danger-soft);
+  color: var(--error);
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.4;
@@ -211,8 +210,8 @@ body.scroll-locked {
   border: 0;
   outline: 0;
   background: transparent;
-  color: var(--white);
-  caret-color: var(--blue-light);
+  color: var(--text-primary);
+  caret-color: var(--primary);
 }
 
 .auth-reveal {
@@ -230,7 +229,7 @@ body.scroll-locked {
 }
 
 .auth-reveal:hover {
-  color: var(--white);
+  color: var(--text-primary);
 }
 
 .auth-submit {
@@ -244,11 +243,11 @@ body.scroll-locked {
   padding: 0.9rem 1rem;
   border: 0;
   border-radius: 1rem;
-  background: linear-gradient(102deg, var(--blue-deep), var(--blue) 48%, var(--blue-light));
-  box-shadow: 0 0.8rem 1.7rem color-mix(in srgb, var(--blue) 32%, transparent);
-  color: var(--white);
+  background: var(--primary);
+  box-shadow: 0 0.8rem 1.7rem color-mix(in srgb, var(--shadow) 24%, transparent);
+  color: var(--on-primary);
   font-weight: 800;
-  transition: transform 180ms ease, box-shadow 180ms ease;
+  transition: transform 180ms ease, background-color 180ms ease;
 }
 
 .auth-submit::before {
@@ -269,18 +268,18 @@ body.scroll-locked {
 
 .auth-submit:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 1.1rem 2.1rem color-mix(in srgb, var(--blue) 40%, transparent);
+  background: var(--primary-hover);
 }
 
 .auth-reveal:focus-visible {
-  outline: 2px solid var(--blue-pale);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 0;
 }
 
 .auth-submit:focus-visible,
 .auth-provider:focus-visible,
 .auth-link:focus-visible {
-  outline: 3px solid var(--blue-pale);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 4px;
 }
 
@@ -294,7 +293,7 @@ body.scroll-locked {
   align-items: center;
   gap: 0.8rem;
   margin: 1.25rem 0 1rem;
-  color: var(--gray);
+  color: var(--text-secondary);
   font-size: 0.75rem;
   white-space: nowrap;
 }
@@ -304,7 +303,7 @@ body.scroll-locked {
   height: 1px;
   flex: 1;
   content: "";
-  background: linear-gradient(90deg, transparent, var(--line-strong));
+  background: var(--border);
 }
 
 .auth-divider::after {
@@ -317,14 +316,14 @@ body.scroll-locked {
   height: 3.5rem;
   place-items: center;
   border-radius: 9999px;
-  background: linear-gradient(145deg, color-mix(in srgb, var(--blue-light) 30%, var(--surface-high)), var(--surface-high));
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--white) 9%, transparent), 0 0.7rem 1.5rem color-mix(in srgb, var(--black) 24%, transparent);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--border), 0 0.7rem 1.5rem color-mix(in srgb, var(--shadow) 24%, transparent);
   transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
 .auth-provider:hover {
   transform: translateY(-3px) scale(1.05);
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--white) 12%, transparent), 0 1.1rem 2rem color-mix(in srgb, var(--black) 32%, transparent);
+  box-shadow: inset 0 0 0 1px var(--border-strong), 0 1.1rem 2rem color-mix(in srgb, var(--shadow) 32%, transparent);
 }
 
 .auth-link {
@@ -341,14 +340,14 @@ body.scroll-locked {
   justify-content: center;
   gap: 0.45rem;
   margin: 1.2rem 0 0;
-  color: var(--gray);
+  color: var(--text-secondary);
   font-size: 0.75rem;
   text-align: center;
 }
 
 .auth-reassurance svg {
   flex: none;
-  color: var(--blue-soft);
+  color: var(--primary-text);
 }
 
 .auth-footer {
@@ -356,12 +355,12 @@ body.scroll-locked {
   width: min(100%, 68rem);
   justify-content: space-between;
   gap: 1rem;
-  color: var(--gray);
+  color: var(--text-secondary);
   font-size: 0.7rem;
 }
 
 .auth-footer span:last-child {
-  color: var(--blue-pale);
+  color: var(--primary-text);
   font-size: 0.95rem;
 }
 
@@ -418,7 +417,7 @@ body.scroll-locked {
   }
 
   .auth-scene::after {
-    background: linear-gradient(180deg, color-mix(in srgb, var(--navy) 30%, transparent), color-mix(in srgb, var(--navy) 90%, transparent) 64%, color-mix(in srgb, var(--navy) 98%, transparent));
+    background: linear-gradient(180deg, color-mix(in srgb, var(--background) 30%, transparent), color-mix(in srgb, var(--background) 90%, transparent) 64%, color-mix(in srgb, var(--background) 98%, transparent));
   }
 
   .auth-scene-content {
@@ -441,7 +440,7 @@ body.scroll-locked {
   .auth-card {
     width: min(100%, 25rem);
     padding: 1.25rem;
-    background: linear-gradient(148deg, color-mix(in srgb, var(--surface-high) 95%, transparent), color-mix(in srgb, var(--surface) 94%, transparent));
+    background: color-mix(in srgb, var(--surface-raised) 95%, transparent);
     backdrop-filter: blur(0.6rem);
   }
 
@@ -688,12 +687,12 @@ body.scroll-locked {
   left: 0;
   z-index: 30;
   transform-origin: top center;
-  border: 1px solid var(--line-strong);
+  border: 1px solid var(--border);
   border-radius: 1rem;
   background: var(--surface-raised);
   box-shadow:
-    0 1.5rem 3.5rem color-mix(in srgb, var(--black) 50%, transparent),
-    0 0.25rem 0.75rem color-mix(in srgb, var(--black) 30%, transparent);
+    0 1.5rem 3.5rem color-mix(in srgb, var(--shadow) 50%, transparent),
+    0 0.25rem 0.75rem color-mix(in srgb, var(--shadow) 30%, transparent);
   transition:
     opacity 200ms cubic-bezier(0.16, 1, 0.3, 1),
     transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -732,7 +731,7 @@ body.scroll-locked {
 .field-scroll {
   overscroll-behavior: contain;
   scrollbar-width: thin;
-  scrollbar-color: var(--line-strong) transparent;
+  scrollbar-color: var(--border-strong) transparent;
 }
 
 .calendar-view {

@@ -37,10 +37,10 @@ const statCards: { key: keyof OwnerRoomsSummary; label: string; icon: IconType; 
 ];
 
 const toneClassNames = {
-  neutral: "bg-(--surface-raised) text-(--blue-light)",
-  success: "bg-(--success)/12 text-(--success)",
-  warning: "bg-(--warning)/15 text-(--warning)",
-  danger: "bg-(--danger)/12 text-(--danger)",
+  neutral: "bg-(--surface-raised) text-(--primary-text)",
+  success: "bg-(--success-soft) text-(--success)",
+  warning: "bg-(--warning-soft) text-(--warning)",
+  danger: "bg-(--error-soft) text-(--error)",
 } as const;
 
 function formatMemberSince(createdAt: string | null): string | null {
@@ -73,15 +73,15 @@ export function ProfileHub({
         <header className="flex flex-wrap items-center gap-4 sm:gap-5">
           <AvatarUploader name={user.name} avatarUrl={user.avatarUrl} />
           <div className="min-w-0 flex-1">
-            <h1 className="wrap-break-word text-2xl font-extrabold tracking-tight text-(--white) sm:text-3xl">
+            <h1 className="wrap-break-word text-2xl font-extrabold tracking-tight text-(--text-primary) sm:text-3xl">
               {user.name}
             </h1>
-            <p className="mt-1 wrap-break-word text-sm text-(--gray)">{user.email}</p>
-            {memberSince ? <p className="mt-1 text-xs text-(--gray)">{memberSince}</p> : null}
+            <p className="mt-1 wrap-break-word text-sm text-(--text-secondary)">{user.email}</p>
+            {memberSince ? <p className="mt-1 text-xs text-(--text-secondary)">{memberSince}</p> : null}
           </div>
         </header>
 
-        <nav aria-label="Seções do perfil" className="mt-8 flex gap-1 overflow-x-auto rounded-2xl border border-(--line-strong) bg-(--surface) p-1.5">
+        <nav aria-label="Seções do perfil" className="mt-8 flex gap-1 overflow-x-auto rounded-2xl border border-(--border) bg-(--surface) p-1.5">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const active = tab.id === activeTab;
@@ -92,10 +92,10 @@ export function ProfileHub({
                 onClick={() => setActiveTab(tab.id)}
                 aria-current={active ? "true" : undefined}
                 className={`flex min-w-0 flex-1 flex-col items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-2.5 text-xs font-semibold transition-colors sm:text-sm ${
-                  active ? "bg-(--surface-raised) text-(--white)" : "text-(--gray) hover:text-(--white)"
+                  active ? "bg-(--surface-raised) text-(--text-primary)" : "text-(--text-secondary) hover:text-(--text-primary)"
                 }`}
               >
-                <Icon aria-hidden="true" size={18} className={active ? "text-(--blue-light)" : undefined} />
+                <Icon aria-hidden="true" size={18} className={active ? "text-(--primary-text)" : undefined} />
                 {tab.label}
               </button>
             );
@@ -111,13 +111,13 @@ export function ProfileHub({
           <div className="min-h-0 overflow-hidden">
             <div className="grid grid-cols-2 gap-2 pt-4 sm:grid-cols-4">
               {statCards.map(({ key, label, icon: Icon, tone }) => (
-                <div key={key} className="flex items-center gap-2.5 rounded-xl border border-(--line-strong) bg-(--surface) px-3 py-2.5">
+                <div key={key} className="flex items-center gap-2.5 rounded-xl border border-(--border) bg-(--surface) px-3 py-2.5">
                   <span className={`flex size-8 shrink-0 items-center justify-center rounded-full ${toneClassNames[tone]}`}>
                     <Icon aria-hidden="true" size={16} />
                   </span>
                   <span className="flex min-w-0 flex-col">
-                    <span className="text-lg leading-tight font-extrabold text-(--white)">{summary[key]}</span>
-                    <span className="truncate text-xs font-semibold text-(--gray)">{label}</span>
+                    <span className="text-lg leading-tight font-extrabold text-(--text-primary)">{summary[key]}</span>
+                    <span className="truncate text-xs font-semibold text-(--text-secondary)">{label}</span>
                   </span>
                 </div>
               ))}
@@ -127,14 +127,14 @@ export function ProfileHub({
 
         <div className="mt-8">
           <TabPanel active={activeTab === "quartos"}>
-            <h2 className="text-xl font-bold text-(--white)">Meus quartos</h2>
-            <p className="mt-1 text-sm text-(--gray)">Cadastre o imóvel e gerencie os quartos reserváveis dentro dele.</p>
+            <h2 className="text-xl font-bold text-(--text-primary)">Meus quartos</h2>
+            <p className="mt-1 text-sm text-(--text-secondary)">Cadastre o imóvel e gerencie os quartos reserváveis dentro dele.</p>
             <OwnerPropertiesGrid properties={properties} />
           </TabPanel>
 
           <TabPanel active={activeTab === "favoritos"}>
-            <h2 className="text-xl font-bold text-(--white)">Favoritos</h2>
-            <p className="mt-1 text-sm text-(--gray)">Quartos que você salvou para comparar depois.</p>
+            <h2 className="text-xl font-bold text-(--text-primary)">Favoritos</h2>
+            <p className="mt-1 text-sm text-(--text-secondary)">Quartos que você salvou para comparar depois.</p>
             <FavoritesGrid items={favorites} loginReturnPath="/perfil" />
           </TabPanel>
 
@@ -143,14 +143,14 @@ export function ProfileHub({
           </TabPanel>
 
           <TabPanel active={activeTab === "coanfitriao"}>
-            <h2 className="text-xl font-bold text-(--white)">Coanfitrião</h2>
-            <p className="mt-1 text-sm text-(--gray)">Convide alguém para ajudar a administrar seus imóveis.</p>
-            <div className="mt-6 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-(--line-strong) p-10 text-center">
-              <span className="flex size-12 items-center justify-center rounded-xl bg-(--surface-raised) text-(--blue-light)">
+            <h2 className="text-xl font-bold text-(--text-primary)">Coanfitrião</h2>
+            <p className="mt-1 text-sm text-(--text-secondary)">Convide alguém para ajudar a administrar seus imóveis.</p>
+            <div className="mt-6 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-(--border) p-10 text-center">
+              <span className="flex size-12 items-center justify-center rounded-xl bg-(--surface-raised) text-(--primary-text)">
                 <LuUsers aria-hidden="true" size={24} />
               </span>
-              <h3 className="text-lg font-bold text-(--white)">Disponível em breve</h3>
-              <p className="max-w-prose text-sm leading-relaxed text-(--gray)">
+              <h3 className="text-lg font-bold text-(--text-primary)">Disponível em breve</h3>
+              <p className="max-w-prose text-sm leading-relaxed text-(--text-secondary)">
                 Em breve você vai poder convidar um coanfitrião para dividir a gestão dos seus imóveis.
               </p>
             </div>

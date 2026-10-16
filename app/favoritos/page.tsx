@@ -40,7 +40,7 @@ export default async function FavoritesPage() {
     <>
       <SiteHeader user={user} />
       <main className="mx-auto w-full max-w-360 px-6 pt-8 pb-28 md:px-10 md:pt-12 md:pb-16 lg:px-12">
-        <h1 className="text-3xl font-extrabold tracking-tight text-(--white)">Favoritos</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight text-(--text-primary)">Favoritos</h1>
         <FavoritesGrid items={result.data.items} />
       </main>
     </>

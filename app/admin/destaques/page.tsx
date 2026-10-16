@@ -57,7 +57,7 @@ export default async function AdminFeaturingPage({ searchParams }: PageProps<"/a
             key={room.id}
             room={room}
             badges={<StatusBadge tone={featuringTones[room.featuringStatus]}>{featuringStatusLabels[room.featuringStatus]}</StatusBadge>}
-            details={<p className="mt-2 text-sm text-(--gray)">{periodText(room)}</p>}
+            details={<p className="mt-2 text-sm text-(--text-secondary)">{periodText(room)}</p>}
             aside={<RoomFeaturingActions room={room} />}
           />
         ))}

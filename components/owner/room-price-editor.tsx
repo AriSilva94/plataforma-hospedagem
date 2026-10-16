@@ -52,12 +52,12 @@ export function RoomPriceEditor({ roomId, roomTitle, priceCents }: { roomId: str
         type="button"
         onClick={() => setOpen(true)}
         aria-label={`Alterar o valor da diária de ${roomTitle}, atualmente ${formatCents(priceCents)}`}
-        className="-mx-2 inline-flex min-h-11 items-center gap-2 rounded-xl px-2 text-lg font-extrabold text-(--white) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
+        className="-mx-2 inline-flex min-h-11 items-center gap-2 rounded-xl px-2 text-lg font-extrabold text-(--text-primary) transition-colors hover:bg-(--text-primary)/5 focus-visible:outline-2 focus-visible:outline-(--focus-ring)"
       >
         <span>
-          {formatCents(priceCents)} <span className="text-sm font-semibold text-(--gray)">/ diária</span>
+          {formatCents(priceCents)} <span className="text-sm font-semibold text-(--text-secondary)">/ diária</span>
         </span>
-        <LuPencil aria-hidden="true" size={14} className="text-(--blue-light)" />
+        <LuPencil aria-hidden="true" size={14} className="text-(--primary-text)" />
       </button>
       <Modal open={open} title={`Valor da diária · ${roomTitle}`} onClose={close} dismissible={!pending}>
         <form noValidate onSubmit={(event) => void save(event)} className="flex flex-col gap-5">

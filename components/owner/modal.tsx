@@ -40,12 +40,12 @@ export function Modal({
       onClick={(event) => {
         if (event.target === event.currentTarget && dismissible) onClose();
       }}
-      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-(--line-strong) bg-(--surface) p-0 text-(--white) backdrop:bg-(--black)/70"
+      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-(--border) bg-(--surface) p-0 text-(--text-primary) backdrop:bg-(--black)/70"
     >
       <div className="flex flex-col gap-5 p-6">
         <div>
           <h2 id={titleId} className="text-lg font-bold">{title}</h2>
-          {description ? <p id={descriptionId} className="mt-2 text-sm leading-relaxed text-(--gray)">{description}</p> : null}
+          {description ? <p id={descriptionId} className="mt-2 text-sm leading-relaxed text-(--text-secondary)">{description}</p> : null}
         </div>
         {children}
       </div>
