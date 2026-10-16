@@ -92,7 +92,7 @@ function DashboardCard({
     <li>
       <Link
         href={href}
-        className="group flex h-full flex-col rounded-2xl border border-(--border) bg-(--surface) p-6 transition-colors hover:border-(--primary) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
+        className="group flex h-full flex-col rounded-2xl border border-(--border) bg-(--surface) p-6 transition-colors hover:border-(--primary-border) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
       >
         <div className="flex items-center gap-3">
           <span className="flex size-10 items-center justify-center rounded-xl bg-(--primary-soft) text-(--primary-text)">

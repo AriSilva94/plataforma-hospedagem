@@ -13,7 +13,7 @@ export const dangerButtonClassName =
   "inline-flex items-center justify-center gap-2 rounded-2xl border border-(--error)/40 px-4 py-3 text-sm font-semibold text-(--error) transition-colors hover:bg-(--error-soft) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--error) disabled:cursor-not-allowed disabled:opacity-60";
 
 export const choiceClassName =
-  "inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-(--border-strong) bg-(--background) px-3.5 text-sm font-semibold text-(--text-primary) transition-colors sm:min-h-9 hover:border-(--primary) has-checked:border-(--primary) has-checked:bg-(--primary-soft) has-focus-visible:ring-2 has-focus-visible:ring-(--focus-ring)";
+  "inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-(--border-strong) bg-(--background) px-3.5 text-sm font-semibold text-(--text-primary) transition-colors sm:min-h-9 hover:border-(--primary-border) has-checked:border-(--primary) has-checked:bg-(--primary-soft) has-focus-visible:ring-2 has-focus-visible:ring-(--focus-ring)";
 
 const choiceControlClassName =
   "size-4 shrink-0 appearance-none border border-(--border-strong) bg-(--surface) bg-center bg-no-repeat transition-colors checked:border-(--primary) checked:bg-(--primary)";

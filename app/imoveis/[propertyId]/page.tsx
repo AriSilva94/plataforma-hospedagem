@@ -86,7 +86,7 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
             {lowestPrice !== undefined ? (
               <a
                 href="#quartos"
-                className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-2xl border border-(--border-strong) bg-(--surface) px-4 text-sm text-(--text-primary) transition-colors hover:border-(--primary) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
+                className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-2xl border border-(--border-strong) bg-(--surface) px-4 text-sm text-(--text-primary) transition-colors hover:border-(--primary-border) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
               >
                 <span className="font-semibold">{roomCount}</span>
                 <span className="text-(--text-secondary)">· a partir de</span>

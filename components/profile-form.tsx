@@ -551,7 +551,7 @@ export function ProfileForm({ user, onUserChange }: { user: CurrentUser; onUserC
                     type="button"
                     disabled={isSendingVerification}
                     onClick={sendVerification}
-                    className="rounded-xl border border-(--border-strong) px-3 py-2 text-xs font-bold text-(--text-primary) transition-colors hover:border-(--primary) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-xl border border-(--border-strong) px-3 py-2 text-xs font-bold text-(--text-primary) transition-colors hover:border-(--primary-border) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isSendingVerification ? "Enviando..." : "Enviar link de confirmação"}
                   </button>

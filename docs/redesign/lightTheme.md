@@ -1,26 +1,38 @@
-# DOMUS X — Light Theme
+# DOMUS X — Light Theme (Radix-inspired)
 
-## Objective
-Build a refined, discreet, welcoming light experience for a room-rental platform. Blue remains the primary brand/interaction color; page and card surfaces should be neutral, not blue-tinted.
+## Reference and scope
+- Visual direction: user-selected **image 5** from a prior Radix reference gallery. Exact screenshot sampling was **not verified**; this spec uses published **Slate Light + Blue Light** scales as a tested starting direction, not an exact recreation of that image.
+- Official references: https://www.radix-ui.com/colors and https://www.radix-ui.com/colors/docs/palette-composition/composing-a-palette
+- Intent: airy, modern and polished hospitality interface with more character than flat gray-on-white. Let subtle cool surfaces and restrained blue accents create depth.
 
-## Core color tokens
-| Token | Hex | Intended use |
-| --- | --- | --- |
-| `background` | `#F7F7F5` | Main page background |
-| `surface` | `#FFFFFF` | Cards, panels, dialogs |
-| `surface-secondary` | `#F0F1F2` | Secondary sections and subtle raised or grouped areas |
-| `border` | `#E1E2E5` | Dividers, card outlines, form borders |
-| `primary` | `#155EEF` | Primary CTAs, selected controls, active links |
-| `text-primary` | `#202127` | Titles and body text |
-| `text-secondary` | `#60646D` | Secondary text and supporting labels |
+## Main semantic mapping
+| Existing role to map | Hex | Radix source | Purpose |
+| --- | --- | --- | --- |
+| `background` | `#FCFCFD` | Slate Light 1 | Main page background |
+| `surface` | `#FFFFFF` | Custom white | Cards and dialogs |
+| `surface-secondary` | `#F9F9FB` | Slate Light 2 | Header, sidebar, grouped areas |
+| `surface-hover` | `#F0F0F3` | Slate Light 3 | Neutral hover/active areas |
+| `surface-elevated` | `#E8E8EC` | Slate Light 4 | Subtle neutral emphasis |
+| `border-subtle` | `#D9D9E0` | Slate Light 6 | Dividers and card outlines |
+| `border-interactive` | `#B9BBC6` | Slate Light 8 | Interactive outlines |
+| `text-primary` | `#1C2024` | Slate Light 12 | Main text |
+| `text-secondary` | `#60646C` | Slate Light 11 | Supporting text |
+| `primary` | `#0D74CE` | Blue Light 11 | CTA fill with white foreground, links; verify component contrast |
+| `primary-hover` | `#005CA9` | Custom darker hover | Primary filled CTA hover; verify |
+| `primary-soft` | `#E6F4FE` | Blue Light 3 | Subtle selected/interactive surface |
+| `primary-soft-hover` | `#D5EFFF` | Blue Light 4 | Soft hover |
+| `primary-border` | `#8EC8F6` | Blue Light 7 | Accent outlines |
+| `primary-text` | `#0D74CE` | Blue Light 11 | Blue link/label text |
+| `brand-bright` | `#0090FF` | Blue Light 9 | Branded graphical accent, not small white-on-blue labels |
 
-## Rules
-- Neutral light surfaces are the default. Do not tint every card, navbar, or section blue.
-- Use `primary` with restraint for actionable and selected elements, not as a generic container fill.
-- Preserve visual hierarchy through whitespace, typography and modest surface contrast.
-- Text on primary filled buttons should be white (`#FFFFFF`), subject to contrast verification.
-- Prefer semantic and tag palettes from `otherColors.md` for alerts, statuses, badges, and category chips.
-- For badges, use the paired **foreground + soft background** tokens defined in `otherColors.md`, rather than full-strength fills.
-- Check text and non-text contrast against WCAG AA in actual component combinations; adjust token shades when necessary and document deviations.
-- Define tokens centrally and apply consistently; do not scatter literal colors across components.
-- Do not change existing layout, spacing, typography, content, responsiveness, or behaviors as part of color implementation.
+## Visual usage
+- Light must not be lifeless: preserve refined blue accents, subtle grouped surfaces and clear depth between page, cards and interactive controls.
+- Do **not** fill the entire interface with pale-blue cards; reserve Blue 3/4 for selected controls, supporting accents and purposeful highlights.
+- Cards and navigation may alternate between Slate 1/2 and white when this helps hierarchy; avoid unnecessary borders on every layer.
+- Keep semantic/status/category colors consistent with `otherColors.md`.
+- Do not assume any accent/foreground pairing is accessible without checking actual usage; use WCAG AA for normal text and UI states.
+
+## Implementation discipline
+- Reuse existing theme variables and components; update **only** existing token mappings where possible.
+- Preserve layout, content, typography, behavior, accessibility semantics and responsiveness.
+- Synchronize the existing design-system documentation with final implemented tokens.

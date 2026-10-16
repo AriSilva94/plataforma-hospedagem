@@ -26,7 +26,7 @@ export function RoomCompletenessSummary({ score, missingCount }: { score: number
 }
 
 const chipClassName =
-  "inline-flex min-h-11 items-center gap-1.5 rounded-full sm:min-h-9 border border-(--border-strong) px-3 text-sm font-semibold text-(--text-primary) transition-colors hover:border-(--primary) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)";
+  "inline-flex min-h-11 items-center gap-1.5 rounded-full sm:min-h-9 border border-(--border-strong) px-3 text-sm font-semibold text-(--text-primary) transition-colors hover:border-(--primary-border) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)";
 
 const VISIBLE_ROOM_HINTS = 2;
 
