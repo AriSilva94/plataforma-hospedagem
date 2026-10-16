@@ -26,6 +26,7 @@
   --surface-accent: light-dark(#f1f6fe, #172130);
   --border-accent: light-dark(#d7e0f0, #2a374c);
   --on-primary: #ffffff;
+  --favorite: #e5484d;
   --focus-ring: light-dark(#0b63e3, #70b8ff);
   --success: light-dark(#18794e, #49b88a);
   --success-soft: light-dark(#e8f5ee, #19372c);
