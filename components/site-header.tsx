@@ -227,7 +227,7 @@ function MobileBottomNavigation({
         <Link
           href="/meus-imoveis"
           aria-label="Anunciar"
-          className="absolute -top-6 flex size-14 items-center justify-center rounded-full border-3 border-(--background) bg-(--primary) text-(--on-primary) shadow-[0_10px_24px_color-mix(in_srgb,var(--shadow)_35%,transparent)] transition-colors hover:bg-(--primary-hover)"
+          className="absolute -top-6 flex size-14 items-center justify-center rounded-full border-3 border-(--white) bg-(--primary) text-(--on-primary) shadow-[0_10px_24px_color-mix(in_srgb,var(--shadow)_35%,transparent)] transition-colors hover:bg-(--primary-hover)"
         >
           <LuPlus aria-hidden="true" size={24} />
         </Link>
