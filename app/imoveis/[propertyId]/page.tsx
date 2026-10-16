@@ -1,26 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { LuArrowDown, LuArrowLeft, LuBath, LuEyeOff, LuMapPin, LuUsers } from "react-icons/lu";
+import { LuArrowDown, LuArrowLeft, LuMapPin } from "react-icons/lu";
 import { Chips } from "@/components/chips";
 import { FavoriteButton } from "@/components/favorite-button";
-import { PageNotice } from "@/components/page-notice";
-import { PropertyPhotoGrid, RoomCover } from "@/components/property-gallery";
+import { MotelTag } from "@/components/motel-tag";
+import { PropertyPhotoGrid } from "@/components/property-gallery";
+import { PublicLocation, PublicPropertyLoadNotice } from "@/components/public-property-parts";
+import { RoomCard } from "@/components/room-card";
 import { SiteHeader } from "@/components/site-header";
 import { getCurrentUser } from "@/lib/current-user";
-import { favoriteRoomIdsSchema } from "@/lib/favorites";
-import {
-  bathroomTypeLabels,
-  formatCents,
-  formatLocation,
-  genderIdentityLabels,
-  labelOf,
-  propertyFeatureLabels,
-  propertyTypeLabels,
-  publicPropertyDetailSchema,
-  roomAmenityLabels,
-  sharedAreaTypeLabels,
-} from "@/lib/properties";
+import { formatCents, formatLocation, isMotel, labelOf, propertyFeatureLabels, propertyTypeLabels, publicPropertyDetailSchema, sharedAreaTypeLabels } from "@/lib/properties";
+import { getFavoriteRoomIds } from "@/lib/room-listings";
 import { getApiData } from "@/lib/server-api";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -51,18 +42,13 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
     return (
       <>
         <SiteHeader user={user} />
-        {result.status === "not-found" ? (
-          <PageNotice title="Local não encontrado" description="Este anúncio não existe ou não está disponível no momento." actionLabel="Voltar para o início" actionHref="/" />
-        ) : (
-          <PageNotice title="Não foi possível carregar" description="Tente novamente em alguns instantes." actionLabel="Tentar novamente" actionHref={`/imoveis/${propertyId}`} />
-        )}
+        <PublicPropertyLoadNotice notFound={result.status === "not-found"} retryHref={`/imoveis/${propertyId}`} />
       </>
     );
   }
 
   const property = result.data;
-  const favorites = user ? await getApiData("/favorites/room-ids", favoriteRoomIdsSchema) : undefined;
-  const favoriteRoomIds = new Set(favorites?.status === "ok" ? favorites.data.roomIds : []);
+  const favoriteRoomIds = new Set(await getFavoriteRoomIds(Boolean(user)));
   const photos = property.media
     .filter((item) => item.type === "IMAGE")
     .map((item, index) => ({ id: item.id, url: item.url, alt: index === 0 ? `Foto principal de ${property.title}` : `Foto ${index + 1} de ${property.title}` }));
@@ -92,7 +78,7 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
           <PropertyPhotoGrid title={property.title} photos={photos} />
 
           <header className="py-8">
-            <p className="text-sm font-semibold text-(--blue-light)">{propertyTypeLabels[property.type]}</p>
+            {isMotel(property.type) ? <MotelTag /> : <p className="text-sm font-semibold text-(--blue-light)">{propertyTypeLabels[property.type]}</p>}
             <h1 className="mt-1 wrap-break-word text-3xl font-extrabold tracking-tight text-(--white)">{property.title}</h1>
             <p className="mt-3 flex items-center gap-2 text-sm text-(--gray)">
               <LuMapPin aria-hidden="true" size={16} className="shrink-0" /> {formatLocation(property)}
@@ -100,7 +86,7 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
             {lowestPrice !== undefined ? (
               <a
                 href="#quartos"
-                className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-(--line-strong) bg-(--surface) px-4 text-sm text-(--white) transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
+                className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-2xl border border-(--line-strong) bg-(--surface) px-4 text-sm text-(--white) transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
               >
                 <span className="font-semibold">{roomCount}</span>
                 <span className="text-(--gray)">· a partir de</span>
@@ -114,50 +100,31 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
           <section id="quartos" aria-labelledby="rooms-title" className="scroll-mt-24 border-t border-(--line) py-8">
             <h2 id="rooms-title" className="text-2xl font-extrabold tracking-tight text-(--white)">Quartos disponíveis</h2>
             <p className="mt-1 text-sm text-(--gray)">Cada quarto tem preço e disponibilidade próprios.</p>
-            <ul className="mt-5 flex flex-col gap-5">
-              {property.rooms.map((room, roomIndex) => {
-                const roomPhotos = room.media
-                  .filter((item) => item.type === "IMAGE")
-                  .map((item, index) => ({ id: item.id, url: item.url, alt: index === 0 ? `Foto de ${room.title}` : `Foto ${index + 1} de ${room.title}` }));
-                return (
-                  <li
-                    key={room.id}
-                    id={`quarto-${room.id}`}
-                    className="grid scroll-mt-24 overflow-hidden rounded-2xl border border-(--line-strong) bg-(--surface) target:border-(--blue-light) target:ring-2 target:ring-(--blue-light) md:grid-cols-[18rem_minmax(0,1fr)]"
-                  >
-                    <RoomCover title={room.title} photos={roomPhotos} eager={roomIndex === 0} className="aspect-4/3 md:aspect-auto md:min-h-56" />
-                    <div className="flex flex-col gap-3 p-5">
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <h3 className="wrap-break-word text-lg font-bold text-(--white)">{room.title}</h3>
-                        <p className="text-lg font-extrabold text-(--white)">
-                          {formatCents(room.priceCents)} <span className="text-sm font-semibold text-(--gray)">/ diária</span>
-                        </p>
-                      </div>
-                      <div className="flex flex-col gap-1.5 text-sm text-(--gray)">
-                        <span className="flex items-center gap-2">
-                          <LuUsers aria-hidden="true" size={15} className="shrink-0" />
-                          {room.capacity === 1 ? "1 pessoa" : `Até ${room.capacity} pessoas`} · Aceita: {room.acceptedAudiences.map((audience) => genderIdentityLabels[audience]).join(", ")}
-                        </span>
-                        <span className="flex items-center gap-2">
-                          <LuBath aria-hidden="true" size={15} className="shrink-0" /> Banheiro {bathroomTypeLabels[room.bathroomType].toLowerCase()}
-                        </span>
-                      </div>
-                      {room.description ? <p className="whitespace-pre-line text-sm leading-relaxed text-(--gray)">{room.description}</p> : null}
-                      {room.amenities.length > 0 ? <Chips items={room.amenities.map((amenity) => labelOf(roomAmenityLabels, amenity))} /> : null}
-                      <div className="mt-auto pt-2">
-                        <FavoriteButton
-                          roomId={room.id}
-                          roomTitle={room.title}
-                          initialFavorited={favoriteRoomIds.has(room.id)}
-                          signedIn={Boolean(user)}
-                          loginReturnPath={`/imoveis/${property.id}#quarto-${room.id}`}
-                          variant="inline"
-                        />
-                      </div>
-                    </div>
-                  </li>
-                );
-              })}
+            <ul className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {property.rooms.map((room) => (
+                <li key={room.id}>
+                  <RoomCard
+                    room={{
+                      id: room.id,
+                      title: room.title,
+                      priceCents: room.priceCents,
+                      featured: false,
+                      verified: room.verified,
+                      coverUrl: room.media.find((item) => item.type === "IMAGE")?.url ?? null,
+                      property: { id: property.id, title: property.title, type: property.type, neighborhood: property.neighborhood, city: property.city, state: property.state },
+                    }}
+                    action={
+                      <FavoriteButton
+                        roomId={room.id}
+                        roomTitle={room.title}
+                        initialFavorited={favoriteRoomIds.has(room.id)}
+                        signedIn={Boolean(user)}
+                        loginReturnPath={`/imoveis/${property.id}/quartos/${room.id}`}
+                      />
+                    }
+                  />
+                </li>
+              ))}
             </ul>
           </section>
 
@@ -209,17 +176,7 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
           ) : null}
 
           <Section title="Localização">
-            <p className="flex items-center gap-2 text-(--white)">
-              <LuMapPin aria-hidden="true" size={16} className="shrink-0" /> {formatLocation(property)}
-            </p>
-            {property.referencePoints.length > 0 ? (
-              <div className="mt-4">
-                <Chips items={property.referencePoints} />
-              </div>
-            ) : null}
-            <p className="mt-4 flex items-center gap-2 text-xs">
-              <LuEyeOff aria-hidden="true" size={14} className="shrink-0" /> A localização exata não é exibida publicamente.
-            </p>
+            <PublicLocation property={property} />
           </Section>
         </div>
       </main>

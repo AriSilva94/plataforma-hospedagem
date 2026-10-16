@@ -73,31 +73,11 @@ export function PropertyPhotoGrid({ title, photos }: { title: string; photos: Vi
         <button
           type="button"
           onClick={() => setViewing(0)}
-          className="absolute right-3 bottom-3 inline-flex min-h-11 items-center gap-2 rounded-xl bg-(--black)/70 px-4 text-sm font-semibold text-(--white) transition-colors hover:bg-(--black)/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
+          className="absolute right-3 bottom-3 inline-flex min-h-11 items-center gap-2 rounded-2xl bg-(--black)/70 px-4 text-sm font-semibold text-(--white) transition-colors hover:bg-(--black)/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
         >
           <LuImages aria-hidden="true" size={16} />
           Ver as {photos.length} fotos
         </button>
-      ) : null}
-      <PhotoViewer title={title} photos={photos} index={viewing} onIndexChange={setViewing} onClose={() => setViewing(null)} />
-    </div>
-  );
-}
-
-export function RoomCover({ title, photos, eager, className }: { title: string; photos: ViewerPhoto[]; eager?: boolean; className: string }) {
-  const [viewing, setViewing] = useState<number | null>(null);
-  const [cover] = photos;
-
-  if (!cover) return <EmptyPhoto className={className} />;
-
-  return (
-    <div className={`relative ${className}`}>
-      <PhotoButton photo={cover} eager={eager} sizes="(min-width: 768px) 288px, 100vw" className="size-full" onOpen={() => setViewing(0)} />
-      {photos.length > 1 ? (
-        <span className="pointer-events-none absolute right-3 bottom-3 inline-flex items-center gap-1.5 rounded-full bg-(--black)/70 px-2.5 py-1 text-xs font-semibold text-(--white)">
-          <LuImages aria-hidden="true" size={13} />
-          {photos.length} fotos
-        </span>
       ) : null}
       <PhotoViewer title={title} photos={photos} index={viewing} onIndexChange={setViewing} onClose={() => setViewing(null)} />
     </div>

@@ -12,6 +12,8 @@ export type CurrentUser = {
   state: string | null;
   roles: string[];
   guestGenderIdentity?: GenderIdentity | null;
+  avatarUrl: string | null;
+  createdAt: string | null;
 };
 
 export function parseCurrentUser(value: unknown): CurrentUser | undefined {
@@ -43,6 +45,8 @@ export function parseCurrentUser(value: unknown): CurrentUser | undefined {
     state: readOptionalString(value, "state"),
     roles: value.roles,
     guestGenderIdentity: parseGuestGenderIdentity(value),
+    avatarUrl: readOptionalString(value, "avatarUrl"),
+    createdAt: readOptionalString(value, "createdAt"),
   };
 }
 

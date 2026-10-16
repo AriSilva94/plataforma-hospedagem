@@ -1,42 +1,42 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import type { IconType } from "react-icons";
 import { BrandMark } from "@/components/brand-mark";
-import { isAdmin } from "@/lib/admin";
 import { logout } from "@/lib/api";
 import {
   LuBell,
-  LuCalendarDays,
-  LuHeart,
+  LuGift,
   LuHouse,
   LuLogIn,
   LuLogOut,
-  LuMenu,
-  LuMessageSquare,
-  LuShieldCheck,
+  LuPlus,
+  LuSearch,
   LuUserRound,
-  LuX,
 } from "react-icons/lu";
 
-const navItems = [
-  { label: "Início", href: "/#inicio" },
-  { label: "Favoritos", href: "/favoritos" },
-  { label: "Reservas" },
-  { label: "Mensagens" },
+const publicNavItems = [
+  { label: "Home", href: "/" },
+  { label: "Anúncios", href: "/anuncios" },
+  { label: "Contato", href: "/contato" },
+  { label: "Sobre", href: "/sobre" },
 ];
 
-const desktopBreakpoint = "(min-width: 768px)";
+function NotificationsPlaceholder() {
+  return (
+    <span role="img" aria-label="Notificações indisponíveis" className="flex size-10 items-center justify-center rounded-xl text-(--white)/85">
+      <LuBell aria-hidden="true" size={19} />
+    </span>
+  );
+}
 
 export function SiteHeader({ user }: { user?: { name: string; roles: string[] } }) {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logoutError, setLogoutError] = useState<string>();
   const router = useRouter();
   const pathname = usePathname();
-
-  const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
 
   async function endSession() {
     setLogoutError(undefined);
@@ -52,112 +52,76 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
   return (
     <>
       <header className="sticky top-0 z-20 border-b border-(--line) bg-(--navy)/85 backdrop-blur-sm">
-        <div className="grid h-16 grid-cols-[40px_1fr_40px] items-center px-4 md:hidden">
-          <button
-            type="button"
-            aria-label="Abrir menu"
-            aria-expanded={mobileMenuOpen}
-            aria-controls="mobile-menu"
-            onClick={() => setMobileMenuOpen(true)}
-            className="flex size-10 items-center justify-center rounded-xl text-(--white) transition-colors hover:bg-(--white)/5"
-          >
-            <LuMenu aria-hidden="true" size={21} />
-          </button>
-          <div className="flex justify-center">
-            <BrandMark size="md" href="/" />
-          </div>
-          <span
-            role="img"
-            aria-label="Notificações indisponíveis"
-            className="flex size-10 items-center justify-center justify-self-end rounded-xl text-(--white)/85"
-          >
-            <LuBell aria-hidden="true" size={19} />
-          </span>
+        <div className="flex h-16 items-center px-4 md:hidden">
+          {user ? (
+            <>
+              <BrandMark size="md" href="/" />
+              <div className="flex-1" />
+              <NotificationsPlaceholder />
+            </>
+          ) : (
+            <div className="flex w-full justify-center">
+              <BrandMark size="md" href="/" />
+            </div>
+          )}
         </div>
-        <div className="mx-auto hidden h-18 w-full max-w-360 items-center gap-4 px-6 md:flex md:px-10 lg:gap-5.5 lg:px-12">
+        <div className="mx-auto hidden h-18 w-full max-w-360 items-center px-6 md:grid md:grid-cols-[auto_1fr_auto] md:gap-6 md:px-10 lg:px-12">
           <BrandMark size="md" href="/" />
-          <div className="flex-1" />
           <nav
             aria-label="Navegação principal"
-            className="hidden items-center gap-3 text-sm font-semibold text-(--gray) md:flex lg:gap-5.5"
+            className="flex items-center justify-center gap-5.5 text-sm font-semibold text-(--gray)"
           >
-            {navItems.map((item) => (
+            {publicNavItems.map((item) => (
               <NavItem key={item.label} {...item} />
             ))}
           </nav>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/meus-imoveis"
-              className="hidden rounded-xl border border-(--blue)/40 bg-(--blue)/14 px-3 py-2.5 text-[13px] font-semibold text-(--blue-light) transition-colors hover:bg-(--blue)/24 md:block lg:px-4.5"
-            >
-              Seja um anfitrião
-            </Link>
+          <div className="relative flex items-center justify-end gap-4">
             {user ? (
-              <div className="relative">
+              <>
+                <NotificationsPlaceholder />
+                <Link
+                  href="/perfil"
+                  className="rounded-2xl bg-(--blue) px-4.5 py-2.5 text-[13px] font-bold text-(--white) transition-colors hover:bg-(--blue-light)"
+                >
+                  Minha conta
+                </Link>
                 <button
                   type="button"
-                  aria-label="Abrir menu do perfil"
-                  aria-expanded={profileMenuOpen}
-                  aria-controls="profile-menu"
-                  onClick={() => setProfileMenuOpen((open) => !open)}
-                  className="flex size-10 items-center justify-center rounded-full border border-(--line-strong) bg-(--surface-raised) text-(--white)"
+                  onClick={() => void endSession()}
+                  className="flex items-center gap-1.5 text-sm font-semibold text-(--gray) transition-colors hover:text-(--white)"
                 >
-                  <span className="text-sm font-bold">
-                    {user.name.slice(0, 1).toUpperCase()}
-                  </span>
+                  <LuLogOut aria-hidden="true" size={16} />
+                  Sair
                 </button>
-                {profileMenuOpen ? (
-                  <div
-                    id="profile-menu"
-                    role="menu"
-                    className="absolute right-0 top-12 w-44 rounded-xl border border-(--line) bg-(--surface) p-1.5 shadow-[0_16px_40px_color-mix(in_srgb,var(--black)_35%,transparent)]"
+                {logoutError ? (
+                  <p
+                    role="alert"
+                    className="absolute right-0 top-full mt-2 text-xs font-semibold text-(--danger-soft)"
                   >
-                    <Link
-                      role="menuitem"
-                      href="/perfil"
-                      className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-(--white) transition-colors hover:bg-(--blue)/14"
-                    >
-                      <LuUserRound aria-hidden="true" size={16} />
-                      Meu perfil
-                    </Link>
-                    {isAdmin(user) ? <AdminMenuLink /> : null}
-                    <button
-                      role="menuitem"
-                      type="button"
-                      onClick={() => void endSession()}
-                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-(--danger) transition-colors hover:bg-(--danger)/12"
-                    >
-                      <LuLogOut aria-hidden="true" size={16} />
-                      Sair
-                    </button>
-                    {logoutError ? (
-                      <p
-                        role="alert"
-                        className="px-3 py-2 text-xs leading-snug text-(--danger-soft)"
-                      >
-                        {logoutError}
-                      </p>
-                    ) : null}
-                  </div>
+                    {logoutError}
+                  </p>
                 ) : null}
-              </div>
+              </>
             ) : (
-              <Link
-                href="/login"
-                className="hidden rounded-xl border border-(--line-strong) px-4.5 py-2.5 text-[13px] font-semibold text-(--white) md:block"
-              >
-                Entrar
-              </Link>
+              <>
+                <Link
+                  href="/login"
+                  className="hidden rounded-2xl border border-(--line-strong) px-4.5 py-2.5 text-[13px] font-semibold text-(--white) transition-colors hover:bg-(--white)/5 md:block"
+                >
+                  Entrar
+                </Link>
+                <Link
+                  href="/cadastro"
+                  className="hidden rounded-2xl bg-(--blue) px-4.5 py-2.5 text-[13px] font-bold text-(--white) transition-colors hover:bg-(--blue-light) lg:block"
+                >
+                  Criar conta
+                </Link>
+              </>
             )}
           </div>
         </div>
       </header>
 
-      <MobileMenu
-        open={mobileMenuOpen}
-        onClose={closeMobileMenu}
-        showLogin={!user}
-      />
       <MobileBottomNavigation
         pathname={pathname}
         hasUser={Boolean(user)}
@@ -173,17 +137,16 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
           <Link
             role="menuitem"
             href="/perfil"
-            className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-(--white) transition-colors hover:bg-(--blue)/14"
+            className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-(--white) transition-colors hover:bg-(--blue)/14"
           >
             <LuUserRound aria-hidden="true" size={16} />
             Meu perfil
           </Link>
-          {isAdmin(user) ? <AdminMenuLink /> : null}
           <button
             role="menuitem"
             type="button"
             onClick={() => void endSession()}
-            className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-(--danger) transition-colors hover:bg-(--danger)/12"
+            className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-(--danger) transition-colors hover:bg-(--danger)/12"
           >
             <LuLogOut aria-hidden="true" size={16} />
             Sair
@@ -194,19 +157,6 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
   );
 }
 
-function AdminMenuLink() {
-  return (
-    <Link
-      role="menuitem"
-      href="/admin"
-      className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-(--white) transition-colors hover:bg-(--blue)/14"
-    >
-      <LuShieldCheck aria-hidden="true" size={16} className="text-(--success)" />
-      Administração
-    </Link>
-  );
-}
-
 function NavItem({
   label,
   href,
@@ -214,33 +164,20 @@ function NavItem({
   className,
 }: {
   label: string;
-  href?: string;
+  href: string;
   onClick?: () => void;
   className?: string;
 }) {
-  return href ? (
-    <a
+  return (
+    <Link
       href={href}
       onClick={onClick}
-      className={`text-(--white) ${className ?? ""}`}
+      className={`text-(--white) transition-colors hover:text-(--blue-pale) ${className ?? ""}`}
     >
       {label}
-    </a>
-  ) : (
-    <span className={className}>{label}</span>
+    </Link>
   );
 }
-
-const focusableSelector =
-  'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])';
-
-const mobileNavigationItems = [
-  { label: "Início", href: "/#inicio", icon: LuHouse },
-  { label: "Favoritos", href: "/favoritos", icon: LuHeart },
-  { label: "Reservas", icon: LuCalendarDays },
-  { label: "Mensagens", icon: LuMessageSquare },
-  { label: "Perfil", href: "/perfil", icon: LuUserRound },
-];
 
 function MobileBottomNavigation({
   pathname,
@@ -253,198 +190,96 @@ function MobileBottomNavigation({
   profileMenuOpen: boolean;
   onProfileClick: () => void;
 }) {
+  const inicio = <MobileNavigationItem label="Início" href="/" icon={LuHouse} active={pathname === "/"} />;
+  const anuncios = (label: string) => (
+    <MobileNavigationItem label={label} href="/anuncios" icon={LuSearch} active={pathname === "/anuncios"} />
+  );
+  const recompensa = <MobileNavigationItem label="Recompensa" icon={LuGift} active={false} disabled />;
+
   return (
     <nav
       aria-label="Navegação inferior"
       className="fixed inset-x-0 bottom-0 z-20 grid h-18 grid-cols-5 border-t border-(--line) bg-(--navy)/96 px-1 pb-[max(.35rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur-sm md:hidden"
     >
-      {mobileNavigationItems.map(({ label, href, icon: Icon }) => {
-        const isProfile = label === "Perfil";
-        const visibleLabel = isProfile && !hasUser ? "Entrar" : label;
-        const VisibleIcon = isProfile && !hasUser ? LuLogIn : Icon;
-        const active = href === "/#inicio" ? pathname === "/" : pathname === href;
-        const className = `flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-semibold ${active ? "text-(--blue-light)" : "text-(--gray)"}`;
-        const content = (
-          <>
-            <Icon aria-hidden="true" size={18} />
-            <span className="truncate">{label}</span>
-          </>
-        );
+      {hasUser ? (
+        <>
+          {inicio}
+          {anuncios("Buscar")}
+        </>
+      ) : (
+        <>
+          {recompensa}
+          {inicio}
+        </>
+      )}
 
-        if (isProfile && hasUser) {
-          return (
-            <button
-              key={label}
-              type="button"
-              aria-expanded={profileMenuOpen}
-              aria-controls="mobile-profile-menu"
-              onClick={onProfileClick}
-              className={className}
-            >
-              {content}
-            </button>
-          );
-        }
+      <div className="relative flex flex-col items-center pt-9 text-[11px] font-semibold text-(--blue-light)">
+        <Link
+          href="/meus-imoveis"
+          aria-label="Anunciar"
+          className="absolute -top-6 flex size-14 items-center justify-center rounded-full border-3 border-(--white) bg-(--blue) text-(--white) shadow-[0_10px_24px_color-mix(in_srgb,var(--blue)_55%,transparent)] transition-colors hover:bg-(--blue-light)"
+        >
+          <LuPlus aria-hidden="true" size={24} />
+        </Link>
+        <span className="truncate">Anunciar</span>
+      </div>
 
-        if (isProfile) {
-          return (
-            <Link key={label} href="/login" className={className}>
-              <VisibleIcon aria-hidden="true" size={18} />
-              <span className="truncate">{visibleLabel}</span>
-            </Link>
-          );
-        }
-
-        return href ? (
-          <Link
-            key={label}
-            href={href}
-            aria-current={active ? "page" : undefined}
-            className={className}
+      {hasUser ? (
+        <>
+          {recompensa}
+          <button
+            type="button"
+            aria-expanded={profileMenuOpen}
+            aria-controls="mobile-profile-menu"
+            onClick={onProfileClick}
+            className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-semibold ${pathname === "/perfil" ? "text-(--blue-light)" : "text-(--gray)"}`}
           >
-            {content}
-          </Link>
-        ) : (
-          <span
-            key={label}
-            aria-disabled="true"
-            className={`${className} opacity-70`}
-          >
-            {content}
-          </span>
-        );
-      })}
+            <LuUserRound aria-hidden="true" size={18} />
+            <span className="truncate">Minha conta</span>
+          </button>
+        </>
+      ) : (
+        <>
+          {anuncios("Quartos")}
+          <MobileNavigationItem label="Entrar" href="/login" icon={LuLogIn} active={false} />
+        </>
+      )}
     </nav>
   );
 }
 
-function MobileMenu({
-  open,
-  onClose,
-  showLogin,
+function MobileNavigationItem({
+  label,
+  href,
+  icon: Icon,
+  active,
+  disabled,
 }: {
-  open: boolean;
-  onClose: () => void;
-  showLogin: boolean;
+  label: string;
+  href?: string;
+  icon: IconType;
+  active: boolean;
+  disabled?: boolean;
 }) {
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const className = `flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-semibold ${active ? "text-(--blue-light)" : "text-(--gray)"}`;
+  const content = (
+    <>
+      <Icon aria-hidden="true" size={18} />
+      <span className="truncate">{label}</span>
+    </>
+  );
 
-  useEffect(() => {
-    if (!open) return;
-
-    const previouslyFocused =
-      document.activeElement instanceof HTMLElement
-        ? document.activeElement
-        : null;
-    document.body.classList.add("scroll-locked");
-    closeButtonRef.current?.focus();
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-        return;
-      }
-      if (event.key === "Tab") trapFocus(event, dialogRef.current);
-    };
-    const desktop = window.matchMedia(desktopBreakpoint);
-    const onBreakpointChange = (event: MediaQueryListEvent) => {
-      if (event.matches) onClose();
-    };
-    document.addEventListener("keydown", onKeyDown);
-    desktop.addEventListener("change", onBreakpointChange);
-
-    return () => {
-      document.body.classList.remove("scroll-locked");
-      document.removeEventListener("keydown", onKeyDown);
-      desktop.removeEventListener("change", onBreakpointChange);
-      previouslyFocused?.focus();
-    };
-  }, [open, onClose]);
+  if (!href || disabled) {
+    return (
+      <span aria-disabled="true" className={`${className} opacity-70`}>
+        {content}
+      </span>
+    );
+  }
 
   return (
-    <div
-      data-open={open}
-      inert={!open}
-      className="group fixed inset-0 z-40 md:hidden invisible transition-[visibility] delay-300 duration-0 data-[open=true]:visible data-[open=true]:delay-0"
-    >
-      <div
-        aria-hidden="true"
-        onClick={onClose}
-        className="absolute inset-0 bg-(--navy-deep)/60 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 ease-out group-data-[open=true]:opacity-100"
-      />
-      <div
-        ref={dialogRef}
-        id="mobile-menu"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Menu"
-        className="absolute inset-y-0 right-0 flex w-[min(86vw,360px)] translate-x-full flex-col border-l border-(--line-strong) bg-(--surface) shadow-[-24px_0_60px_color-mix(in_srgb,var(--black)_45%,transparent)] transition-transform duration-450 ease-[cubic-bezier(.22,1,.36,1)] group-data-[open=true]:translate-x-0"
-      >
-        <div className="flex h-18 shrink-0 items-center justify-between border-b border-(--line) px-6">
-          <BrandMark size="md" />
-          <button
-            ref={closeButtonRef}
-            type="button"
-            aria-label="Fechar menu"
-            onClick={onClose}
-            className="flex size-10 items-center justify-center rounded-xl border border-(--line-strong) text-(--white) transition-colors hover:bg-(--white)/5"
-          >
-            <LuX aria-hidden="true" size={20} />
-          </button>
-        </div>
-        <nav
-          aria-label="Navegação principal"
-          className="flex-1 overflow-y-auto px-3 py-4"
-        >
-          <ul className="flex flex-col">
-            {navItems.map((item) => (
-              <li
-                key={item.label}
-                className="translate-x-4 border-b border-(--line) opacity-0 transition-[opacity,transform] duration-500 ease-[cubic-bezier(.22,1,.36,1)] last:border-b-0 group-data-[open=true]:translate-x-0 group-data-[open=true]:opacity-100"
-              >
-                <NavItem
-                  {...item}
-                  onClick={onClose}
-                  className="block rounded-lg px-3 py-4 text-lg font-semibold text-(--gray)"
-                />
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <div className="flex shrink-0 flex-col gap-3 border-t border-(--line) p-6">
-          <Link
-            href="/meus-imoveis"
-            onClick={onClose}
-            className="rounded-xl border border-(--blue)/40 bg-(--blue)/14 px-4.5 py-3 text-center text-sm font-semibold text-(--blue-light) transition-colors hover:bg-(--blue)/24"
-          >
-            Seja um anfitrião
-          </Link>
-          {showLogin ? (
-            <Link
-              href="/login"
-              className="rounded-xl bg-(--blue) px-4.5 py-3 text-center text-sm font-bold text-(--white) transition-colors hover:bg-(--blue-light)"
-            >
-              Entrar
-            </Link>
-          ) : null}
-        </div>
-      </div>
-    </div>
+    <Link href={href} aria-current={active ? "page" : undefined} className={className}>
+      {content}
+    </Link>
   );
-}
-
-function trapFocus(event: KeyboardEvent, dialog: HTMLElement | null): void {
-  const focusable = dialog?.querySelectorAll<HTMLElement>(focusableSelector);
-  if (!focusable?.length) return;
-
-  const first = focusable[0];
-  const last = focusable[focusable.length - 1];
-  const isInside = dialog?.contains(document.activeElement);
-  const boundary = event.shiftKey ? first : last;
-
-  if (!isInside || document.activeElement === boundary) {
-    event.preventDefault();
-    (event.shiftKey ? last : first).focus();
-  }
 }

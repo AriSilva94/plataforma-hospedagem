@@ -1,5 +1,5 @@
 import { createServer, type IncomingMessage, type Server } from "node:http";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3030";
 let server: Server;
@@ -126,6 +126,23 @@ test.beforeAll(async () => {
       return;
     }
 
+    if (request.url === "/owner/properties" && request.method === "GET") {
+      response.writeHead(200).end(JSON.stringify([]));
+      return;
+    }
+
+    if (request.url === "/favorites" && request.method === "GET") {
+      response.writeHead(200).end(JSON.stringify({ items: [] }));
+      return;
+    }
+
+    if (request.url === "/owner/rooms/summary" && request.method === "GET") {
+      response.writeHead(200).end(
+        JSON.stringify({ totalRooms: 0, availableRooms: 0, pendingVerificationRooms: 0, rejectedVerificationRooms: 0 }),
+      );
+      return;
+    }
+
     if (request.url === "/owner/postal-codes/01310100" && request.method === "GET") {
       if (postalCodeDelayMs) await new Promise((resolve) => setTimeout(resolve, postalCodeDelayMs));
       response.writeHead(200).end(JSON.stringify({ street: "Avenida Paulista", neighborhood: "Bela Vista", city: "São Paulo", state: "SP" }));
@@ -196,8 +213,13 @@ test.beforeEach(async ({ context }) => {
   ]);
 });
 
-test("organiza os dados e distingue recursos futuros", async ({ page }) => {
+async function openProfileTab(page: Page) {
   await page.goto("/perfil");
+  await page.getByRole("button", { name: "Perfil", exact: true }).click();
+}
+
+test("organiza os dados e distingue recursos futuros", async ({ page }) => {
+  await openProfileTab(page);
 
   await expect(page.getByRole("heading", { name: "Ana Silva", level: 1 })).toBeVisible();
   for (const heading of ["Dados pessoais", "Verificação", "Perfis de acesso", "Segurança", "Conta"]) {
@@ -218,7 +240,7 @@ test("organiza os dados e distingue recursos futuros", async ({ page }) => {
 });
 
 test("altera a senha validando a confirmação e mostrando o erro da API", async ({ page }) => {
-  await page.goto("/perfil");
+  await openProfileTab(page);
   await page.getByRole("button", { name: "Alterar senha" }).click();
   const current = page.getByLabel("Senha atual");
   const next = page.getByLabel("Nova senha", { exact: true });
@@ -247,14 +269,14 @@ test("altera a senha validando a confirmação e mostrando o erro da API", async
 
 test("orienta a definir senha por e-mail quando a conta não tem senha", async ({ page }) => {
   user = { ...user, hasPassword: false };
-  await page.goto("/perfil");
+  await openProfileTab(page);
 
   await expect(page.getByRole("button", { name: "Alterar senha" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Definir senha por e-mail" })).toHaveAttribute("href", "/recuperar-senha");
 });
 
 test("desativa a conta após confirmar com a senha e leva ao login", async ({ page }) => {
-  await page.goto("/perfil");
+  await openProfileTab(page);
   await page.getByRole("button", { name: "Desativar conta" }).click();
   const dialog = page.getByRole("dialog", { name: "Desativar sua conta?" });
   await expect(dialog).toBeVisible();
@@ -276,7 +298,7 @@ test("desativa a conta após confirmar com a senha e leva ao login", async ({ pa
 });
 
 test("envia o link de confirmação quando o e-mail não está verificado", async ({ page }) => {
-  await page.goto("/perfil");
+  await openProfileTab(page);
 
   await page.getByRole("button", { name: "Enviar link de confirmação" }).click();
 
@@ -286,7 +308,7 @@ test("envia o link de confirmação quando o e-mail não está verificado", asyn
 
 test("mostra o e-mail como verificado sem oferecer novo envio", async ({ page }) => {
   user = { ...user, emailVerifiedAt: "2026-10-08T00:00:00.000Z" };
-  await page.goto("/perfil");
+  await openProfileTab(page);
 
   await expect(page.getByText("Seu e-mail está verificado.")).toBeVisible();
   await expect(page.getByText("Verificado", { exact: true })).toBeVisible();
@@ -295,7 +317,7 @@ test("mostra o e-mail como verificado sem oferecer novo envio", async ({ page })
 });
 
 test("destaca a ativação antes dos dados quando não há perfis", async ({ page }) => {
-  await page.goto("/perfil");
+  await openProfileTab(page);
   const access = page.getByRole("heading", { name: "Perfis de acesso" });
   await expect(page.getByText("Escolha como quer usar a plataforma")).toBeVisible();
   expect(await access.evaluate((element) => {
@@ -307,7 +329,7 @@ test("destaca a ativação antes dos dados quando não há perfis", async ({ pag
 
 test("mantém os dados primeiro quando já existe um perfil", async ({ page }) => {
   user = { ...user, roles: ["GUEST"] };
-  await page.goto("/perfil");
+  await openProfileTab(page);
   await expect(page.getByText("Escolha como quer usar a plataforma")).toHaveCount(0);
   expect(await page.getByRole("heading", { name: "Dados pessoais" }).evaluate((element) => {
     const accessHeading = document.getElementById("access-heading");
@@ -316,7 +338,7 @@ test("mantém os dados primeiro quando já existe um perfil", async ({ page }) =
 });
 
 test("salva os dados atuais e adiciona somente o perfil ausente", async ({ page }) => {
-  await page.goto("/perfil");
+  await openProfileTab(page);
   await page.getByRole("textbox", { name: "Nome" }).fill("Ana Souza");
   await page.getByRole("button", { name: "Salvar dados" }).click();
   await expect(page.getByRole("heading", { name: "Ana Souza", level: 1 })).toBeVisible();
@@ -336,7 +358,7 @@ test("salva os dados atuais e adiciona somente o perfil ausente", async ({ page 
 });
 
 test("valida nome curto no formulário e não envia PATCH", async ({ page }) => {
-  await page.goto("/perfil");
+  await openProfileTab(page);
   const name = page.getByRole("textbox", { name: "Nome" });
   await name.fill(" A ");
   await page.getByRole("button", { name: "Salvar dados" }).click();
@@ -347,7 +369,7 @@ test("valida nome curto no formulário e não envia PATCH", async ({ page }) => 
 });
 
 test("salva telefone, nascimento, estado e cidade normalizados", async ({ page }) => {
-  await page.goto("/perfil");
+  await openProfileTab(page);
   const phone = page.getByRole("textbox", { name: "Telefone" });
   await phone.pressSequentially("11912345678");
   await expect(phone).toHaveValue("(11) 91234-5678");
@@ -382,7 +404,7 @@ test("salva telefone, nascimento, estado e cidade normalizados", async ({ page }
 });
 
 test("escolhe a data de nascimento pelo calendário, do ano ao dia", async ({ page }) => {
-  await page.goto("/perfil");
+  await openProfileTab(page);
   const birthDate = page.getByRole("textbox", { name: "Data de nascimento" });
   const calendar = page.getByRole("dialog", { name: "Escolher data de nascimento" });
 
@@ -407,7 +429,7 @@ test("escolhe a data de nascimento pelo calendário, do ano ao dia", async ({ pa
 });
 
 test("abre o calendário ao clicar no campo de data sem impedir a digitação", async ({ page }) => {
-  await page.goto("/perfil");
+  await openProfileTab(page);
   const birthDate = page.getByRole("textbox", { name: "Data de nascimento" });
   const calendar = page.getByRole("dialog", { name: "Escolher data de nascimento" });
 
@@ -429,7 +451,7 @@ test("abre o calendário ao clicar no campo de data sem impedir a digitação", 
 
 test("carrega os dados pessoais cadastrados e permite limpá-los", async ({ page }) => {
   user = { ...user, phone: "+551131234567", birthDate: "1990-05-10", city: "Recife", state: "PE" };
-  await page.goto("/perfil");
+  await openProfileTab(page);
 
   const phone = page.getByRole("textbox", { name: "Telefone" });
   const birthDate = page.getByRole("textbox", { name: "Data de nascimento" });
@@ -455,7 +477,7 @@ test("carrega os dados pessoais cadastrados e permite limpá-los", async ({ page
 
 test("troca de estado limpa a cidade e carrega as cidades do novo estado", async ({ page }) => {
   user = { ...user, city: "Recife", state: "PE" };
-  await page.goto("/perfil");
+  await openProfileTab(page);
   const city = page.getByRole("button", { name: /^Cidade/ });
   await expect(city).toContainText("Recife");
 
@@ -471,7 +493,7 @@ test("troca de estado limpa a cidade e carrega as cidades do novo estado", async
 });
 
 test("valida telefone, data incompleta e maioridade sem enviar PATCH", async ({ page }) => {
-  await page.goto("/perfil");
+  await openProfileTab(page);
   const phone = page.getByRole("textbox", { name: "Telefone" });
   const birthDate = page.getByRole("textbox", { name: "Data de nascimento" });
   await phone.fill("1191234");
@@ -503,7 +525,7 @@ test("exige dados pessoais completos antes de cadastrar um imóvel", async ({ pa
 
 test("salva o público do hóspede pelo seletor com busca", async ({ page }) => {
   user = { ...user, roles: ["GUEST"] };
-  await page.goto("/perfil");
+  await openProfileTab(page);
   const identity = page.getByRole("button", { name: /^Você se identifica como/ });
 
   await page.getByRole("button", { name: "Salvar", exact: true }).click();
@@ -523,7 +545,7 @@ test("salva o público do hóspede pelo seletor com busca", async ({ page }) => 
 
 test("limpa a confirmação de dados salvos ao alterar um seletor", async ({ page }) => {
   user = { ...user, city: "Recife", state: "PE" };
-  await page.goto("/perfil");
+  await openProfileTab(page);
   await page.getByRole("button", { name: "Salvar dados" }).click();
   await expect(page.getByText("Dados atualizados.")).toBeVisible();
 
@@ -533,7 +555,7 @@ test("limpa a confirmação de dados salvos ao alterar um seletor", async ({ pag
 });
 
 test("mostra o e-mail da conta sem permitir alteração", async ({ page }) => {
-  await page.goto("/perfil");
+  await openProfileTab(page);
   const email = page.getByRole("textbox", { name: "E-mail" });
 
   await expect(email).toHaveValue("ana@example.com");
@@ -542,7 +564,7 @@ test("mostra o e-mail da conta sem permitir alteração", async ({ page }) => {
 });
 
 test("normaliza o nome antes de enviar PATCH sem incluir o e-mail", async ({ page }) => {
-  await page.goto("/perfil");
+  await openProfileTab(page);
   await page.getByRole("textbox", { name: "Nome" }).fill(" Ana Souza ");
   await page.getByRole("button", { name: "Salvar dados" }).click();
 
@@ -553,7 +575,7 @@ test("normaliza o nome antes de enviar PATCH sem incluir o e-mail", async ({ pag
 test("mostra espera e falha do perfil no contexto da ação", async ({ page }) => {
   profileDelayMs = 200;
   profileError = true;
-  await page.goto("/perfil");
+  await openProfileTab(page);
   await page.getByRole("button", { name: "Adicionar perfil de proprietário" }).click();
   await expect(page.getByRole("button", { name: "Adicionando perfil..." })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Salvar dados" })).toBeVisible();
@@ -566,7 +588,7 @@ test("perfil na navegação inferior abre e fecha o menu ao clicar novamente", a
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/perfil");
 
-  const profileButton = page.getByRole("navigation", { name: "Navegação inferior" }).getByRole("button", { name: "Perfil" });
+  const profileButton = page.getByRole("navigation", { name: "Navegação inferior" }).getByRole("button", { name: "Minha conta" });
   const profileMenu = page.locator("#mobile-profile-menu");
 
   await profileButton.click();
@@ -603,11 +625,24 @@ test("cadastra imóvel escolhendo o tipo no seletor com busca", async ({ page })
   expect(ownerRequests).toEqual([]);
 
   await page.getByRole("button", { name: /^Tipo do imóvel/ }).click();
-  await page.getByRole("option", { name: "Sobrado" }).click();
+  await page.getByRole("option", { name: "Casa" }).click();
   await page.getByRole("button", { name: /^Salvar/ }).click();
 
   await expect.poll(() => ownerRequests.length).toBe(1);
-  expect(ownerRequests[0]).toMatchObject({ method: "POST", url: "/owner/properties", body: { title: "Casa Central", type: "TOWNHOUSE" } });
+  expect(ownerRequests[0]).toMatchObject({ method: "POST", url: "/owner/properties", body: { title: "Casa Central", type: "HOUSE" } });
+});
+
+test("cadastra motel como tipo do imóvel", async ({ page }) => {
+  user = { ...user, ...completePersonalData, roles: ["OWNER"] };
+  await page.goto("/meus-imoveis/novo");
+  await page.getByRole("textbox", { name: "Título do anúncio" }).fill("Motel Central");
+  await page.getByRole("textbox", { name: /^Descrição do imóvel/ }).fill("Suítes com hidromassagem.");
+  await page.getByRole("button", { name: /^Tipo do imóvel/ }).click();
+  await page.getByRole("option", { name: "Motel" }).click();
+  await page.getByRole("button", { name: /^Salvar/ }).click();
+
+  await expect.poll(() => ownerRequests.length).toBe(1);
+  expect(ownerRequests[0]).toMatchObject({ method: "POST", url: "/owner/properties", body: { title: "Motel Central", type: "MOTEL" } });
 });
 
 test("salva a UF do imóvel pelo seletor com busca", async ({ page }) => {

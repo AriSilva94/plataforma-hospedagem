@@ -2,9 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { LuArrowRight, LuChevronDown, LuCircleAlert, LuCircleCheck, LuEye, LuExternalLink, LuImage, LuPencil, LuPlus } from "react-icons/lu";
+import { MotelTag } from "@/components/motel-tag";
 import { OwnerDataNotice } from "@/components/owner/owner-notice";
 import { OwnerPage } from "@/components/owner/owner-page";
-import { PropertyStatusBadge } from "@/components/owner/property-status-badge";
+import { PropertyStatusBadge, RoomVerification } from "@/components/owner/property-status-badge";
 import { StatusBadge } from "@/components/owner/status-badge";
 import { PropertyStatusActions } from "@/components/owner/property-status-actions";
 import { RoomAvailabilityToggle } from "@/components/owner/room-availability-toggle";
@@ -18,6 +19,7 @@ import {
   formatCents,
   formatLocation,
   genderIdentityLabels,
+  isMotel,
   propertyDetailSchema,
   publishRequirements,
   propertyTypeLabels,
@@ -38,7 +40,7 @@ function PropertySection({ title, editHref, children }: { title: string; editHre
       <Link
         href={editHref}
         aria-label={`Editar ${title}`}
-        className="-mr-2 inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg px-2 text-sm font-semibold text-(--blue-light) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
+        className="-mr-2 inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl px-2 text-sm font-semibold text-(--blue-light) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
       >
         <LuPencil aria-hidden="true" size={14} />
         Editar
@@ -79,12 +81,14 @@ function RoomRow({
   propertyId,
   propertyStatus,
   room,
+  motel,
   warnBeforePause,
   focusAfterChangeId,
 }: {
   propertyId: string;
   propertyStatus: PropertyStatus;
   room: Room;
+  motel: boolean;
   warnBeforePause: boolean;
   focusAfterChangeId?: string;
 }) {
@@ -119,6 +123,10 @@ function RoomRow({
             {complete ? <LuCircleCheck aria-hidden="true" size={14} /> : <LuCircleAlert aria-hidden="true" size={14} />}
             {complete ? "Anúncio completo" : `Anúncio ${room.completenessScore}% · ${nextStep}`}
           </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <RoomVerification status={room.verificationStatus} rejectedReason={room.verificationRejectedReason} />
+            {motel ? <MotelTag /> : null}
+          </div>
         </div>
       </Link>
       <div className="flex items-center justify-between gap-4 border-t border-(--line) pt-3 @2xl:justify-end @2xl:border-0 @2xl:pt-0">
@@ -327,6 +335,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
                     propertyId={property.id}
                     propertyStatus={property.status}
                     room={room}
+                    motel={isMotel(property.type)}
                     warnBeforePause={warnBeforePause(room)}
                     focusAfterChangeId={roomFilter ? "rooms-heading" : undefined}
                   />
@@ -343,7 +352,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
               </summary>
               <ul className={`mt-2 ${roomListClassName}`}>
                 {archivedRooms.map((room) => (
-                  <RoomRow key={room.id} propertyId={property.id} propertyStatus={property.status} room={room} warnBeforePause={false} />
+                  <RoomRow key={room.id} propertyId={property.id} propertyStatus={property.status} room={room} motel={isMotel(property.type)} warnBeforePause={false} />
                 ))}
               </ul>
             </details>
@@ -351,9 +360,12 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
         </section>
 
         <aside aria-labelledby="property-heading" className={`${cardClassName} lg:sticky lg:top-24`}>
-          <h2 id="property-heading" className="font-bold text-(--white)">
-            O imóvel
-          </h2>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 id="property-heading" className="font-bold text-(--white)">
+              O imóvel
+            </h2>
+            {isMotel(property.type) ? <MotelTag /> : null}
+          </div>
           {cover ? (
             <div className="relative mt-4 h-28 overflow-hidden rounded-xl bg-(--surface-raised)">
               <Image src={cover.url} alt="Foto de capa do imóvel" fill sizes="320px" className="object-cover" />
@@ -404,7 +416,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
                     <li key={criterion}>
                       <Link
                         href={hint.href}
-                        className="-mx-2 flex min-h-11 items-center justify-between gap-3 rounded-lg px-2 text-sm font-semibold text-(--blue-light) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
+                        className="-mx-2 flex min-h-11 items-center justify-between gap-3 rounded-xl px-2 text-sm font-semibold text-(--blue-light) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
                       >
                         {hint.label}
                         <LuArrowRight aria-hidden="true" size={14} className="shrink-0" />

@@ -1,6 +1,7 @@
 const tones = {
   success: "border-(--success)/38 bg-(--success)/10 text-(--success)",
   warning: "border-(--warning)/38 bg-(--warning)/10 text-(--warning)",
+  danger: "border-(--danger)/38 bg-(--danger)/10 text-(--danger)",
   neutral: "border-(--line-strong) bg-(--surface-raised) text-(--gray)",
 } as const;
 

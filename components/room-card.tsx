@@ -1,10 +1,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { LuImage, LuStar } from "react-icons/lu";
-import { formatCents, formatLocation, propertyTypeLabels, type PublicRoomCard } from "@/lib/properties";
+import { LuBadgeCheck, LuHotel, LuImage, LuMapPin, LuStar } from "react-icons/lu";
+import { formatCents, formatLocation, isMotel, type PublicRoomCard } from "@/lib/properties";
 
-export function RoomCard({ room, action, unavailable = false }: { room: PublicRoomCard; action?: ReactNode; unavailable?: boolean }) {
+const badgeClassName =
+  "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold text-(--white) shadow-[0_2px_8px_color-mix(in_srgb,var(--black)_35%,transparent)]";
+
+export function RoomCard({
+  room,
+  action,
+  unavailable = false,
+}: {
+  room: PublicRoomCard;
+  action?: ReactNode;
+  unavailable?: boolean;
+}) {
   const content = (
     <>
       <div className="relative aspect-4/3 bg-(--surface-raised)">
@@ -25,33 +36,65 @@ export function RoomCard({ room, action, unavailable = false }: { room: PublicRo
           <span className="absolute left-2.5 top-2.5 inline-flex items-center rounded-full bg-(--navy)/85 px-2.5 py-1 text-[11px] font-bold text-(--white)">
             Indisponível no momento
           </span>
-        ) : room.featured ? (
-          <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-(--navy)/70 px-2.5 py-1 text-[11px] font-bold text-(--white)">
-            <LuStar aria-hidden="true" size={12} className="text-(--warning)" fill="currentColor" /> Destaque
-          </span>
+        ) : room.verified || room.featured || isMotel(room.property.type) ? (
+          <div className="absolute left-2.5 top-2.5 flex flex-col items-start gap-1.5">
+            {room.verified ? (
+              <span className={`${badgeClassName} bg-(--success-deep)`}>
+                <LuBadgeCheck aria-hidden="true" size={12} className="text-(--success-soft)" />
+                Verificado
+              </span>
+            ) : null}
+            {room.featured ? (
+              <span className={`${badgeClassName} bg-(--warning-deep)`}>
+                <LuStar aria-hidden="true" size={12} className="text-(--warning)" fill="currentColor" />
+                Destaque
+              </span>
+            ) : null}
+            {isMotel(room.property.type) ? (
+              <span className={`${badgeClassName} bg-(--info-deep)`}>
+                <LuHotel aria-hidden="true" size={12} className="text-(--info)" />
+                Motel
+              </span>
+            ) : null}
+          </div>
         ) : null}
       </div>
-      <div className="p-4">
-        <h3 className="wrap-break-word text-sm font-bold text-(--white)">{room.title}</h3>
-        <p className="mt-1 wrap-break-word text-xs text-(--gray)">
-          {room.property.title} · {propertyTypeLabels[room.property.type]}
-        </p>
-        <p className="mt-0.5 text-xs text-(--gray)">{formatLocation(room.property)}</p>
-        <p className="mt-3 text-xs text-(--gray)">
-          <strong className={`text-sm ${unavailable ? "text-(--gray)" : "text-(--blue-light)"}`}>{formatCents(room.priceCents)}</strong> / diária
-        </p>
+      <div className="flex grow flex-col p-4">
+        <h3 className="line-clamp-2 wrap-break-word text-base font-bold leading-snug text-(--blue-soft)">
+          {room.title}
+        </h3>
+        <div className="mt-auto pt-2.5">
+          <p className="text-xs text-(--gray)">
+            <strong
+              className={`text-base ${unavailable ? "text-(--gray)" : "text-(--white)"}`}
+            >
+              {formatCents(room.priceCents)}
+            </strong>{" "}
+            / diária
+          </p>
+          <p className="mt-2 flex items-start gap-1.5 text-xs text-(--gray)">
+            <LuMapPin
+              aria-hidden="true"
+              size={14}
+              className="mt-px shrink-0 text-(--blue-light)"
+            />
+            <span className="line-clamp-1">{formatLocation(room.property)}</span>
+          </p>
+        </div>
       </div>
     </>
   );
 
   return (
-    <div className="relative">
+    <div className="relative flex h-full flex-col">
       {unavailable ? (
-        <div className="overflow-hidden rounded-2xl border border-dashed border-(--line-strong) bg-(--surface)">{content}</div>
+        <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-dashed border-(--line-strong) bg-(--surface)">
+          {content}
+        </div>
       ) : (
         <Link
-          href={`/imoveis/${room.property.id}#quarto-${room.id}`}
-          className="group block overflow-hidden rounded-2xl border border-(--line) bg-(--surface) transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
+          href={`/imoveis/${room.property.id}/quartos/${room.id}`}
+          className="group flex h-full flex-col overflow-hidden rounded-2xl border border-(--line) bg-(--surface) transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
         >
           {content}
         </Link>

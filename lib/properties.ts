@@ -1,8 +1,9 @@
 import { z } from "@/lib/zod";
 
-export const propertyTypes = ["HOUSE", "APARTMENT", "TOWNHOUSE", "STUDIO", "SHARED_HOUSE", "OTHER"] as const;
+export const propertyTypes = ["HOUSE", "MOTEL"] as const;
 export const propertyStatuses = ["DRAFT", "ACTIVE", "UNAVAILABLE"] as const;
 export const roomStatuses = ["AVAILABLE", "UNAVAILABLE", "INACTIVE"] as const;
+export const roomVerificationStatuses = ["PENDING", "VERIFIED", "REJECTED"] as const;
 export const bathroomTypes = ["PRIVATE", "SHARED"] as const;
 export const genderIdentities = ["MAN", "WOMAN", "TRANS_WOMAN", "TRANS_MAN"] as const;
 export const sharedAreaTypes = ["LIVING_ROOM", "KITCHEN", "SHARED_BATHROOM", "LAUNDRY", "OUTDOOR_AREA", "GARAGE", "OTHER"] as const;
@@ -59,7 +60,12 @@ export const brazilianStateOptions = brazilianStates
 
 export type PropertyType = (typeof propertyTypes)[number];
 export type PropertyStatus = (typeof propertyStatuses)[number];
+
+export function isMotel(type: PropertyType): boolean {
+  return type === "MOTEL";
+}
 export type RoomStatus = (typeof roomStatuses)[number];
+export type RoomVerificationStatus = (typeof roomVerificationStatuses)[number];
 export type BathroomType = (typeof bathroomTypes)[number];
 export type GenderIdentity = (typeof genderIdentities)[number];
 export type SharedAreaType = (typeof sharedAreaTypes)[number];
@@ -68,11 +74,7 @@ export type CompletenessCriterion = (typeof completenessCriteria)[number];
 
 export const propertyTypeLabels: Record<PropertyType, string> = {
   HOUSE: "Casa",
-  APARTMENT: "Apartamento",
-  TOWNHOUSE: "Sobrado",
-  STUDIO: "Studio / kitnet",
-  SHARED_HOUSE: "Pensão / república",
-  OTHER: "Outro",
+  MOTEL: "Motel",
 };
 
 export const propertyStatusLabels: Record<PropertyStatus, string> = {
@@ -85,6 +87,12 @@ export const roomStatusLabels: Record<RoomStatus, string> = {
   AVAILABLE: "Reservável",
   UNAVAILABLE: "Pausado",
   INACTIVE: "Arquivado",
+};
+
+export const roomVerificationStatusLabels: Record<RoomVerificationStatus, string> = {
+  PENDING: "Em análise",
+  VERIFIED: "Verificado",
+  REJECTED: "Atenção",
 };
 
 export const roomStatusHints: Record<RoomStatus, string> = {
@@ -187,6 +195,15 @@ export const propertySummarySchema = z.object({
   minAvailablePriceCents: z.number().nullable(),
 });
 
+export const ownerRoomsSummarySchema = z.object({
+  totalRooms: z.number(),
+  availableRooms: z.number(),
+  pendingVerificationRooms: z.number(),
+  rejectedVerificationRooms: z.number(),
+});
+
+export type OwnerRoomsSummary = z.infer<typeof ownerRoomsSummarySchema>;
+
 export const roomSummarySchema = z.object({
   id: z.string(),
   title: z.string(),
@@ -198,6 +215,8 @@ export const roomSummarySchema = z.object({
   completenessScore: z.number(),
   completenessMissing: z.array(z.enum(completenessCriteria)),
   coverUrl: z.string().nullable(),
+  verificationStatus: z.enum(roomVerificationStatuses),
+  verificationRejectedReason: z.string().nullable(),
 });
 
 export const propertyDetailSchema = z.object({
@@ -244,6 +263,8 @@ export const roomDetailSchema = z.object({
   completenessScore: z.number(),
   completenessMissing: z.array(z.enum(completenessCriteria)),
   media: z.array(mediaSchema),
+  verificationStatus: z.enum(roomVerificationStatuses),
+  verificationRejectedReason: z.string().nullable(),
   property: z.object({ id: z.string(), title: z.string(), status: z.enum(propertyStatuses), availableRoomCount: z.number() }),
 });
 
@@ -252,6 +273,7 @@ export const publicRoomCardSchema = z.object({
   title: z.string(),
   priceCents: z.number(),
   featured: z.boolean(),
+  verified: z.boolean(),
   coverUrl: z.string().nullable(),
   property: z.object({
     id: z.string(),
@@ -291,6 +313,7 @@ export const publicPropertyDetailSchema = z.object({
     }),
   ),
   media: z.array(mediaSchema),
+  host: z.object({ id: z.string(), name: z.string() }),
   rooms: z.array(
     z.object({
       id: z.string(),
@@ -302,12 +325,20 @@ export const publicPropertyDetailSchema = z.object({
       acceptedAudiences: z.array(z.enum(genderIdentities)),
       amenities: z.array(z.string()),
       additionalInfo: z.string().nullable(),
+      verified: z.boolean(),
       media: z.array(mediaSchema),
     }),
   ),
 });
 
+export const publicOwnerProfileSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  rooms: z.array(publicRoomCardSchema),
+});
+
 export type Media = z.infer<typeof mediaSchema>;
+export type PublicOwnerProfile = z.infer<typeof publicOwnerProfileSchema>;
 export type PublicRoomCard = z.infer<typeof publicRoomCardSchema>;
 export type PublicRoomPage = z.infer<typeof publicRoomPageSchema>;
 export type PublicPropertyDetail = z.infer<typeof publicPropertyDetailSchema>;

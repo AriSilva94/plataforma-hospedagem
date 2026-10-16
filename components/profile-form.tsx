@@ -32,7 +32,7 @@ import { brazilianStates } from "@/lib/properties";
 import { CurrentUser, formatPhone, parseCurrentUser } from "@/lib/user";
 
 const secondaryDisabledButtonClassName =
-  "rounded-xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-(--gray) disabled:cursor-not-allowed";
+  "rounded-2xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-(--gray) disabled:cursor-not-allowed";
 
 const verificationStates = {
   verified: { label: "Verificado", className: "text-(--success)" },
@@ -138,7 +138,7 @@ function AccessProfileCard({
         {active && manageHref ? (
           <Link
             href={manageHref}
-            className="flex w-full justify-center rounded-xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-(--white) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
+            className="flex w-full justify-center rounded-2xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-(--white) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
           >
             Gerenciar imóveis
           </Link>
@@ -155,7 +155,7 @@ function AccessProfileCard({
             type="button"
             disabled={pending}
             onClick={onAdd}
-            className="w-full rounded-xl bg-(--blue) px-4 py-3 text-sm font-bold text-(--white) transition-colors hover:bg-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-2xl bg-(--blue) px-4 py-3 text-sm font-bold text-(--white) transition-colors hover:bg-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isAdding
               ? "Adicionando perfil..."
@@ -167,9 +167,9 @@ function AccessProfileCard({
   );
 }
 
-export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
-  const [user, setUser] = useState(initialUser);
-  const initialValues = toFormValues(initialUser);
+export function ProfileForm({ user, onUserChange }: { user: CurrentUser; onUserChange: (user: CurrentUser) => void }) {
+  const initialValues = toFormValues(user);
+  const [{ roles: initialRoles }] = useState(user);
   const {
     register,
     handleSubmit,
@@ -209,7 +209,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
     [subscribe],
   );
   const EmailStatusIcon = user.emailVerified ? LuMailCheck : LuMailWarning;
-  const prioritizeProfiles = initialUser.roles.length === 0;
+  const prioritizeProfiles = initialRoles.length === 0;
 
   async function requestUser(
     run: () => Promise<Response>,
@@ -250,7 +250,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
           }),
         }),
       );
-      setUser(updatedUser);
+      onUserChange(updatedUser);
       reset(toFormValues(updatedUser));
       setSaveMessage("Dados atualizados.");
     } catch (error) {
@@ -293,7 +293,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
       const updatedUser = await requestUser(() =>
         apiFetch(`/users/me/profiles/${role}`, { method: "POST" }),
       );
-      setUser(updatedUser);
+      onUserChange(updatedUser);
       setProfileMessage(
         `Perfil de ${role === "guest" ? "hóspede" : "proprietário"} adicionado.`,
       );
@@ -342,7 +342,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
           details={
             <GuestIdentityForm
               value={user.guestGenderIdentity}
-              onSaved={setUser}
+              onSaved={onUserChange}
             />
           }
         />
@@ -370,7 +370,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
           </div>
           <Link
             href="/admin"
-            className="inline-flex shrink-0 items-center justify-center rounded-xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-(--white) transition-colors hover:bg-(--white)/5"
+            className="inline-flex shrink-0 items-center justify-center rounded-2xl border border-(--line-strong) px-4 py-3 text-sm font-semibold text-(--white) transition-colors hover:bg-(--white)/5"
           >
             Abrir administração
           </Link>
@@ -390,23 +390,11 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
   );
 
   return (
-    <main className="min-h-[calc(100vh-72px)] px-4 pt-8 pb-28 sm:px-6 md:pt-12 md:pb-16">
+    <div>
       <div className="mx-auto max-w-4xl">
-        <header className="grid grid-cols-[4rem_minmax(0,1fr)] items-center gap-4 border-b border-(--line) pb-8 sm:flex sm:flex-wrap sm:gap-5">
-          <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-(--blue) text-2xl font-extrabold text-(--white) sm:h-18 sm:w-18">
-            {user.name.slice(0, 1).toUpperCase()}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-(--gray)">Seu perfil</p>
-            <h1 className="mt-1 wrap-break-word text-2xl font-extrabold tracking-tight text-(--white) sm:text-3xl">
-              {user.name}
-            </h1>
-            <p className="mt-1 wrap-break-word text-sm text-(--gray)">
-              {user.email}
-            </p>
-          </div>
+        <div className="flex flex-wrap items-center gap-3 border-b border-(--line) pb-8">
           <span
-            className={`col-span-2 inline-flex w-fit items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold sm:w-auto ${
+            className={`inline-flex w-fit items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold ${
               user.emailVerified
                 ? "border-(--success)/38 bg-(--success)/10 text-(--success)"
                 : "border-(--info)/38 bg-(--info)/10 text-(--info)"
@@ -415,7 +403,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
             <EmailStatusIcon aria-hidden="true" size={15} />
             {user.emailVerified ? "E-mail verificado" : "E-mail não verificado"}
           </span>
-        </header>
+        </div>
 
         {prioritizeProfiles ? accessSection : null}
 
@@ -528,7 +516,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
             ) : null}
             <button
               disabled={isSaving || Boolean(profilePendingRole)}
-              className="mt-6 rounded-xl bg-(--blue) px-5 py-3 text-sm font-bold text-(--white) transition-colors hover:bg-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-6 rounded-2xl bg-(--blue) px-5 py-3 text-sm font-bold text-(--white) transition-colors hover:bg-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60"
               type="submit"
             >
               {isSaving ? "Salvando..." : "Salvar dados"}
@@ -563,7 +551,7 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
                     type="button"
                     disabled={isSendingVerification}
                     onClick={sendVerification}
-                    className="rounded-lg border border-(--line-strong) px-3 py-2 text-xs font-bold text-(--white) transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-xl border border-(--line-strong) px-3 py-2 text-xs font-bold text-(--white) transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isSendingVerification ? "Enviando..." : "Enviar link de confirmação"}
                   </button>
@@ -635,6 +623,6 @@ export function ProfileForm({ user: initialUser }: { user: CurrentUser }) {
           <DeactivateAccount hasPassword={user.hasPassword} />
         </section>
       </div>
-    </main>
+    </div>
   );
 }

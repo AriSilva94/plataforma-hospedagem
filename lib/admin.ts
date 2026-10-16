@@ -1,5 +1,5 @@
 import { z } from "@/lib/zod";
-import { propertyStatuses, propertyTypes, roomStatuses } from "@/lib/properties";
+import { propertyStatuses, propertyTypes, roomStatuses, roomVerificationStatuses } from "@/lib/properties";
 
 export const ADMIN_PAGE_SIZE = 20;
 
@@ -83,6 +83,8 @@ export const adminRoomSchema = z.object({
   featuredUntil: z.string().nullable(),
   listed: z.boolean(),
   featuringStatus: z.enum(featuringStatuses),
+  verificationStatus: z.enum(roomVerificationStatuses),
+  verificationRejectedReason: z.string().nullable(),
   property: z.object({
     id: z.string(),
     title: z.string(),
