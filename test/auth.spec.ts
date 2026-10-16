@@ -303,5 +303,5 @@ test("confirmação sem token válido oferece novo cadastro em vez do botão", a
 
   await expect(page.getByRole("heading", { name: "Link inválido" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Confirmar e-mail" })).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "Criar conta" })).toHaveAttribute("href", "/cadastro");
+  await expect(page.getByRole("main").getByRole("link", { name: "Criar conta" })).toHaveAttribute("href", "/cadastro");
 });
