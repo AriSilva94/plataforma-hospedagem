@@ -60,13 +60,13 @@ export function RoomCard({
         ) : null}
       </div>
       <div className="flex grow flex-col p-4">
-        <h3 className="line-clamp-2 wrap-break-word text-base font-bold leading-snug text-(--primary-text)">
+        <h3 className="line-clamp-2 wrap-break-word text-base font-bold leading-snug text-(--text-primary)">
           {room.title}
         </h3>
         <div className="mt-auto pt-2.5">
           <p className="text-[13px] text-(--text-secondary)">
             <strong
-              className={`text-base ${unavailable ? "text-(--text-secondary)" : "text-(--text-primary)"}`}
+              className={`text-base ${unavailable ? "text-(--text-secondary)" : "text-(--primary-text)"}`}
             >
               {formatCents(room.priceCents)}
             </strong>{" "}
@@ -76,7 +76,7 @@ export function RoomCard({
             <LuMapPin
               aria-hidden="true"
               size={14}
-              className="mt-px shrink-0 text-(--primary-text)"
+              className="mt-px shrink-0"
             />
             <span className="line-clamp-1">{formatLocation(room.property)}</span>
           </p>
@@ -94,7 +94,7 @@ export function RoomCard({
       ) : (
         <Link
           href={`/imoveis/${room.property.id}/quartos/${room.id}`}
-          className="group flex h-full flex-col overflow-hidden rounded-2xl border border-(--primary-border)/50 bg-(--primary-soft) transition-colors hover:border-(--primary-border) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
+          className="group flex h-full flex-col overflow-hidden rounded-2xl bg-(--surface-accent) border border-(--border-accent) transition-[border-color,box-shadow] duration-200 hover:border-(--primary)/40 hover:shadow-[0_14px_28px_-16px_color-mix(in_srgb,var(--shadow)_45%,transparent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
         >
           {content}
         </Link>

@@ -23,6 +23,8 @@
   --primary-text: light-dark(#0b63e3, #70b8ff);
   --primary-soft: light-dark(#e6f4fe, #0d2847);
   --primary-border: light-dark(#8ec8f6, #205d9e);
+  --surface-accent: light-dark(#f1f6fe, #172130);
+  --border-accent: light-dark(#d7e0f0, #2a374c);
   --on-primary: #ffffff;
   --focus-ring: light-dark(#0b63e3, #70b8ff);
   --success: light-dark(#18794e, #49b88a);
