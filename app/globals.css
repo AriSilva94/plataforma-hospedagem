@@ -1,37 +1,61 @@
 @import "tailwindcss";
 
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+
+  &:where([data-theme="dark"] *) {
+    @slot;
+  }
+}
+
 :root {
-  color-scheme: dark;
+  color-scheme: light dark;
+}
+
+:root,
+.auth-scene {
   --white: #ffffff;
   --black: #000000;
-  --shadow: #000000;
-  --background: #121316;
-  --surface: #1d1f23;
-  --surface-raised: #282b30;
-  --border: #383b42;
-  --border-strong: #6b6f78;
-  --text-primary: #f4f4f5;
-  --text-secondary: #a5a8b0;
-  --primary: #2f6cdd;
-  --primary-hover: #2c66d1;
-  --primary-text: #73a7f7;
-  --primary-soft: #212d45;
+  --shadow: light-dark(#5f636b, #000000);
+  --background: light-dark(#f7f7f5, #121316);
+  --surface: light-dark(#ffffff, #1d1f23);
+  --surface-raised: light-dark(#f0f1f2, #282b30);
+  --border: light-dark(#e1e2e5, #383b42);
+  --border-strong: light-dark(#80848c, #6b6f78);
+  --text-primary: light-dark(#202127, #f4f4f5);
+  --text-secondary: light-dark(#60646d, #a5a8b0);
+  --primary: light-dark(#155eef, #2f6cdd);
+  --primary-hover: light-dark(#1253d2, #2c66d1);
+  --primary-text: light-dark(#155eef, #73a7f7);
+  --primary-soft: light-dark(#ecf2fe, #212d45);
   --on-primary: #ffffff;
-  --focus-ring: #73a7f7;
-  --success: #49b88a;
-  --success-soft: #233431;
-  --warning: #e3a44d;
-  --warning-soft: #393229;
-  --error: #e57373;
-  --error-soft: #392b2e;
-  --info: #73a7f7;
-  --info-soft: #293241;
-  --lavender: #b8a1d9;
-  --lavender-soft: #30283c;
-  --champagne: #d4b68a;
-  --champagne-soft: #362e25;
-  --terracotta: #d99580;
-  --terracotta-soft: #392a27;
+  --focus-ring: light-dark(#155eef, #73a7f7);
+  --success: light-dark(#18794e, #49b88a);
+  --success-soft: light-dark(#eaf3ef, #233431);
+  --warning: light-dark(#93570f, #e3a44d);
+  --warning-soft: light-dark(#f6f0e7, #393229);
+  --error: light-dark(#c93636, #e57373);
+  --error-soft: light-dark(#fbefef, #392b2e);
+  --info: light-dark(#155eef, #73a7f7);
+  --info-soft: light-dark(#ecf2fe, #293241);
+  --lavender: light-dark(#7954a1, #b8a1d9);
+  --lavender-soft: light-dark(#f1ebf7, #30283c);
+  --champagne: light-dark(#86602f, #d4b68a);
+  --champagne-soft: light-dark(#f7f0e6, #362e25);
+  --terracotta: light-dark(#9c5039, #d99580);
+  --terracotta-soft: light-dark(#f8ede8, #392a27);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -99,6 +123,7 @@ body.scroll-locked {
   min-height: 22rem;
   overflow: hidden;
   padding: 2rem;
+  color-scheme: dark;
   background: var(--background);
 }
 

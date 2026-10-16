@@ -5,6 +5,7 @@ import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { IconType } from "react-icons";
 import { BrandMark } from "@/components/brand-mark";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { logout } from "@/lib/api";
 import {
   LuBell,
@@ -57,11 +58,16 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
             <>
               <BrandMark size="md" href="/" />
               <div className="flex-1" />
+              <ThemeToggle />
               <NotificationsPlaceholder />
             </>
           ) : (
-            <div className="flex w-full justify-center">
+            <div className="grid w-full grid-cols-[1fr_auto_1fr] items-center">
+              <span />
               <BrandMark size="md" href="/" />
+              <div className="flex justify-end">
+                <ThemeToggle />
+              </div>
             </div>
           )}
         </div>
@@ -76,6 +82,7 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
             ))}
           </nav>
           <div className="relative flex items-center justify-end gap-4">
+            <ThemeToggle />
             {user ? (
               <>
                 <NotificationsPlaceholder />
