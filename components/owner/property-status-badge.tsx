@@ -10,7 +10,7 @@ import {
 
 const propertyTones = { DRAFT: "neutral", ACTIVE: "success", UNAVAILABLE: "warning" } as const;
 const roomTones = { AVAILABLE: "success", UNAVAILABLE: "warning", INACTIVE: "neutral" } as const;
-const roomVerificationTones = { PENDING: "warning", VERIFIED: "success", REJECTED: "danger" } as const;
+export const roomVerificationTones ={ PENDING: "warning", VERIFIED: "success", REJECTED: "danger" } as const;
 
 export function PropertyStatusBadge({ status }: { status: PropertyStatus }) {
   return <StatusBadge tone={propertyTones[status]}>{propertyStatusLabels[status]}</StatusBadge>;

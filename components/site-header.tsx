@@ -77,10 +77,8 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
           </nav>
           <div className="relative flex items-center justify-end gap-4">
             {user ? (
-              <NotificationsPlaceholder />
-            ) : null}
-            {user ? (
               <>
+                <NotificationsPlaceholder />
                 <Link
                   href="/perfil"
                   className="rounded-2xl bg-(--blue) px-4.5 py-2.5 text-[13px] font-bold text-(--white) transition-colors hover:bg-(--blue-light)"
@@ -243,13 +241,7 @@ function MobileBottomNavigation({
       ) : (
         <>
           {anuncios("Quartos")}
-          <Link
-            href="/login"
-            className="flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-semibold text-(--gray)"
-          >
-            <LuLogIn aria-hidden="true" size={18} />
-            <span className="truncate">Entrar</span>
-          </Link>
+          <MobileNavigationItem label="Entrar" href="/login" icon={LuLogIn} active={false} />
         </>
       )}
     </nav>

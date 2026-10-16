@@ -7,7 +7,7 @@ import { CompletenessMeter } from "@/components/owner/completeness-meter";
 import { AdminRoomCard } from "@/components/admin/admin-room-card";
 import { RoomVerificationActions } from "@/components/admin/room-verification-actions";
 import { OwnerPage } from "@/components/owner/owner-page";
-import { RoomStatusBadge } from "@/components/owner/property-status-badge";
+import { RoomStatusBadge, roomVerificationTones } from "@/components/owner/property-status-badge";
 import { StatusBadge } from "@/components/owner/status-badge";
 import { secondaryButtonClassName } from "@/components/owner/styles";
 import { PageNotice } from "@/components/page-notice";
@@ -24,6 +24,8 @@ const verificationOptions = [
   { value: "verificado", label: "Verificados", api: "VERIFIED" },
   { value: "rejeitado", label: "Rejeitados", api: "REJECTED" },
 ] as const;
+
+const verificationBadgeLabels = { PENDING: "Em análise", VERIFIED: "Verificado", REJECTED: "Rejeitado" } as const;
 
 export default async function AdminRoomsPage({ searchParams }: PageProps<"/admin/quartos">) {
   const params = await searchParams;
@@ -59,9 +61,7 @@ export default async function AdminRoomsPage({ searchParams }: PageProps<"/admin
               <>
                 <RoomStatusBadge status={room.status} />
                 {room.featuringStatus === "ACTIVE" ? <StatusBadge tone="success">{featuringStatusLabels.ACTIVE}</StatusBadge> : null}
-                {room.verificationStatus === "VERIFIED" ? <StatusBadge tone="success">Verificado</StatusBadge> : null}
-                {room.verificationStatus === "PENDING" ? <StatusBadge tone="warning">Em análise</StatusBadge> : null}
-                {room.verificationStatus === "REJECTED" ? <StatusBadge tone="danger">Rejeitado</StatusBadge> : null}
+                <StatusBadge tone={roomVerificationTones[room.verificationStatus]}>{verificationBadgeLabels[room.verificationStatus]}</StatusBadge>
               </>
             }
             aside={
