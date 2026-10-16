@@ -79,6 +79,13 @@ body.scroll-locked {
   overflow: hidden;
 }
 
+.theme-switching,
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+}
+
 ::selection {
   background: var(--primary);
   color: var(--on-primary);

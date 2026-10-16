@@ -11,9 +11,12 @@ function resolveCurrentTheme(): Theme {
 
 export function ThemeToggle() {
   function toggleTheme() {
+    const root = document.documentElement;
     const next: Theme = resolveCurrentTheme() === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
+    root.classList.add("theme-switching");
+    root.dataset.theme = next;
     document.cookie = `${themeCookieName}=${next}; path=/; max-age=${themeCookieMaxAge}; samesite=lax`;
+    requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove("theme-switching")));
   }
 
   return (
