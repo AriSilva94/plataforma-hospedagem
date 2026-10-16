@@ -6,10 +6,7 @@ import { parseTheme, themeCookieName, type Theme } from "@/lib/theme";
 const themeCookieMaxAge = 60 * 60 * 24 * 365;
 
 function resolveCurrentTheme(): Theme {
-  return (
-    parseTheme(document.documentElement.dataset.theme) ??
-    (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
-  );
+  return parseTheme(document.documentElement.dataset.theme) ?? "light";
 }
 
 export function ThemeToggle() {

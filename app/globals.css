@@ -1,19 +1,9 @@
 @import "tailwindcss";
 
-@custom-variant dark {
-  @media (prefers-color-scheme: dark) {
-    &:where(:root:not([data-theme="light"]) *) {
-      @slot;
-    }
-  }
-
-  &:where([data-theme="dark"] *) {
-    @slot;
-  }
-}
+@custom-variant dark (&:where([data-theme="dark"] *));
 
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
 :root,
@@ -48,10 +38,6 @@
   --champagne-soft: light-dark(#f7f0e6, #362e25);
   --terracotta: light-dark(#9c5039, #d99580);
   --terracotta-soft: light-dark(#f8ede8, #392a27);
-}
-
-:root[data-theme="light"] {
-  color-scheme: light;
 }
 
 :root[data-theme="dark"] {

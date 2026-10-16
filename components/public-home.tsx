@@ -217,13 +217,13 @@ function CalendarDemo() {
           <span className="w-16 shrink-0 text-xs font-semibold text-(--text-secondary)">{room}</span>
           <div className="grid flex-1 grid-cols-7 gap-1">
             {days.map((free, day) => (
-              <span key={day} className={`h-6 rounded-md ${free ? "bg-(--success)/35" : "bg-(--text-primary)/6"}`} />
+              <span key={day} className={`h-6 rounded-md ${free ? "bg-(--success-soft) ring-1 ring-inset ring-(--success)/30" : "bg-(--text-primary)/6"}`} />
             ))}
           </div>
         </div>
       ))}
       <div className="mt-1 flex gap-4 text-xs text-(--text-secondary)">
-        <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-sm bg-(--success)/35" />Livre</span>
+        <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-sm bg-(--success-soft) ring-1 ring-inset ring-(--success)/30" />Livre</span>
         <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-sm bg-(--text-primary)/6" />Ocupado</span>
       </div>
     </div>
