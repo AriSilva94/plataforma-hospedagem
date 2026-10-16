@@ -48,7 +48,7 @@ export function GuestIdentityForm({
       <label id="guest-gender-identity-label" htmlFor="guest-gender-identity" className="block text-sm font-semibold text-(--text-secondary)">
         Você se identifica como
       </label>
-      <p className="mt-1 text-xs leading-relaxed text-(--text-secondary)">
+      <p className="mt-1 text-[13px] leading-relaxed text-(--text-secondary)">
         Usado apenas para mostrar quartos compatíveis. Não é exibido a proprietários. Será exigido antes de reservar.
       </p>
       <div className="mt-3 flex flex-col gap-2 sm:flex-row">

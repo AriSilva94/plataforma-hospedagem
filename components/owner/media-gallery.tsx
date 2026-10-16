@@ -129,7 +129,7 @@ const MediaTile = memo(function MediaTile({
             onBlur={(event) => {
               if (event.relatedTarget) actions.releaseKeyboard(item.id);
             }}
-            className="absolute right-2 top-2 flex size-11 cursor-grab touch-none items-center justify-center rounded-xl bg-(--black)/70 text-(--on-primary) transition-colors hover:bg-(--black)/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-40 aria-pressed:bg-(--primary) sm:size-9"
+            className="absolute right-2 top-2 flex size-11 cursor-grab touch-none items-center justify-center rounded-xl bg-(--black)/70 text-(--on-primary) transition-colors hover:bg-(--black)/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-60 aria-pressed:bg-(--primary) sm:size-9"
           >
             <LuGripVertical aria-hidden="true" size={18} />
           </button>
@@ -142,7 +142,7 @@ const MediaTile = memo(function MediaTile({
             aria-label={`Tornar capa: ${label}`}
             disabled={disabled}
             onClick={() => actions.makeCover(item.id)}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 text-xs font-semibold text-(--primary-text) transition-colors hover:bg-(--primary-soft) focus-visible:outline-2 focus-visible:outline-(--focus-ring) disabled:opacity-40 sm:min-h-9"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 text-xs font-semibold text-(--primary-text) transition-colors hover:bg-(--primary-soft) focus-visible:outline-2 focus-visible:outline-(--focus-ring) disabled:opacity-60 sm:min-h-9"
           >
             <LuStar aria-hidden="true" size={14} />
             Tornar capa
@@ -155,7 +155,7 @@ const MediaTile = memo(function MediaTile({
           aria-label={`Remover ${label}`}
           disabled={disabled}
           onClick={() => actions.remove(item)}
-          className="flex size-11 items-center justify-center rounded-xl text-(--error) transition-colors hover:bg-(--primary-soft) focus-visible:outline-2 focus-visible:outline-(--focus-ring) disabled:opacity-40 sm:size-9"
+          className="flex size-11 items-center justify-center rounded-xl text-(--error) transition-colors hover:bg-(--primary-soft) focus-visible:outline-2 focus-visible:outline-(--focus-ring) disabled:opacity-60 sm:size-9"
         >
           <LuTrash2 aria-hidden="true" size={16} />
         </button>
@@ -524,7 +524,7 @@ export function MediaGallery({
         <p className="text-sm text-(--text-secondary)">Nenhum arquivo enviado ainda.</p>
       ) : (
         <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs text-(--text-secondary)">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-[13px] text-(--text-secondary)">
             {canReorder ? (
               <p id={REORDER_INSTRUCTIONS_ID} className="flex items-center gap-1.5">
                 <LuGripVertical aria-hidden="true" size={14} className="shrink-0" />

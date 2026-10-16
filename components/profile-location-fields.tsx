@@ -120,7 +120,7 @@ export function ProfileLocationFields({
           )}
         />
         {failed ? (
-          <p id="profile-city-status" role="alert" className="mt-2 text-xs leading-relaxed text-(--text-secondary)">
+          <p id="profile-city-status" role="alert" className="mt-2 text-[13px] leading-relaxed text-(--text-secondary)">
             Não foi possível carregar as cidades.{" "}
             <button type="button" onClick={retry} className="font-bold text-(--primary-text) underline underline-offset-2 outline-hidden hover:text-(--text-primary) focus-visible:ring-2 focus-visible:ring-(--focus-ring)">
               Tentar novamente

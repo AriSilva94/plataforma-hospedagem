@@ -73,7 +73,7 @@ export function RoomAvailabilityToggle({
         <span className="sr-only">Quarto {roomTitle}: </span>
         <span className="text-sm font-semibold text-(--text-primary)">Reservável</span>
         <span className="sr-only">. </span>
-        <span className="block text-xs text-(--text-secondary)">{availabilityHint(available, propertyStatus)}</span>
+        <span className="block text-[13px] text-(--text-secondary)">{availabilityHint(available, propertyStatus)}</span>
       </Switch>
       {error ? (
         <p role="alert" className="mt-2 text-xs text-(--error)">

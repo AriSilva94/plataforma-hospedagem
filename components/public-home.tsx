@@ -68,7 +68,7 @@ export function PublicHome({
 
       <main>
         <section id="inicio" className="relative isolate overflow-hidden">
-          <Image src="/rooms/room1.png" alt="" fill priority sizes="100vw" className="-z-10 object-cover opacity-20 mix-blend-luminosity" />
+          <Image src="/rooms/room1.png" alt="" fill priority sizes="100vw" className="-z-10 object-cover opacity-20 dark:mix-blend-luminosity" />
           <div aria-hidden="true" className="absolute inset-0 -z-10 bg-linear-to-b from-transparent from-45% to-(--background)/70" />
 
           <div className={`${sectionShell} flex flex-col items-center pb-32 pt-16 text-center md:pb-44 md:pt-24`}>

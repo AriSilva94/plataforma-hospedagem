@@ -171,7 +171,7 @@ export function AuthForm({
                   {fieldError.message}
                 </p>
               ) : field.hint ? (
-                <p id={hintId} className="mt-1.5 text-xs leading-normal text-(--text-secondary)">
+                <p id={hintId} className="mt-1.5 text-[13px] leading-normal text-(--text-secondary)">
                   {field.hint}
                 </p>
               ) : null}

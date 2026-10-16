@@ -118,7 +118,7 @@ function RoomRow({
           <p className="mt-1 text-sm text-(--text-secondary)">
             {room.capacity === 1 ? "1 pessoa" : `${room.capacity} pessoas`} · Banheiro {bathroomTypeLabels[room.bathroomType].toLowerCase()}
           </p>
-          <p className="mt-0.5 truncate text-xs text-(--text-secondary)">{room.acceptedAudiences.map((audience) => genderIdentityLabels[audience]).join(", ")}</p>
+          <p className="mt-0.5 truncate text-[13px] text-(--text-secondary)">{room.acceptedAudiences.map((audience) => genderIdentityLabels[audience]).join(", ")}</p>
           <p className={`mt-1.5 flex items-center gap-1.5 text-xs font-semibold ${complete ? "text-(--success)" : "text-(--warning)"}`}>
             {complete ? <LuCircleCheck aria-hidden="true" size={14} /> : <LuCircleAlert aria-hidden="true" size={14} />}
             {complete ? "Anúncio completo" : `Anúncio ${room.completenessScore}% · ${nextStep}`}
@@ -273,7 +273,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
         </section>
       ) : null}
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
+      <div className="mt-8 grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
         <section aria-labelledby="rooms-heading" className="@container">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>

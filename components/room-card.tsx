@@ -5,7 +5,7 @@ import { LuBadgeCheck, LuHotel, LuImage, LuMapPin, LuStar } from "react-icons/lu
 import { formatCents, formatLocation, isMotel, type PublicRoomCard } from "@/lib/properties";
 
 const badgeClassName =
-  "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold shadow-[0_2px_8px_color-mix(in_srgb,var(--shadow)_35%,transparent)]";
+  "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold shadow-[0_2px_8px_color-mix(in_srgb,var(--shadow)_35%,transparent)]";
 
 export function RoomCard({
   room,
@@ -33,7 +33,7 @@ export function RoomCard({
           </div>
         )}
         {unavailable ? (
-          <span className="absolute left-2.5 top-2.5 inline-flex items-center rounded-full bg-(--background)/85 px-2.5 py-1 text-[11px] font-bold text-(--text-primary)">
+          <span className="absolute left-2.5 top-2.5 inline-flex items-center rounded-full bg-(--background)/85 px-2.5 py-1 text-xs font-bold text-(--text-primary)">
             Indisponível no momento
           </span>
         ) : room.verified || room.featured || isMotel(room.property.type) ? (
@@ -64,7 +64,7 @@ export function RoomCard({
           {room.title}
         </h3>
         <div className="mt-auto pt-2.5">
-          <p className="text-xs text-(--text-secondary)">
+          <p className="text-[13px] text-(--text-secondary)">
             <strong
               className={`text-base ${unavailable ? "text-(--text-secondary)" : "text-(--text-primary)"}`}
             >
@@ -72,7 +72,7 @@ export function RoomCard({
             </strong>{" "}
             / diária
           </p>
-          <p className="mt-2 flex items-start gap-1.5 text-xs text-(--text-secondary)">
+          <p className="mt-2 flex items-start gap-1.5 text-[13px] text-(--text-secondary)">
             <LuMapPin
               aria-hidden="true"
               size={14}

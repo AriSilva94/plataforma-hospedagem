@@ -4,7 +4,7 @@ export function OptionalTag() {
 
 export function FieldHint({ id, children }: { id: string; children: string }) {
   return (
-    <p id={id} className="mt-1 text-xs leading-relaxed text-(--text-secondary)">
+    <p id={id} className="mt-1 text-[13px] leading-relaxed text-(--text-secondary)">
       {children}
     </p>
   );

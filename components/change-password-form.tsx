@@ -110,7 +110,7 @@ export function ChangePasswordForm({ hasPassword }: { hasPassword: boolean }) {
               {fieldError ? (
                 <FieldError id={errorId} message={fieldError} />
               ) : hint ? (
-                <p id={hintId} className="mt-2 text-xs leading-relaxed text-(--text-secondary)">{hint}</p>
+                <p id={hintId} className="mt-2 text-[13px] leading-relaxed text-(--text-secondary)">{hint}</p>
               ) : null}
             </div>
           );
@@ -124,7 +124,7 @@ export function ChangePasswordForm({ hasPassword }: { hasPassword: boolean }) {
       >
         {isPasswordVisible ? "Ocultar senhas" : "Mostrar senhas"}
       </button>
-      <p className="mt-4 text-xs leading-relaxed text-(--text-secondary)">
+      <p className="mt-4 text-[13px] leading-relaxed text-(--text-secondary)">
         Ao alterar a senha, os outros dispositivos conectados à sua conta serão desconectados.
       </p>
       {error ? (

@@ -27,7 +27,7 @@ export function ChoiceGroup({
   return (
     <fieldset id={id} aria-describedby={error ? errorId : undefined} disabled={disabled}>
       <legend className="text-sm font-semibold text-(--text-secondary)">{legend}</legend>
-      {description ? <p className="mt-1 text-xs leading-relaxed text-(--text-secondary)">{description}</p> : null}
+      {description ? <p className="mt-1 text-[13px] leading-relaxed text-(--text-secondary)">{description}</p> : null}
       <div className="mt-2 flex flex-wrap gap-2">
         {options.map((option) => (
           <label key={option.value} className={choiceClassName}>

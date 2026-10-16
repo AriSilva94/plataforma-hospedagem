@@ -55,7 +55,7 @@ export function AvatarUploader({
         ref={inputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp"
-        className="sr-only"
+        className="hidden"
         onChange={(event) => {
           const file = event.target.files?.[0];
           event.target.value = "";

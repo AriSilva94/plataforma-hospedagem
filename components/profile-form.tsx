@@ -130,7 +130,7 @@ function AccessProfileCard({
       {active && details ? (
         details
       ) : (
-        <p className="mt-5 border-t border-(--border) pt-4 text-xs text-(--text-secondary)">
+        <p className="mt-5 border-t border-(--border) pt-4 text-[13px] text-(--text-secondary)">
           Informações deste perfil disponíveis em breve.
         </p>
       )}
@@ -450,7 +450,7 @@ export function ProfileForm({ user, onUserChange }: { user: CurrentUser; onUserC
                   value={user.email}
                   aria-describedby="profile-email-hint"
                 />
-                <p id="profile-email-hint" className="mt-2 text-xs leading-relaxed text-(--text-secondary)">
+                <p id="profile-email-hint" className="mt-2 text-[13px] leading-relaxed text-(--text-secondary)">
                   O e-mail identifica sua conta e não pode ser alterado.
                 </p>
               </div>
@@ -500,7 +500,7 @@ export function ProfileForm({ user, onUserChange }: { user: CurrentUser; onUserC
               </div>
               <ProfileLocationFields control={control} setValue={setValue} disabled={isSaving} labelClassName={fieldLabelClassName} />
             </div>
-            <p className="mt-5 text-xs leading-relaxed text-(--text-secondary)">
+            <p className="mt-5 text-[13px] leading-relaxed text-(--text-secondary)">
               Telefone, data de nascimento, cidade e estado são obrigatórios
               para anunciar um imóvel. É necessário ter pelo menos 18 anos.
             </p>

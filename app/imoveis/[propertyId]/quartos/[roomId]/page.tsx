@@ -205,7 +205,7 @@ export default async function PublicRoomPage({ params }: PageProps<"/imoveis/[pr
                   />
                 </div>
 
-                <p className="mt-4 flex items-start gap-2 text-xs leading-relaxed text-(--text-secondary)">
+                <p className="mt-4 flex items-start gap-2 text-[13px] leading-relaxed text-(--text-secondary)">
                   <LuTriangleAlert aria-hidden="true" size={14} className="mt-0.5 shrink-0" />
                   <span>
                     <strong className="text-(--text-primary)">Aviso importante:</strong> a DOMUS X não interfere em negociações, valores ou regras entre você e o anfitrião. A responsabilidade por

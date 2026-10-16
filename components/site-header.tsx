@@ -78,7 +78,7 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
             className="flex items-center justify-center gap-5.5 text-sm font-semibold text-(--text-secondary)"
           >
             {publicNavItems.map((item) => (
-              <NavItem key={item.label} {...item} />
+              <NavItem key={item.label} {...item} active={item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)} />
             ))}
           </nav>
           <div className="relative flex items-center justify-end gap-4">
@@ -95,7 +95,7 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
                 <button
                   type="button"
                   onClick={() => void endSession()}
-                  className="flex items-center gap-1.5 text-sm font-semibold text-(--text-secondary) transition-colors hover:text-(--text-primary)"
+                  className="flex min-h-11 items-center gap-1.5 text-sm font-semibold text-(--text-secondary) transition-colors hover:text-(--text-primary)"
                 >
                   <LuLogOut aria-hidden="true" size={16} />
                   Sair
@@ -167,11 +167,13 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
 function NavItem({
   label,
   href,
+  active,
   onClick,
   className,
 }: {
   label: string;
   href: string;
+  active: boolean;
   onClick?: () => void;
   className?: string;
 }) {
@@ -179,7 +181,8 @@ function NavItem({
     <Link
       href={href}
       onClick={onClick}
-      className={`text-(--text-primary) transition-colors hover:text-(--primary-text) ${className ?? ""}`}
+      aria-current={active ? "page" : undefined}
+      className={`inline-flex min-h-11 items-center transition-colors hover:text-(--primary-text) ${active ? "text-(--primary-text)" : "text-(--text-primary)"} ${className ?? ""}`}
     >
       {label}
     </Link>
@@ -220,7 +223,7 @@ function MobileBottomNavigation({
         </>
       )}
 
-      <div className="relative flex flex-col items-center pt-9 text-[11px] font-semibold text-(--primary-text)">
+      <div className="relative flex flex-col items-center pt-9 text-xs font-semibold text-(--primary-text)">
         <Link
           href="/meus-imoveis"
           aria-label="Anunciar"
@@ -239,7 +242,7 @@ function MobileBottomNavigation({
             aria-expanded={profileMenuOpen}
             aria-controls="mobile-profile-menu"
             onClick={onProfileClick}
-            className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-semibold ${pathname === "/perfil" ? "text-(--primary-text)" : "text-(--text-secondary)"}`}
+            className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg text-xs font-semibold ${pathname === "/perfil" ? "text-(--primary-text)" : "text-(--text-secondary)"}`}
           >
             <LuUserRound aria-hidden="true" size={18} />
             <span className="truncate">Minha conta</span>
@@ -268,7 +271,7 @@ function MobileNavigationItem({
   active: boolean;
   disabled?: boolean;
 }) {
-  const className = `flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-semibold ${active ? "text-(--primary-text)" : "text-(--text-secondary)"}`;
+  const className = `flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg text-xs font-semibold ${active ? "text-(--primary-text)" : "text-(--text-secondary)"}`;
   const content = (
     <>
       <Icon aria-hidden="true" size={18} />

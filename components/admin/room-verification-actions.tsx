@@ -81,7 +81,7 @@ export function RoomVerificationActions({ room }: { room: Room }) {
       ) : null}
 
       {room.verificationStatus === "REJECTED" && room.verificationRejectedReason ? (
-        <p className="text-xs leading-relaxed text-(--text-secondary)">Motivo: {room.verificationRejectedReason}</p>
+        <p className="text-[13px] leading-relaxed text-(--text-secondary)">Motivo: {room.verificationRejectedReason}</p>
       ) : null}
 
       {error ? (

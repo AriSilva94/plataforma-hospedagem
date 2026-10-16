@@ -169,7 +169,7 @@ export function Combobox({
           {selected ? selected.label : placeholder}
         </span>
         {selected?.detail ? (
-          <span className="shrink-0 rounded-md bg-(--primary-soft) px-1.5 py-0.5 text-[0.6875rem] leading-4 font-bold tracking-wider text-(--primary-text) ring-1 ring-(--primary-border) ring-inset">
+          <span className="shrink-0 rounded-md bg-(--primary-soft) px-1.5 py-0.5 text-xs leading-4 font-bold tracking-wider text-(--primary-text) ring-1 ring-(--primary-border) ring-inset">
             {selected.detail}
           </span>
         ) : null}
@@ -231,7 +231,7 @@ export function Combobox({
                 </span>
                 {option.detail ? (
                   <span
-                    className={`shrink-0 rounded-md px-1.5 py-0.5 text-[0.6875rem] leading-4 font-bold tracking-wider ring-1 ring-inset ${
+                    className={`shrink-0 rounded-md px-1.5 py-0.5 text-xs leading-4 font-bold tracking-wider ring-1 ring-inset ${
                       isSelected ? "bg-(--primary-soft) text-(--primary-text) ring-(--primary-border)" : "bg-(--text-primary)/5 text-(--text-secondary) ring-(--border)"
                     }`}
                   >
