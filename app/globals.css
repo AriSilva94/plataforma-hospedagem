@@ -24,20 +24,20 @@
   --primary-soft: light-dark(#ecf2fe, #212d45);
   --on-primary: #ffffff;
   --focus-ring: light-dark(#155eef, #73a7f7);
-  --success: light-dark(#18794e, #49b88a);
-  --success-soft: light-dark(#eaf3ef, #233431);
-  --warning: light-dark(#93570f, #e3a44d);
-  --warning-soft: light-dark(#f6f0e7, #393229);
-  --error: light-dark(#c93636, #e57373);
-  --error-soft: light-dark(#fbefef, #392b2e);
-  --info: light-dark(#155eef, #73a7f7);
-  --info-soft: light-dark(#ecf2fe, #293241);
-  --lavender: light-dark(#7954a1, #b8a1d9);
-  --lavender-soft: light-dark(#f1ebf7, #30283c);
-  --champagne: light-dark(#86602f, #d4b68a);
-  --champagne-soft: light-dark(#f7f0e6, #362e25);
-  --terracotta: light-dark(#9c5039, #d99580);
-  --terracotta-soft: light-dark(#f8ede8, #392a27);
+  --success: light-dark(#2e7752, #6ab290);
+  --success-soft: light-dark(#ecf3ef, #293734);
+  --warning: light-dark(#8d5a26, #d6a96f);
+  --warning-soft: light-dark(#f5f0eb, #3b352f);
+  --error: light-dark(#b23e3a, #da8b88);
+  --error-soft: light-dark(#f9eeee, #3a2f32);
+  --info: light-dark(#155eef, #82a8e1);
+  --info-soft: light-dark(#eaf1fe, #2d3541);
+  --lavender: light-dark(#765899, #b5a5cd);
+  --lavender-soft: light-dark(#f3f0f6, #35343e);
+  --champagne: light-dark(#82623a, #cdb898);
+  --champagne-soft: light-dark(#f4f1ed, #393736);
+  --terracotta: light-dark(#955541, #cc9b8c);
+  --terracotta-soft: light-dark(#f5f0ee, #393334);
 }
 
 :root[data-theme="dark"] {

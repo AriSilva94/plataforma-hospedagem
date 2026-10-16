@@ -174,9 +174,9 @@ export default async function PublicRoomPage({ params }: PageProps<"/imoveis/[pr
             <aside className="flex flex-col gap-4 lg:sticky lg:top-24">
               <Link
                 href="/meus-imoveis/novo"
-                className="flex items-center gap-2 rounded-2xl border border-(--border) bg-(--surface-raised) px-4 py-3 text-sm font-semibold text-(--text-primary) transition-colors hover:border-(--border-strong)"
+                className="flex items-center gap-2 rounded-2xl border border-(--success)/35 bg-(--success-soft) px-4 py-3 text-sm font-semibold text-(--success) transition-colors hover:border-(--success)/60"
               >
-                <LuMegaphone aria-hidden="true" size={16} className="shrink-0 text-(--primary-text)" /> 100% Gratuito — Anuncie seu espaço
+                <LuMegaphone aria-hidden="true" size={16} className="shrink-0" /> 100% Gratuito — Anuncie seu espaço
               </Link>
 
               <div className="rounded-2xl border border-(--border) bg-(--surface) p-5">
@@ -189,7 +189,7 @@ export default async function PublicRoomPage({ params }: PageProps<"/imoveis/[pr
                   href={whatsappHref}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-4 flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-(--border-strong) px-4 text-sm font-bold text-(--text-primary) transition-colors hover:bg-(--text-primary)/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
+                  className="mt-4 flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-(--success)/35 bg-(--success-soft) px-4 text-sm font-bold text-(--success) transition-colors hover:border-(--success)/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
                 >
                   <FaWhatsapp aria-hidden="true" size={18} /> Falar com anfitrião
                 </a>

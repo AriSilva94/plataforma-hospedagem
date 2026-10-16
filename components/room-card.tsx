@@ -39,19 +39,19 @@ export function RoomCard({
         ) : room.verified || room.featured || isMotel(room.property.type) ? (
           <div className="absolute left-2.5 top-2.5 flex flex-col items-start gap-1.5">
             {room.verified ? (
-              <span className={`${badgeClassName} bg-(--surface) text-(--text-primary)`}>
-                <LuBadgeCheck aria-hidden="true" size={12} className="text-(--success)" />
+              <span className={`${badgeClassName} bg-(--success-soft) text-(--success)`}>
+                <LuBadgeCheck aria-hidden="true" size={12} />
                 Verificado
               </span>
             ) : null}
             {room.featured ? (
-              <span className={`${badgeClassName} bg-(--surface) text-(--text-primary)`}>
-                <LuStar aria-hidden="true" size={12} className="text-(--champagne)" fill="currentColor" />
+              <span className={`${badgeClassName} bg-(--warning-soft) text-(--warning)`}>
+                <LuStar aria-hidden="true" size={12} fill="currentColor" />
                 Destaque
               </span>
             ) : null}
             {isMotel(room.property.type) ? (
-              <span className={`${badgeClassName} bg-(--surface) text-(--text-secondary)`}>
+              <span className={`${badgeClassName} bg-(--lavender-soft) text-(--lavender)`}>
                 <LuHotel aria-hidden="true" size={12} />
                 Motel
               </span>
