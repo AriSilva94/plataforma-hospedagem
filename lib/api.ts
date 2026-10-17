@@ -58,13 +58,18 @@ export function toErrorMessage(error: unknown): string {
 }
 
 function request(path: string, init: RequestInit = {}): Promise<Response> {
+  const headers = new Headers(init.headers);
+  if (!(init.body instanceof FormData)) {
+    headers.set("Content-Type", "application/json");
+  }
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(init.method?.toUpperCase() ?? "GET")) {
+    headers.set("X-CSRF-Protection", "1");
+  }
+
   return fetch(`${apiUrl}${path}`, {
     ...init,
     credentials: "include",
-    headers:
-      init.body instanceof FormData
-        ? init.headers
-        : { "Content-Type": "application/json", ...init.headers },
+    headers,
   });
 }
 

@@ -121,8 +121,10 @@ for (const path of [
 
 test("cadastro envia dados sem perfil e pede a confirmação do e-mail", async ({ page }) => {
   let submittedBody: unknown;
+  let csrfHeader: string | undefined;
   await page.route(`${apiUrl}/auth/register`, async (route) => {
     submittedBody = route.request().postDataJSON();
+    csrfHeader = route.request().headers()["x-csrf-protection"];
     await route.fulfill({ status: 202, body: JSON.stringify({}) });
   });
 
@@ -140,6 +142,7 @@ test("cadastro envia dados sem perfil e pede a confirmação do e-mail", async (
     email: "ana@example.com",
     password: "senha-segura1",
   });
+  expect(csrfHeader).toBe("1");
 });
 
 test("login mostra erro de e-mail inválido e não envia POST", async ({ page }) => {
