@@ -49,11 +49,11 @@ export function AuthShell({ title, description, links, children }: AuthShellProp
               <div className="auth-divider">ou continue com</div>
               <div className="flex justify-center">
                 <a
-                  aria-label="Continuar com Google"
                   href={`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3030"}/auth/google`}
                   className="auth-provider"
                 >
-                  <FcGoogle aria-hidden="true" size={24} />
+                  <FcGoogle aria-hidden="true" size={22} />
+                  <span>Continuar com Google</span>
                 </a>
               </div>
               <nav className="mt-5 flex flex-col items-center gap-2 text-center text-sm font-semibold text-(--primary-text)">
