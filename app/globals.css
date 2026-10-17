@@ -83,10 +83,31 @@ body.scroll-locked {
 }
 
 .theme-switching,
-.theme-switching *,
-.theme-switching *::before,
-.theme-switching *::after {
+.theme-switching *:not(.theme-toggle *),
+.theme-switching *:not(.theme-toggle *)::before,
+.theme-switching *:not(.theme-toggle *)::after {
   transition: none !important;
+}
+
+::view-transition-group(root) {
+  animation-duration: 0.7s;
+}
+
+::view-transition-old(theme-toggle) {
+  display: none;
+}
+
+::view-transition-group(theme-toggle),
+::view-transition-new(theme-toggle) {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none;
+  }
 }
 
 ::selection {
