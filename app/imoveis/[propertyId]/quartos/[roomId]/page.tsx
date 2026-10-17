@@ -32,7 +32,7 @@ const WHATSAPP_PLACEHOLDER_NUMBER = "5500000000000";
 
 function StatBox({ icon: Icon, label, value }: { icon: IconType; label: string; value: string }) {
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-(--border) bg-(--surface) p-4">
+    <div className="flex items-start gap-3 rounded-xl border border-(--border-accent) bg-(--surface) p-4">
       <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-(--primary-soft) text-(--primary-text)">
         <Icon aria-hidden="true" size={18} />
       </span>
