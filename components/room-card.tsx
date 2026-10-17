@@ -94,7 +94,7 @@ export function RoomCard({
       ) : (
         <Link
           href={`/imoveis/${room.property.id}/quartos/${room.id}`}
-          className="group flex h-full flex-col overflow-hidden rounded-2xl bg-(--surface-accent) border border-(--border-accent) transition-[border-color,box-shadow] duration-200 hover:border-(--primary)/40 hover:shadow-[0_14px_28px_-16px_color-mix(in_srgb,var(--shadow)_45%,transparent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
+          className="group flex h-full flex-col overflow-hidden rounded-2xl bg-(--surface) border border-(--border-accent) transition-[border-color,box-shadow] duration-200 hover:border-(--primary)/40 hover:shadow-[0_14px_28px_-16px_color-mix(in_srgb,var(--shadow)_45%,transparent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
         >
           {content}
         </Link>
