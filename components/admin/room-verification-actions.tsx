@@ -62,7 +62,7 @@ export function RoomVerificationActions({ room }: { room: Room }) {
             placeholder="Motivo da rejeição"
             aria-label="Motivo da rejeição"
             rows={2}
-            className="w-full rounded-xl border border-(--line-strong) bg-(--navy) px-3 py-2 text-sm text-(--white) outline-hidden focus:border-(--blue-light)"
+            className="w-full rounded-xl border border-(--border-strong) bg-(--background) px-3 py-2 text-sm text-(--text-primary) outline-hidden focus:border-(--primary)"
           />
           <div className="flex gap-2">
             <button
@@ -81,11 +81,11 @@ export function RoomVerificationActions({ room }: { room: Room }) {
       ) : null}
 
       {room.verificationStatus === "REJECTED" && room.verificationRejectedReason ? (
-        <p className="text-xs leading-relaxed text-(--gray)">Motivo: {room.verificationRejectedReason}</p>
+        <p className="text-[13px] leading-relaxed text-(--text-secondary)">Motivo: {room.verificationRejectedReason}</p>
       ) : null}
 
       {error ? (
-        <p role="alert" className="text-sm text-(--danger)">
+        <p role="alert" className="text-sm text-(--error)">
           {error}
         </p>
       ) : null}

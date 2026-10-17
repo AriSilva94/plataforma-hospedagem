@@ -10,9 +10,9 @@ import { loginHref } from "@/lib/return-path";
 
 const variantClassNames = {
   overlay:
-    "flex size-8 items-center justify-center rounded-full bg-(--white) text-(--navy-deep) shadow-[0_2px_8px_color-mix(in_srgb,var(--black)_35%,transparent)] transition-colors hover:bg-(--danger-pale) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:opacity-60",
+    "flex size-8 items-center justify-center rounded-full bg-(--white) text-(--black) shadow-[0_2px_8px_color-mix(in_srgb,var(--shadow)_35%,transparent)] transition-colors hover:bg-(--white)/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) disabled:opacity-60",
   inline:
-    "inline-flex min-h-11 items-center gap-2 rounded-2xl border border-(--line-strong) px-4 text-sm font-semibold text-(--white) transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) disabled:opacity-60",
+    "inline-flex min-h-11 items-center gap-2 rounded-2xl border border-(--favorite-border) px-4 text-sm font-semibold text-(--favorite-text) transition-[border-color,transform] duration-200 ease-out hover:scale-103 hover:border-(--favorite) motion-reduce:transition-none motion-reduce:hover:scale-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) disabled:opacity-60",
 } as const;
 
 export function FavoriteButton({
@@ -37,7 +37,7 @@ export function FavoriteButton({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string>();
   const label = favorited ? `Remover ${roomTitle} dos favoritos` : `Salvar ${roomTitle} nos favoritos`;
-  const icon = <LuHeart aria-hidden="true" size={variant === "overlay" ? 14 : 18} fill={favorited ? "currentColor" : "none"} className={favorited ? "text-(--danger)" : undefined} />;
+  const icon = <LuHeart aria-hidden="true" size={variant === "overlay" ? 14 : 18} fill={favorited ? "currentColor" : "none"} className="text-(--favorite)" />;
 
   if (!signedIn) {
     return (

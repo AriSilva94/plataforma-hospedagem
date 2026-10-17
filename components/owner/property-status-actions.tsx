@@ -91,7 +91,7 @@ export function PropertyStatusActions({
             type="button"
             disabled={pending}
             onClick={() => setConfirming("delete")}
-            className="inline-flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold text-(--danger) transition-colors hover:bg-(--danger)/12 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--danger) disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold text-(--error) transition-colors hover:bg-(--error-soft) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--error) disabled:cursor-not-allowed disabled:opacity-60"
           >
             Excluir rascunho
           </button>
@@ -119,7 +119,7 @@ export function PropertyStatusActions({
         onCancel={() => setConfirming(undefined)}
       />
       {!canPublish && status !== "ACTIVE" && !hidePublish ? (
-        <p className="max-w-md text-sm text-(--gray)">Complete os itens pendentes para habilitar a publicação.</p>
+        <p className="max-w-md text-sm text-(--text-secondary)">Complete os itens pendentes para habilitar a publicação.</p>
       ) : null}
       {error ? (
         <div className="max-w-md">

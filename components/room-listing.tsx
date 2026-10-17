@@ -73,13 +73,13 @@ export function RoomListing({ initial, favoriteRoomIds, signedIn }: { initial: P
           ))}
         </ul>
       ) : initial ? (
-        <p className="mx-auto mt-10 max-w-xl rounded-2xl border border-dashed border-(--line-strong) p-6 text-center text-sm text-(--gray)">Ainda não há quartos disponíveis. Volte em breve.</p>
+        <p className="mx-auto mt-10 max-w-xl rounded-2xl border border-dashed border-(--border) p-6 text-center text-sm text-(--text-secondary)">Ainda não há quartos disponíveis. Volte em breve.</p>
       ) : null}
       {error ? (
         <div className="mt-6 flex flex-col items-center gap-3">
-          <p role="alert" className="text-center text-sm font-semibold text-(--danger-soft)">{error}</p>
+          <p role="alert" className="text-center text-sm font-semibold text-(--error)">{error}</p>
           {nextCursor ? (
-            <button type="button" onClick={() => void loadMore(nextCursor)} className="min-h-10 rounded-2xl border border-(--line-strong) px-5 text-sm font-semibold text-(--white) transition-colors hover:bg-(--white)/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)">
+            <button type="button" onClick={() => void loadMore(nextCursor)} className="min-h-10 rounded-2xl border border-(--border-strong) px-5 text-sm font-semibold text-(--text-primary) transition-colors hover:bg-(--primary-soft) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)">
               Tentar novamente
             </button>
           ) : null}
@@ -88,7 +88,7 @@ export function RoomListing({ initial, favoriteRoomIds, signedIn }: { initial: P
       {nextCursor ? (
         <div ref={sentinelRef} aria-hidden="true" className="h-1" />
       ) : null}
-      {loading ? <p className="mt-8 text-center text-sm text-(--gray)">Carregando mais quartos...</p> : null}
+      {loading ? <p className="mt-8 text-center text-sm text-(--text-secondary)">Carregando mais quartos...</p> : null}
     </>
   );
 }

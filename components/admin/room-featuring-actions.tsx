@@ -84,7 +84,7 @@ export function RoomFeaturingActions({ room }: { room: Pick<AdminRoom, "id" | "t
         ) : null}
       </div>
       {error && !editing ? (
-        <p role="alert" className="text-sm text-(--danger)">
+        <p role="alert" className="text-sm text-(--error)">
           {error}
         </p>
       ) : null}

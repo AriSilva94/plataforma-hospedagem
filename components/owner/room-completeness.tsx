@@ -7,7 +7,7 @@ export function RoomCompletenessSummary({ score, missingCount }: { score: number
   const complete = missingCount === 0;
   return (
     <div className="flex items-center gap-3 text-sm">
-      <span className="font-bold text-(--white)">{score}%</span>
+      <span className="font-bold text-(--text-primary)">{score}%</span>
       <progress
         value={score}
         max={100}
@@ -15,7 +15,7 @@ export function RoomCompletenessSummary({ score, missingCount }: { score: number
         className={`block h-1.5 w-24 appearance-none overflow-hidden rounded-full bg-(--surface-raised) [&::-webkit-progress-bar]:bg-(--surface-raised) [&::-webkit-progress-value]:rounded-full [&::-moz-progress-bar]:rounded-full ${
           complete
             ? "[&::-moz-progress-bar]:bg-(--success) [&::-webkit-progress-value]:bg-(--success)"
-            : "[&::-moz-progress-bar]:bg-(--blue-light) [&::-webkit-progress-value]:bg-(--blue-light)"
+            : "[&::-moz-progress-bar]:bg-(--primary) [&::-webkit-progress-value]:bg-(--primary)"
         }`}
       />
       <span className={`font-semibold ${complete ? "text-(--success)" : "text-(--warning)"}`}>
@@ -26,7 +26,7 @@ export function RoomCompletenessSummary({ score, missingCount }: { score: number
 }
 
 const chipClassName =
-  "inline-flex min-h-11 items-center gap-1.5 rounded-full sm:min-h-9 border border-(--line-strong) px-3 text-sm font-semibold text-(--white) transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)";
+  "inline-flex min-h-11 items-center gap-1.5 rounded-full sm:min-h-9 border border-(--border-strong) px-3 text-sm font-semibold text-(--text-primary) transition-colors hover:border-(--primary-border) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)";
 
 const VISIBLE_ROOM_HINTS = 2;
 
@@ -56,20 +56,20 @@ export function RoomCompletenessHints({
         return hash && path.endsWith(`secao=${section}`) ? (
           <a key={hint.criterion} href={`#${hash}`} className={chipClassName}>
             {hint.label}
-            <LuArrowRight aria-hidden="true" size={14} className="text-(--blue-light)" />
+            <LuArrowRight aria-hidden="true" size={14} className="text-(--primary-text)" />
           </a>
         ) : (
           <Link key={hint.criterion} href={hint.href} className={chipClassName}>
             {hint.label}
-            <LuArrowRight aria-hidden="true" size={14} className="text-(--blue-light)" />
+            <LuArrowRight aria-hidden="true" size={14} className="text-(--primary-text)" />
           </Link>
         );
       })}
-      {hiddenRoomHints > 0 ? <span className="text-(--gray)">+{hiddenRoomHints} no quarto</span> : null}
+      {hiddenRoomHints > 0 ? <span className="text-(--text-secondary)">+{hiddenRoomHints} no quarto</span> : null}
       {propertyItems.length > 0 ? (
         <Link href={completenessHint(propertyItems[0], propertyId, roomId).href} className={chipClassName}>
           {propertyItems.length === 1 ? "1 item no imóvel" : `${propertyItems.length} itens no imóvel`}
-          <LuArrowUpRight aria-hidden="true" size={14} className="text-(--blue-light)" />
+          <LuArrowUpRight aria-hidden="true" size={14} className="text-(--primary-text)" />
         </Link>
       ) : null}
     </div>

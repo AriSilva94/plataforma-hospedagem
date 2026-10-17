@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { cookies } from "next/headers";
 import { connection } from "next/server";
 import { Toaster } from "@/components/toaster";
+import { parseTheme, themeCookieName } from "@/lib/theme";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -17,10 +19,12 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   await connection();
+  const theme = parseTheme((await cookies()).get(themeCookieName)?.value);
 
   return (
     <html
       lang="pt-BR"
+      data-theme={theme}
       className={`${jakarta.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">

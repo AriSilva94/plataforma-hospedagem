@@ -118,10 +118,10 @@ export function PropertyLocationForm({ property, guided }: { property: PropertyD
     <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col gap-6 py-6">
       <section aria-labelledby="private-address-heading">
         <div className="flex items-start gap-3">
-          <LuEyeOff aria-hidden="true" size={20} className="mt-0.5 shrink-0 text-(--blue-light)" />
+          <LuEyeOff aria-hidden="true" size={20} className="mt-0.5 shrink-0 text-(--primary-text)" />
           <div>
-            <h2 id="private-address-heading" className="text-lg font-bold text-(--white)">Endereço completo</h2>
-            <p className="mt-1 text-sm leading-relaxed text-(--gray)">
+            <h2 id="private-address-heading" className="text-lg font-bold text-(--text-primary)">Endereço completo</h2>
+            <p className="mt-1 text-sm leading-relaxed text-(--text-secondary)">
               Informação privada. Não é exibida no anúncio público.
             </p>
           </div>
@@ -146,7 +146,7 @@ export function PropertyLocationForm({ property, guided }: { property: PropertyD
                   className={field.name === "postalCode" ? `${fieldClassName} pr-10` : fieldClassName}
                 />
                 {field.name === "postalCode" && isLookingUpPostalCode ? (
-                  <span role="status" className="pointer-events-none absolute top-1.5 right-3 bottom-0 flex items-center text-(--blue-light)">
+                  <span role="status" className="pointer-events-none absolute top-1.5 right-3 bottom-0 flex items-center text-(--primary-text)">
                     <LuLoaderCircle aria-hidden="true" size={18} className="animate-spin motion-reduce:animate-none" />
                     <span className="sr-only">Buscando endereço...</span>
                   </span>
@@ -192,12 +192,12 @@ export function PropertyLocationForm({ property, guided }: { property: PropertyD
         </div>
       </section>
 
-      <section aria-labelledby="public-location-heading" className="border-t border-(--line) pt-6">
+      <section aria-labelledby="public-location-heading" className="border-t border-(--border) pt-6">
         <div className="flex items-start gap-3">
-          <LuMapPin aria-hidden="true" size={20} className="mt-0.5 shrink-0 text-(--blue-light)" />
+          <LuMapPin aria-hidden="true" size={20} className="mt-0.5 shrink-0 text-(--primary-text)" />
           <div>
-            <h2 id="public-location-heading" className="text-lg font-bold text-(--white)">Localização aproximada</h2>
-            <p className="mt-1 text-sm leading-relaxed text-(--gray)">
+            <h2 id="public-location-heading" className="text-lg font-bold text-(--text-primary)">Localização aproximada</h2>
+            <p className="mt-1 text-sm leading-relaxed text-(--text-secondary)">
               No anúncio público aparecerão apenas bairro, cidade, UF e os pontos de referência abaixo.
             </p>
           </div>

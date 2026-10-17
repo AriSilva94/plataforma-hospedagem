@@ -71,12 +71,12 @@ export function RoomAvailabilityToggle({
     <div>
       <Switch checked={available} disabled={pending} onChange={requestChange}>
         <span className="sr-only">Quarto {roomTitle}: </span>
-        <span className="text-sm font-semibold text-(--white)">Reservável</span>
+        <span className="text-sm font-semibold text-(--text-primary)">Reservável</span>
         <span className="sr-only">. </span>
-        <span className="block text-xs text-(--gray)">{availabilityHint(available, propertyStatus)}</span>
+        <span className="block text-[13px] text-(--text-secondary)">{availabilityHint(available, propertyStatus)}</span>
       </Switch>
       {error ? (
-        <p role="alert" className="mt-2 text-xs text-(--danger)">
+        <p role="alert" className="mt-2 text-xs text-(--error)">
           {error}
         </p>
       ) : null}

@@ -32,13 +32,13 @@ const WHATSAPP_PLACEHOLDER_NUMBER = "5500000000000";
 
 function StatBox({ icon: Icon, label, value }: { icon: IconType; label: string; value: string }) {
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-(--line) bg-(--surface) p-4">
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-(--blue)/14 text-(--blue-light)">
+    <div className="flex items-start gap-3 rounded-xl border border-(--border-accent) bg-(--surface) p-4">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-(--primary-soft) text-(--primary-text)">
         <Icon aria-hidden="true" size={18} />
       </span>
       <div>
-        <p className="text-xs font-semibold tracking-wide text-(--gray) uppercase">{label}</p>
-        <p className="mt-0.5 text-sm font-semibold text-(--white)">{value}</p>
+        <p className="text-xs font-semibold tracking-wide text-(--text-secondary) uppercase">{label}</p>
+        <p className="mt-0.5 text-sm font-semibold text-(--text-primary)">{value}</p>
       </div>
     </div>
   );
@@ -93,7 +93,7 @@ export default async function PublicRoomPage({ params }: PageProps<"/imoveis/[pr
       <SiteHeader user={user} />
       <main className="px-4 pt-6 pb-28 sm:px-6 md:pt-10 md:pb-16">
         <div className="mx-auto max-w-6xl">
-          <Link href={`/imoveis/${property.id}`} className="inline-flex items-center gap-2 text-sm font-semibold text-(--gray) transition-colors hover:text-(--white)">
+          <Link href={`/imoveis/${property.id}`} className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-secondary) transition-colors hover:text-(--text-primary)">
             <LuArrowLeft aria-hidden="true" size={16} /> {property.title}
           </Link>
 
@@ -111,8 +111,8 @@ export default async function PublicRoomPage({ params }: PageProps<"/imoveis/[pr
                 highlights={highlights}
               />
 
-              <section className="border-t border-(--line) py-8">
-                <h2 className="text-lg font-bold text-(--white)">Detalhes da acomodação</h2>
+              <section className="border-t border-(--border) py-8">
+                <h2 className="text-lg font-bold text-(--text-primary)">Detalhes da acomodação</h2>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <StatBox icon={LuUsers} label="Capacidade" value={room.capacity === 1 ? "1 pessoa" : `Até ${room.capacity} pessoas`} />
                   <StatBox icon={LuTag} label="Público" value={room.acceptedAudiences.map((audience) => genderIdentityLabels[audience]).join(", ")} />
@@ -121,22 +121,22 @@ export default async function PublicRoomPage({ params }: PageProps<"/imoveis/[pr
 
                 {room.description ? (
                   <div className="mt-6">
-                    <p className="mb-2 text-sm font-semibold text-(--white)">Sobre este quarto</p>
-                    <p className="whitespace-pre-line text-sm leading-relaxed text-(--gray)">{room.description}</p>
+                    <p className="mb-2 text-sm font-semibold text-(--text-primary)">Sobre este quarto</p>
+                    <p className="whitespace-pre-line text-sm leading-relaxed text-(--text-secondary)">{room.description}</p>
                   </div>
                 ) : null}
-                {room.additionalInfo ? <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-(--gray)">{room.additionalInfo}</p> : null}
+                {room.additionalInfo ? <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-(--text-secondary)">{room.additionalInfo}</p> : null}
 
                 {room.amenities.length > 0 ? (
                   <div className="mt-6">
-                    <p className="mb-3 text-sm font-semibold text-(--white)">O que o quarto oferece</p>
+                    <p className="mb-3 text-sm font-semibold text-(--text-primary)">O que o quarto oferece</p>
                     <IconList items={room.amenities.map((amenity) => ({ icon: iconOf(roomAmenityIcons, amenity), label: labelOf(roomAmenityLabels, amenity) }))} />
                   </div>
                 ) : null}
 
                 {hasPropertyContext ? (
-                  <details className="mt-6 rounded-2xl border border-(--line) bg-(--surface) p-4 text-sm text-(--gray)">
-                    <summary className="cursor-pointer font-semibold text-(--white)">Sobre o imóvel e áreas compartilhadas</summary>
+                  <details className="mt-6 rounded-2xl border border-(--border) bg-(--surface) p-4 text-sm text-(--text-secondary)">
+                    <summary className="cursor-pointer font-semibold text-(--text-primary)">Sobre o imóvel e áreas compartilhadas</summary>
                     <div className="mt-4 flex flex-col gap-4">
                       {property.description ? <p className="whitespace-pre-line leading-relaxed">{property.description}</p> : null}
                       {property.features.length > 0 ? (
@@ -147,10 +147,10 @@ export default async function PublicRoomPage({ params }: PageProps<"/imoveis/[pr
                           {property.sharedAreas.map((area, index) => {
                             const Icon = sharedAreaTypeIcons[area.type];
                             return (
-                              <li key={`${area.type}-${index}`} className="flex items-start gap-3 rounded-xl border border-(--line) bg-(--surface-raised) p-4">
-                                <Icon aria-hidden="true" size={18} className="mt-0.5 shrink-0 text-(--blue-light)" />
+                              <li key={`${area.type}-${index}`} className="flex items-start gap-3 rounded-xl border border-(--border) bg-(--surface-raised) p-4">
+                                <Icon aria-hidden="true" size={18} className="mt-0.5 shrink-0 text-(--primary-text)" />
                                 <div>
-                                  <p className="font-semibold text-(--white)">{area.label ?? sharedAreaTypeLabels[area.type]}</p>
+                                  <p className="font-semibold text-(--text-primary)">{area.label ?? sharedAreaTypeLabels[area.type]}</p>
                                   {area.description ? <p className="mt-1">{area.description}</p> : null}
                                 </div>
                               </li>
@@ -163,8 +163,8 @@ export default async function PublicRoomPage({ params }: PageProps<"/imoveis/[pr
                 ) : null}
               </section>
 
-              <section className="border-t border-(--line) py-8">
-                <h2 className="text-lg font-bold text-(--white)">Localização</h2>
+              <section className="border-t border-(--border) py-8">
+                <h2 className="text-lg font-bold text-(--text-primary)">Localização</h2>
                 <div className="mt-4">
                   <PublicLocation property={property} />
                 </div>
@@ -174,22 +174,22 @@ export default async function PublicRoomPage({ params }: PageProps<"/imoveis/[pr
             <aside className="flex flex-col gap-4 lg:sticky lg:top-24">
               <Link
                 href="/meus-imoveis/novo"
-                className="flex items-center gap-2 rounded-2xl border border-(--success)/35 bg-(--success)/12 px-4 py-3 text-sm font-semibold text-(--success-soft) transition-colors hover:border-(--success)/60"
+                className="flex items-center gap-2 rounded-2xl border border-(--success)/35 bg-(--success-soft) px-4 py-3 text-sm font-semibold text-(--success) transition-colors hover:border-(--success)/60"
               >
                 <LuMegaphone aria-hidden="true" size={16} className="shrink-0" /> 100% Gratuito — Anuncie seu espaço
               </Link>
 
-              <div className="rounded-2xl border border-(--line-strong) bg-(--surface) p-5">
-                <p className="flex items-center gap-2 text-xs font-semibold tracking-wide text-(--gray) uppercase">
+              <div className="rounded-2xl border border-(--border) bg-(--surface) p-5">
+                <p className="flex items-center gap-2 text-xs font-semibold tracking-wide text-(--text-secondary) uppercase">
                   <LuCalendarDays aria-hidden="true" size={14} /> Diária
                 </p>
-                <p className="mt-1 text-2xl font-extrabold text-(--white)">{formatCents(room.priceCents)}</p>
+                <p className="mt-1 text-2xl font-extrabold text-(--text-primary)">{formatCents(room.priceCents)}</p>
 
                 <a
                   href={whatsappHref}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-4 flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-4 text-sm font-bold text-(--black) transition-colors hover:brightness-95"
+                  className="mt-4 flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-(--success)/35 bg-(--success-soft) px-4 text-sm font-bold text-(--success) transition-colors hover:border-(--success)/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
                 >
                   <FaWhatsapp aria-hidden="true" size={18} /> Falar com anfitrião
                 </a>
@@ -205,25 +205,25 @@ export default async function PublicRoomPage({ params }: PageProps<"/imoveis/[pr
                   />
                 </div>
 
-                <p className="mt-4 flex items-start gap-2 text-xs leading-relaxed text-(--gray)">
+                <p className="mt-4 flex items-start gap-2 text-[13px] leading-relaxed text-(--text-secondary)">
                   <LuTriangleAlert aria-hidden="true" size={14} className="mt-0.5 shrink-0" />
                   <span>
-                    <strong className="text-(--white)">Aviso importante:</strong> a DOMUS X não interfere em negociações, valores ou regras entre você e o anfitrião. A responsabilidade por
+                    <strong className="text-(--text-primary)">Aviso importante:</strong> a DOMUS X não interfere em negociações, valores ou regras entre você e o anfitrião. A responsabilidade por
                     informações e condutas é exclusiva das partes envolvidas.
                   </span>
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-(--line) bg-(--surface) p-5">
-                <p className="flex items-start gap-2 text-sm text-(--gray)">
+              <div className="rounded-2xl border border-(--border) bg-(--surface) p-5">
+                <p className="flex items-start gap-2 text-sm text-(--text-secondary)">
                   <LuFlag aria-hidden="true" size={16} className="mt-0.5 shrink-0" />
                   <span>
-                    <strong className="text-(--white)">Não obteve resposta?</strong> Notifique-nos. Seu relato é fundamental para identificarmos e removermos anúncios inativos da plataforma.
+                    <strong className="text-(--text-primary)">Não obteve resposta?</strong> Notifique-nos. Seu relato é fundamental para identificarmos e removermos anúncios inativos da plataforma.
                   </span>
                 </p>
                 <a
                   href={reportMailHref}
-                  className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-2xl border border-(--danger)/35 bg-(--danger)/12 px-4 text-sm font-semibold text-(--danger-soft) transition-colors hover:border-(--danger)/60"
+                  className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-2xl border border-(--error)/35 bg-(--error-soft) px-4 text-sm font-semibold text-(--error) transition-colors hover:border-(--error)/60"
                 >
                   <LuFlag aria-hidden="true" size={14} /> Reportar anúncio inativo
                 </a>

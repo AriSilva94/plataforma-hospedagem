@@ -16,9 +16,9 @@ import { getApiData } from "@/lib/server-api";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="border-t border-(--line) py-8">
-      <h2 className="text-lg font-bold text-(--white)">{title}</h2>
-      <div className="mt-4 text-sm leading-relaxed text-(--gray)">{children}</div>
+    <section className="border-t border-(--border) py-8">
+      <h2 className="text-lg font-bold text-(--text-primary)">{title}</h2>
+      <div className="mt-4 text-sm leading-relaxed text-(--text-secondary)">{children}</div>
     </section>
   );
 }
@@ -60,10 +60,10 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
     <>
       <SiteHeader user={user} />
       {previa === "1" ? (
-        <div className="sticky top-16 z-10 border-b border-(--line-strong) bg-(--surface-raised) px-4 py-3 sm:px-6 md:top-18">
-          <p className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 text-sm text-(--gray)">
+        <div className="sticky top-16 z-10 border-b border-(--border) bg-(--surface-raised) px-4 py-3 sm:px-6 md:top-18">
+          <p className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 text-sm text-(--text-secondary)">
             <span>Prévia: é assim que os hóspedes veem este anúncio.</span>
-            <Link href={`/meus-imoveis/${property.id}`} className="font-semibold text-(--white) underline underline-offset-4 hover:text-(--blue-light)">
+            <Link href={`/meus-imoveis/${property.id}`} className="font-semibold text-(--text-primary) underline underline-offset-4 hover:text-(--primary-text)">
               Voltar ao gerenciamento
             </Link>
           </p>
@@ -71,35 +71,35 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
       ) : null}
       <main className="px-4 pt-6 pb-28 sm:px-6 md:pt-10 md:pb-16">
         <div className="mx-auto max-w-5xl">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-(--gray) transition-colors hover:text-(--white)">
+          <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-secondary) transition-colors hover:text-(--text-primary)">
             <LuArrowLeft aria-hidden="true" size={16} /> Início
           </Link>
 
           <PropertyPhotoGrid title={property.title} photos={photos} />
 
           <header className="py-8">
-            {isMotel(property.type) ? <MotelTag /> : <p className="text-sm font-semibold text-(--blue-light)">{propertyTypeLabels[property.type]}</p>}
-            <h1 className="mt-1 wrap-break-word text-3xl font-extrabold tracking-tight text-(--white)">{property.title}</h1>
-            <p className="mt-3 flex items-center gap-2 text-sm text-(--gray)">
+            {isMotel(property.type) ? <MotelTag /> : <p className="text-sm font-semibold text-(--primary-text)">{propertyTypeLabels[property.type]}</p>}
+            <h1 className="mt-1 wrap-break-word text-3xl font-extrabold tracking-tight text-(--text-primary)">{property.title}</h1>
+            <p className="mt-3 flex items-center gap-2 text-sm text-(--text-secondary)">
               <LuMapPin aria-hidden="true" size={16} className="shrink-0" /> {formatLocation(property)}
             </p>
             {lowestPrice !== undefined ? (
               <a
                 href="#quartos"
-                className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-2xl border border-(--line-strong) bg-(--surface) px-4 text-sm text-(--white) transition-colors hover:border-(--blue-light) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)"
+                className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-2xl border border-(--border-strong) bg-(--surface) px-4 text-sm text-(--text-primary) transition-colors hover:border-(--primary-border) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
               >
                 <span className="font-semibold">{roomCount}</span>
-                <span className="text-(--gray)">· a partir de</span>
+                <span className="text-(--text-secondary)">· a partir de</span>
                 <span className="font-bold">{formatCents(lowestPrice)}</span>
-                <span className="text-(--gray)">/ diária</span>
-                <LuArrowDown aria-hidden="true" size={16} className="text-(--blue-light)" />
+                <span className="text-(--text-secondary)">/ diária</span>
+                <LuArrowDown aria-hidden="true" size={16} className="text-(--primary-text)" />
               </a>
             ) : null}
           </header>
 
-          <section id="quartos" aria-labelledby="rooms-title" className="scroll-mt-24 border-t border-(--line) py-8">
-            <h2 id="rooms-title" className="text-2xl font-extrabold tracking-tight text-(--white)">Quartos disponíveis</h2>
-            <p className="mt-1 text-sm text-(--gray)">Cada quarto tem preço e disponibilidade próprios.</p>
+          <section id="quartos" aria-labelledby="rooms-title" className="scroll-mt-24 border-t border-(--border) py-8">
+            <h2 id="rooms-title" className="text-2xl font-extrabold tracking-tight text-(--text-primary)">Quartos disponíveis</h2>
+            <p className="mt-1 text-sm text-(--text-secondary)">Cada quarto tem preço e disponibilidade próprios.</p>
             <ul className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {property.rooms.map((room) => (
                 <li key={room.id}>
@@ -144,8 +144,8 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
             <Section title="Áreas compartilhadas">
               <ul className="grid gap-3 sm:grid-cols-2">
                 {property.sharedAreas.map((area, index) => (
-                  <li key={`${area.type}-${index}`} className="rounded-xl border border-(--line) bg-(--surface) p-4">
-                    <p className="font-semibold text-(--white)">{area.label ?? sharedAreaTypeLabels[area.type]}</p>
+                  <li key={`${area.type}-${index}`} className="rounded-xl border border-(--border) bg-(--surface) p-4">
+                    <p className="font-semibold text-(--text-primary)">{area.label ?? sharedAreaTypeLabels[area.type]}</p>
                     {area.description ? <p className="mt-1">{area.description}</p> : null}
                   </li>
                 ))}

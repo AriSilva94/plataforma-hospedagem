@@ -3,7 +3,7 @@ import { LuCircleAlert, LuCircleCheck } from "react-icons/lu";
 
 export function FormActions({ children }: { children: ReactNode }) {
   return (
-    <div className="sticky bottom-18 z-10 -mx-4 flex flex-wrap items-center gap-3 border-t border-(--line) bg-(--navy)/95 px-4 py-3 backdrop-blur-sm sm:-mx-6 sm:px-6 md:bottom-0">
+    <div className="sticky bottom-18 z-10 -mx-4 flex flex-wrap items-center gap-3 border-t border-(--border) bg-(--background)/95 px-4 py-3 backdrop-blur-sm sm:-mx-6 sm:px-6 md:bottom-0">
       {children}
     </div>
   );
@@ -12,7 +12,7 @@ export function FormActions({ children }: { children: ReactNode }) {
 export function FormStatus({ error, saved, dirty }: { error?: string; saved?: string; dirty?: boolean }) {
   if (error) {
     return (
-      <p role="alert" className="flex min-w-0 items-center gap-1.5 text-sm text-(--danger-soft)">
+      <p role="alert" className="flex min-w-0 items-center gap-1.5 text-sm text-(--error)">
         <LuCircleAlert aria-hidden="true" size={16} className="shrink-0" />
         {error}
       </p>

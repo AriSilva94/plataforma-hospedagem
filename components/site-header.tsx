@@ -5,6 +5,7 @@ import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { IconType } from "react-icons";
 import { BrandMark } from "@/components/brand-mark";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { logout } from "@/lib/api";
 import {
   LuBell,
@@ -26,7 +27,7 @@ const publicNavItems = [
 
 function NotificationsPlaceholder() {
   return (
-    <span role="img" aria-label="Notificações indisponíveis" className="flex size-10 items-center justify-center rounded-xl text-(--white)/85">
+    <span role="img" aria-label="Notificações indisponíveis" className="flex size-10 items-center justify-center rounded-xl text-(--text-primary)/85">
       <LuBell aria-hidden="true" size={19} />
     </span>
   );
@@ -51,17 +52,22 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
 
   return (
     <>
-      <header className="sticky top-0 z-20 border-b border-(--line) bg-(--navy)/85 backdrop-blur-sm">
+      <header className="sticky top-0 z-20 border-b border-(--border) bg-(--background)/85 backdrop-blur-sm">
         <div className="flex h-16 items-center px-4 md:hidden">
           {user ? (
             <>
               <BrandMark size="md" href="/" />
               <div className="flex-1" />
+              <ThemeToggle />
               <NotificationsPlaceholder />
             </>
           ) : (
-            <div className="flex w-full justify-center">
+            <div className="grid w-full grid-cols-[1fr_auto_1fr] items-center">
+              <span />
               <BrandMark size="md" href="/" />
+              <div className="flex justify-end">
+                <ThemeToggle />
+              </div>
             </div>
           )}
         </div>
@@ -69,26 +75,27 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
           <BrandMark size="md" href="/" />
           <nav
             aria-label="Navegação principal"
-            className="flex items-center justify-center gap-5.5 text-sm font-semibold text-(--gray)"
+            className="flex items-center justify-center gap-5.5 text-sm font-semibold text-(--text-secondary)"
           >
             {publicNavItems.map((item) => (
-              <NavItem key={item.label} {...item} />
+              <NavItem key={item.label} {...item} active={item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)} />
             ))}
           </nav>
           <div className="relative flex items-center justify-end gap-4">
+            <ThemeToggle />
             {user ? (
               <>
                 <NotificationsPlaceholder />
                 <Link
                   href="/perfil"
-                  className="rounded-2xl bg-(--blue) px-4.5 py-2.5 text-[13px] font-bold text-(--white) transition-colors hover:bg-(--blue-light)"
+                  className="rounded-2xl bg-(--primary) px-4.5 py-2.5 text-[13px] font-bold text-(--on-primary) transition-colors hover:bg-(--primary-hover)"
                 >
                   Minha conta
                 </Link>
                 <button
                   type="button"
                   onClick={() => void endSession()}
-                  className="flex items-center gap-1.5 text-sm font-semibold text-(--gray) transition-colors hover:text-(--white)"
+                  className="flex min-h-11 items-center gap-1.5 text-sm font-semibold text-(--text-secondary) transition-colors hover:text-(--text-primary)"
                 >
                   <LuLogOut aria-hidden="true" size={16} />
                   Sair
@@ -96,7 +103,7 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
                 {logoutError ? (
                   <p
                     role="alert"
-                    className="absolute right-0 top-full mt-2 text-xs font-semibold text-(--danger-soft)"
+                    className="absolute right-0 top-full mt-2 text-xs font-semibold text-(--error)"
                   >
                     {logoutError}
                   </p>
@@ -106,13 +113,13 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
               <>
                 <Link
                   href="/login"
-                  className="hidden rounded-2xl border border-(--line-strong) px-4.5 py-2.5 text-[13px] font-semibold text-(--white) transition-colors hover:bg-(--white)/5 md:block"
+                  className="hidden rounded-2xl border border-(--border-strong) px-4.5 py-2.5 text-[13px] font-semibold text-(--text-primary) transition-colors hover:bg-(--primary-soft) md:block"
                 >
                   Entrar
                 </Link>
                 <Link
                   href="/cadastro"
-                  className="hidden rounded-2xl bg-(--blue) px-4.5 py-2.5 text-[13px] font-bold text-(--white) transition-colors hover:bg-(--blue-light) lg:block"
+                  className="hidden rounded-2xl bg-(--primary) px-4.5 py-2.5 text-[13px] font-bold text-(--on-primary) transition-colors hover:bg-(--primary-hover) lg:block"
                 >
                   Criar conta
                 </Link>
@@ -132,12 +139,12 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
         <div
           id="mobile-profile-menu"
           role="menu"
-          className="fixed bottom-19 right-3 z-30 flex w-44 flex-col gap-1 rounded-xl border border-(--line) bg-(--surface) p-1.5 shadow-[0_16px_40px_color-mix(in_srgb,var(--black)_35%,transparent)] md:hidden"
+          className="fixed bottom-19 right-3 z-30 flex w-44 flex-col gap-1 rounded-xl border border-(--border) bg-(--surface) p-1.5 shadow-[0_16px_40px_color-mix(in_srgb,var(--shadow)_35%,transparent)] md:hidden"
         >
           <Link
             role="menuitem"
             href="/perfil"
-            className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-(--white) transition-colors hover:bg-(--blue)/14"
+            className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-(--text-primary) transition-colors hover:bg-(--primary-soft)"
           >
             <LuUserRound aria-hidden="true" size={16} />
             Meu perfil
@@ -146,7 +153,7 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
             role="menuitem"
             type="button"
             onClick={() => void endSession()}
-            className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-(--danger) transition-colors hover:bg-(--danger)/12"
+            className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-(--error) transition-colors hover:bg-(--error-soft)"
           >
             <LuLogOut aria-hidden="true" size={16} />
             Sair
@@ -160,11 +167,13 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
 function NavItem({
   label,
   href,
+  active,
   onClick,
   className,
 }: {
   label: string;
   href: string;
+  active: boolean;
   onClick?: () => void;
   className?: string;
 }) {
@@ -172,7 +181,8 @@ function NavItem({
     <Link
       href={href}
       onClick={onClick}
-      className={`text-(--white) transition-colors hover:text-(--blue-pale) ${className ?? ""}`}
+      aria-current={active ? "page" : undefined}
+      className={`inline-flex min-h-11 items-center transition-colors hover:text-(--primary-text) ${active ? "text-(--primary-text)" : "text-(--text-primary)"} ${className ?? ""}`}
     >
       {label}
     </Link>
@@ -199,7 +209,7 @@ function MobileBottomNavigation({
   return (
     <nav
       aria-label="Navegação inferior"
-      className="fixed inset-x-0 bottom-0 z-20 grid h-18 grid-cols-5 border-t border-(--line) bg-(--navy)/96 px-1 pb-[max(.35rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur-sm md:hidden"
+      className="fixed inset-x-0 bottom-0 z-20 grid h-18 grid-cols-5 border-t border-(--border) bg-(--background)/96 px-1 pb-[max(.35rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur-sm md:hidden"
     >
       {hasUser ? (
         <>
@@ -213,11 +223,11 @@ function MobileBottomNavigation({
         </>
       )}
 
-      <div className="relative flex flex-col items-center pt-9 text-[11px] font-semibold text-(--blue-light)">
+      <div className="relative flex flex-col items-center pt-9 text-xs font-semibold text-(--primary-text)">
         <Link
           href="/meus-imoveis"
           aria-label="Anunciar"
-          className="absolute -top-6 flex size-14 items-center justify-center rounded-full border-3 border-(--white) bg-(--blue) text-(--white) shadow-[0_10px_24px_color-mix(in_srgb,var(--blue)_55%,transparent)] transition-colors hover:bg-(--blue-light)"
+          className="absolute -top-6 flex size-14 items-center justify-center rounded-full border-3 border-(--white) bg-(--primary) text-(--on-primary) shadow-[0_10px_24px_color-mix(in_srgb,var(--shadow)_35%,transparent)] transition-colors hover:bg-(--primary-hover)"
         >
           <LuPlus aria-hidden="true" size={24} />
         </Link>
@@ -232,7 +242,7 @@ function MobileBottomNavigation({
             aria-expanded={profileMenuOpen}
             aria-controls="mobile-profile-menu"
             onClick={onProfileClick}
-            className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-semibold ${pathname === "/perfil" ? "text-(--blue-light)" : "text-(--gray)"}`}
+            className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg text-xs font-semibold ${pathname === "/perfil" ? "text-(--primary-text)" : "text-(--text-secondary)"}`}
           >
             <LuUserRound aria-hidden="true" size={18} />
             <span className="truncate">Minha conta</span>
@@ -261,7 +271,7 @@ function MobileNavigationItem({
   active: boolean;
   disabled?: boolean;
 }) {
-  const className = `flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-semibold ${active ? "text-(--blue-light)" : "text-(--gray)"}`;
+  const className = `flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg text-xs font-semibold ${active ? "text-(--primary-text)" : "text-(--text-secondary)"}`;
   const content = (
     <>
       <Icon aria-hidden="true" size={18} />

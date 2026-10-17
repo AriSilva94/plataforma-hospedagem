@@ -1,10 +1,10 @@
 export function OptionalTag() {
-  return <span className="font-normal text-(--gray)/80"> (opcional)</span>;
+  return <span className="font-normal text-(--text-secondary)/80"> (opcional)</span>;
 }
 
 export function FieldHint({ id, children }: { id: string; children: string }) {
   return (
-    <p id={id} className="mt-1 text-xs leading-relaxed text-(--gray)">
+    <p id={id} className="mt-1 text-[13px] leading-relaxed text-(--text-secondary)">
       {children}
     </p>
   );
@@ -12,7 +12,7 @@ export function FieldHint({ id, children }: { id: string; children: string }) {
 
 export function CharacterCount({ id, length, max }: { id: string; length: number; max: number }) {
   return (
-    <p id={id} className={`mt-1 text-right text-xs tabular-nums ${length > max ? "text-(--danger)" : "text-(--gray)"}`}>
+    <p id={id} className={`mt-1 text-right text-xs tabular-nums ${length > max ? "text-(--error)" : "text-(--text-secondary)"}`}>
       {length}/{max}
     </p>
   );

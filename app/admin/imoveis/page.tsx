@@ -37,14 +37,14 @@ export default async function AdminPropertiesPage({ searchParams }: PageProps<"/
           <li key={property.id} className={`${cardClassName} flex flex-col gap-4 md:flex-row md:items-center md:justify-between`}>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="wrap-break-word font-bold text-(--white)">{property.title}</h2>
+                <h2 className="wrap-break-word font-bold text-(--text-primary)">{property.title}</h2>
                 <PropertyStatusBadge status={property.status} />
               </div>
-              <p className="mt-1 text-sm text-(--gray)">{[propertyTypeLabels[property.type], formatPlace(property)].filter(Boolean).join(" · ")}</p>
-              <p className="mt-1 break-all text-sm text-(--gray)">
+              <p className="mt-1 text-sm text-(--text-secondary)">{[propertyTypeLabels[property.type], formatPlace(property)].filter(Boolean).join(" · ")}</p>
+              <p className="mt-1 break-all text-sm text-(--text-secondary)">
                 {property.owner.name} · {property.owner.email}
               </p>
-              <p className="mt-2 text-sm text-(--gray)">
+              <p className="mt-2 text-sm text-(--text-secondary)">
                 {property.roomCount === 1 ? "1 quarto" : `${property.roomCount} quartos`} · {property.availableRoomCount} {property.availableRoomCount === 1 ? "reservável" : "reserváveis"} · cadastrado em {formatDate(property.createdAt)}
               </p>
               <ListedIndicator listed={property.listed} hiddenLabel="Fora da home: imóvel não publicado, sem quarto reservável ou proprietário inativo" />

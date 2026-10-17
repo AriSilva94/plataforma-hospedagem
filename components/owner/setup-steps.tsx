@@ -16,7 +16,7 @@ export function SetupSteps({
 
   return (
     <nav aria-label="Etapas do cadastro" className="mt-6">
-      <p className="text-sm font-semibold text-(--blue-light)">
+      <p className="text-sm font-semibold text-(--primary-text)">
         Passo {currentIndex + 1} de {setupSteps.length} · {setupSteps[currentIndex].label}
       </p>
       <ol className="mt-3 grid grid-cols-5 gap-2">
@@ -27,10 +27,10 @@ export function SetupSteps({
             <>
               <span
                 aria-hidden="true"
-                className={`block h-1.5 rounded-full ${done ? "bg-(--success)" : active ? "bg-(--blue)" : "bg-(--line-strong)"}`}
+                className={`block h-1.5 rounded-full ${done ? "bg-(--success)" : active ? "bg-(--primary)" : "bg-(--border-strong)"}`}
               />
               <span
-                className={`mt-2 hidden items-center gap-1.5 text-xs font-semibold sm:flex ${active ? "text-(--white)" : "text-(--gray)"}`}
+                className={`mt-2 hidden items-center gap-1.5 text-xs font-semibold sm:flex ${active ? "text-(--text-primary)" : "text-(--text-secondary)"}`}
               >
                 {done ? <LuCheck aria-hidden="true" size={13} className="shrink-0 text-(--success)" /> : null}
                 {step.label}
@@ -46,7 +46,7 @@ export function SetupSteps({
                   href={setupStepHref(propertyId, step.id)}
                   aria-current={active ? "step" : undefined}
                   aria-label={step.label}
-                  className="block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--blue-light)"
+                  className="block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--focus-ring)"
                 >
                   {content}
                 </Link>

@@ -16,11 +16,11 @@ export function BrandMark({
   href?: string;
 }) {
   const style = sizes[size];
-  const className = `inline-flex items-center gap-2 font-extrabold text-(--white) ${style.label}`;
+  const className = `inline-flex items-center gap-2 font-extrabold text-(--text-primary) ${style.label}`;
   const content = (
     <>
       <span
-        className={`flex items-center justify-center bg-(--blue) ${style.badge}`}
+        className={`flex items-center justify-center bg-(--primary) text-(--on-primary) ${style.badge}`}
       >
         D
       </span>

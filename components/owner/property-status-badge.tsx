@@ -24,7 +24,7 @@ export function RoomVerification({ status, rejectedReason }: { status: RoomVerif
   return (
     <>
       <StatusBadge tone={roomVerificationTones[status]}>{roomVerificationStatusLabels[status]}</StatusBadge>
-      {status === "REJECTED" && rejectedReason ? <span className="text-xs text-(--gray)">{rejectedReason}</span> : null}
+      {status === "REJECTED" && rejectedReason ? <span className="text-[13px] text-(--text-secondary)">{rejectedReason}</span> : null}
     </>
   );
 }

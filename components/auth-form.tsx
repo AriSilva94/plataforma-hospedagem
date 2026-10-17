@@ -135,7 +135,7 @@ export function AuthForm({
 
           return (
             <div key={field.name} className="auth-field">
-              <label htmlFor={inputId} className="block text-sm font-semibold text-(--text-soft)">
+              <label htmlFor={inputId} className="block text-sm font-semibold text-(--text-primary)">
                 {field.label}
                 <span className="auth-input-wrap">
                   {Icon ? <Icon aria-hidden="true" size={17} /> : null}
@@ -171,7 +171,7 @@ export function AuthForm({
                   {fieldError.message}
                 </p>
               ) : field.hint ? (
-                <p id={hintId} className="mt-1.5 text-xs leading-normal text-(--gray)">
+                <p id={hintId} className="mt-1.5 text-[13px] leading-normal text-(--text-secondary)">
                   {field.hint}
                 </p>
               ) : null}

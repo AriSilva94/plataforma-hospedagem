@@ -44,16 +44,16 @@ export function OptionalDetails({
       suppressHydrationWarning
       open={open || forceOpen}
       onToggle={(event) => setOpen(event.currentTarget.open)}
-      className="group rounded-2xl border border-(--line-strong) bg-(--surface)"
+      className="group rounded-2xl border border-(--border) bg-(--surface)"
     >
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-2xl p-4 font-bold sm:p-5 text-(--white) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light) [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-2xl p-4 font-bold sm:p-5 text-(--text-primary) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) [&::-webkit-details-marker]:hidden">
         <span>
-          {title} <span className="font-normal text-(--gray)">({tag})</span>
-          <span className="mt-1 block text-sm font-normal text-(--gray)">{description}</span>
+          {title} <span className="font-normal text-(--text-secondary)">({tag})</span>
+          <span className="mt-1 block text-sm font-normal text-(--text-secondary)">{description}</span>
         </span>
-        <LuChevronDown aria-hidden="true" size={20} className="shrink-0 text-(--gray) transition-transform group-open:rotate-180" />
+        <LuChevronDown aria-hidden="true" size={20} className="shrink-0 text-(--text-secondary) transition-transform group-open:rotate-180" />
       </summary>
-      <div className="flex flex-col gap-5 border-t border-(--line) p-4 sm:p-5">{children}</div>
+      <div className="flex flex-col gap-5 border-t border-(--border) p-4 sm:p-5">{children}</div>
     </details>
   );
 }

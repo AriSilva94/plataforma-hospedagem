@@ -26,8 +26,8 @@ export function ChoiceGroup({
 
   return (
     <fieldset id={id} aria-describedby={error ? errorId : undefined} disabled={disabled}>
-      <legend className="text-sm font-semibold text-(--gray)">{legend}</legend>
-      {description ? <p className="mt-1 text-xs leading-relaxed text-(--gray)">{description}</p> : null}
+      <legend className="text-sm font-semibold text-(--text-secondary)">{legend}</legend>
+      {description ? <p className="mt-1 text-[13px] leading-relaxed text-(--text-secondary)">{description}</p> : null}
       <div className="mt-2 flex flex-wrap gap-2">
         {options.map((option) => (
           <label key={option.value} className={choiceClassName}>
@@ -36,7 +36,7 @@ export function ChoiceGroup({
             ) : (
               <span className="relative flex size-4 shrink-0">
                 <input type="checkbox" value={option.value} className={checkboxClassName} {...registration} />
-                <LuCheck aria-hidden="true" size={12} strokeWidth={3} className="pointer-events-none absolute inset-0 m-auto text-(--white) opacity-0 transition-opacity peer-checked:opacity-100" />
+                <LuCheck aria-hidden="true" size={12} strokeWidth={3} className="pointer-events-none absolute inset-0 m-auto text-(--on-primary) opacity-0 transition-opacity peer-checked:opacity-100" />
               </span>
             )}
             {option.label}

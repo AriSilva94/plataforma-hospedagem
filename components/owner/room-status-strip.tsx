@@ -44,11 +44,11 @@ export function RoomStatusStrip({
   }
 
   return (
-    <section aria-label="Situação do quarto" className="mt-4 overflow-hidden rounded-2xl border border-(--line-strong) bg-(--surface)">
+    <section aria-label="Situação do quarto" className="mt-4 overflow-hidden rounded-2xl border border-(--border) bg-(--surface)">
       {status === "INACTIVE" ? (
         <>
           <div className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-            <p className="flex items-start gap-3 text-sm text-(--gray)">
+            <p className="flex items-start gap-3 text-sm text-(--text-secondary)">
               <LuArchive aria-hidden="true" size={18} className="mt-0.5 shrink-0" />
               {roomStatusHints.INACTIVE}
             </p>
@@ -56,7 +56,7 @@ export function RoomStatusStrip({
               {pending ? "Reativando..." : "Reativar quarto"}
             </button>
           </div>
-          {error ? <p role="alert" className="px-4 pb-3 text-xs text-(--danger) sm:px-5">{error}</p> : null}
+          {error ? <p role="alert" className="px-4 pb-3 text-xs text-(--error) sm:px-5">{error}</p> : null}
         </>
       ) : (
         <div className="px-4 py-2 sm:px-5">
@@ -69,8 +69,8 @@ export function RoomStatusStrip({
           />
         </div>
       )}
-      <div className="flex flex-wrap items-center gap-2 border-t border-(--line) px-4 py-2.5 sm:px-5">
-        <span className="text-xs font-semibold text-(--gray)">Verificação:</span>
+      <div className="flex flex-wrap items-center gap-2 border-t border-(--border) px-4 py-2.5 sm:px-5">
+        <span className="text-xs font-semibold text-(--text-secondary)">Verificação:</span>
         <RoomVerification status={verificationStatus} rejectedReason={verificationRejectedReason} />
       </div>
     </section>

@@ -59,12 +59,12 @@ export function SharedAreasForm({ property }: { property: PropertyDetail }) {
 
   return (
     <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col gap-5 py-6">
-      <p className="max-w-prose text-sm leading-relaxed text-(--gray)">
+      <p className="max-w-prose text-sm leading-relaxed text-(--text-secondary)">
         Opcional. Áreas que pertencem à casa como um todo e são compartilhadas entre os quartos. Não é necessário repeti-las em cada quarto.
       </p>
 
       {fields.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-(--line-strong) p-6 text-sm text-(--gray)">
+        <p className="rounded-2xl border border-dashed border-(--border) p-6 text-sm text-(--text-secondary)">
           Nenhuma área cadastrada.
         </p>
       ) : (

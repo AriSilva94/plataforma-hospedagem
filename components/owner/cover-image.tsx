@@ -7,7 +7,7 @@ export function CoverImage({ url, alt, sizes }: { url: string | null; alt: strin
       {url ? (
         <Image src={url} alt={alt} fill sizes={sizes} className="object-cover" />
       ) : (
-        <div className="flex size-full flex-col items-center justify-center gap-2 text-(--gray)">
+        <div className="flex size-full flex-col items-center justify-center gap-2 text-(--text-secondary)">
           <LuImage aria-hidden="true" size={28} />
           <span className="text-xs font-semibold">Sem foto de capa</span>
         </div>

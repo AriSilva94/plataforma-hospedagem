@@ -82,14 +82,14 @@ export default async function SetupPropertyPage({ params, searchParams }: PagePr
           <div className="flex flex-col gap-4 py-8">
             <ul className="flex flex-col gap-3">
               {property.rooms.map((room) => (
-                <li key={room.id} className="flex items-center justify-between gap-4 rounded-2xl border border-(--line-strong) bg-(--surface) p-4">
+                <li key={room.id} className="flex items-center justify-between gap-4 rounded-2xl border border-(--border) bg-(--surface) p-4">
                   <Link
                     href={`/meus-imoveis/${property.id}/quartos/${room.id}`}
-                    className="min-w-0 wrap-break-word font-bold text-(--white) hover:text-(--blue-light) focus-visible:outline-2 focus-visible:outline-(--blue-light)"
+                    className="min-w-0 wrap-break-word font-bold text-(--text-primary) hover:text-(--primary-text) focus-visible:outline-2 focus-visible:outline-(--focus-ring)"
                   >
                     {room.title}
                   </Link>
-                  <span className="shrink-0 text-sm font-semibold text-(--gray)">{formatCents(room.priceCents)} / diária</span>
+                  <span className="shrink-0 text-sm font-semibold text-(--text-secondary)">{formatCents(room.priceCents)} / diária</span>
                 </li>
               ))}
             </ul>
@@ -106,11 +106,11 @@ export default async function SetupPropertyPage({ params, searchParams }: PagePr
       {step === "revisao" ? (
         <div className="flex flex-col gap-6 py-8">
           <PublishChecklist propertyId={property.id} missing={property.missingRequirements} />
-          <p className="text-sm leading-relaxed text-(--gray)">
+          <p className="text-sm leading-relaxed text-(--text-secondary)">
             Opcional: cadastre as{" "}
             <Link
               href={`/meus-imoveis/${property.id}/editar?secao=areas`}
-              className="font-semibold text-(--blue-light) underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-(--blue-light)"
+              className="font-semibold text-(--primary-text) underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-(--focus-ring)"
             >
               áreas compartilhadas
             </Link>{" "}
@@ -121,7 +121,7 @@ export default async function SetupPropertyPage({ params, searchParams }: PagePr
       ) : null}
 
       {formStep ? null : (
-        <div className="flex flex-wrap items-center gap-3 border-t border-(--line) pt-6 pb-4">
+        <div className="flex flex-wrap items-center gap-3 border-t border-(--border) pt-6 pb-4">
           {previousHref ? (
             <Link href={previousHref} className={secondaryButtonClassName}>
               <LuArrowLeft aria-hidden="true" size={16} />

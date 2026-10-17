@@ -9,7 +9,7 @@ export type ViewerPhoto = { id: string; url: string; alt: string };
 const SWIPE_THRESHOLD = 50;
 
 const navButtonClassName =
-  "absolute top-1/2 flex size-12 -translate-y-1/2 items-center justify-center rounded-full bg-(--black)/60 text-(--white) transition-colors hover:bg-(--black)/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--blue-light)";
+  "absolute top-1/2 flex size-12 -translate-y-1/2 items-center justify-center rounded-full bg-(--black)/60 text-(--white) transition-colors hover:bg-(--black)/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)";
 
 export function PhotoViewer({
   title,
@@ -58,7 +58,7 @@ export function PhotoViewer({
       {photo && index !== null ? (
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between gap-4 px-4 py-3 sm:px-6">
-            <p aria-live="polite" className="text-sm font-semibold tabular-nums text-(--gray)">
+            <p aria-live="polite" className="text-sm font-semibold tabular-nums text-(--white)/70">
               {index + 1} / {photos.length}
             </p>
             <button
@@ -66,7 +66,7 @@ export function PhotoViewer({
               autoFocus
               aria-label="Fechar fotos"
               onClick={onClose}
-              className="flex size-11 items-center justify-center rounded-full text-(--white) transition-colors hover:bg-(--white)/10 focus-visible:outline-2 focus-visible:outline-(--blue-light)"
+              className="flex size-11 items-center justify-center rounded-full text-(--white) transition-colors hover:bg-(--white)/10 focus-visible:outline-2 focus-visible:outline-(--focus-ring)"
             >
               <LuX aria-hidden="true" size={22} />
             </button>
@@ -96,7 +96,7 @@ export function PhotoViewer({
               </>
             ) : null}
           </div>
-          <p className="px-4 py-3 text-center text-sm text-(--gray) sm:px-6">{photo.alt}</p>
+          <p className="px-4 py-3 text-center text-sm text-(--white)/70 sm:px-6">{photo.alt}</p>
         </div>
       ) : null}
     </dialog>

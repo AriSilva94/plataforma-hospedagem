@@ -18,7 +18,7 @@ export function PublicLocation({
 }) {
   return (
     <>
-      <p className="flex items-center gap-2 text-sm text-(--white)">
+      <p className="flex items-center gap-2 text-sm text-(--text-primary)">
         <LuMapPin aria-hidden="true" size={16} className="shrink-0" /> {formatLocation(property)}
       </p>
       {property.referencePoints.length > 0 ? (
@@ -26,7 +26,7 @@ export function PublicLocation({
           <Chips items={property.referencePoints} />
         </div>
       ) : null}
-      <p className="mt-4 flex items-center gap-2 text-xs text-(--gray)">
+      <p className="mt-4 flex items-center gap-2 text-[13px] text-(--text-secondary)">
         <LuEyeOff aria-hidden="true" size={14} className="shrink-0" /> A localização exata não é exibida publicamente.
       </p>
     </>

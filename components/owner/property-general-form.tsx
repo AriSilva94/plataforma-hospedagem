@@ -195,7 +195,7 @@ export function PropertyGeneralForm({ property, guided }: { property?: PropertyD
         </div>
 
         <div className="flex flex-col gap-4">
-          <p className="text-xs leading-relaxed text-(--gray)">Marque o que o imóvel oferece. Os hóspedes veem isso no anúncio.</p>
+          <p className="text-[13px] leading-relaxed text-(--text-secondary)">Marque o que o imóvel oferece. Os hóspedes veem isso no anúncio.</p>
           {propertyFeatureGroups.map((group) => (
             <ChoiceGroup
               key={group.id}
@@ -220,7 +220,7 @@ export function PropertyGeneralForm({ property, guided }: { property?: PropertyD
         ) : null}
         <FormStatus error={error} saved={message} dirty={editing && isDirty} />
       </FormActions>
-      {!property ? <p className="text-xs text-(--gray)">Você poderá editar tudo depois. O imóvel só aparece para hóspedes quando for publicado.</p> : null}
+      {!property ? <p className="text-[13px] text-(--text-secondary)">Você poderá editar tudo depois. O imóvel só aparece para hóspedes quando for publicado.</p> : null}
       <UnsavedChangesGuard dirty={isDirty && !isSubmitting} />
     </form>
   );
