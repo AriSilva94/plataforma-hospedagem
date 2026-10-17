@@ -414,6 +414,11 @@ body.scroll-locked {
   .auth-panel {
     padding: 2.75rem;
   }
+
+  .auth-card {
+    background: transparent;
+    box-shadow: none;
+  }
 }
 
 @media (max-width: 1023px) {
