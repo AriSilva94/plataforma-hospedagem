@@ -41,8 +41,7 @@ export function AuthShell({ title, description, links, children }: AuthShellProp
           </section>
           <section className="auth-panel">
             <div className="auth-card">
-              <div className="auth-emblem" aria-hidden="true">D</div>
-              <h1 className="mt-5 text-3xl tracking-[-0.04em] text-(--text-primary)">
+              <h1 className="text-3xl tracking-[-0.04em] text-(--text-primary)">
                 {title}
               </h1>
               <p className="mt-2 leading-relaxed text-(--text-secondary)">{description}</p>
