@@ -600,6 +600,30 @@ test("perfil na navegação inferior abre e fecha o menu ao clicar novamente", a
   await expect(profileButton).toHaveAttribute("aria-expanded", "false");
 });
 
+test("minha conta no cabeçalho abre o menu ao passar o mouse e ao clicar", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/perfil");
+
+  const accountButton = page.getByRole("banner").getByRole("button", { name: "Minha conta" });
+  const accountMenu = page.locator("#desktop-profile-menu");
+
+  await expect(accountMenu).toBeHidden();
+  await accountButton.hover();
+  await expect(accountMenu.getByRole("menuitem", { name: "Meu perfil" })).toBeVisible();
+  await accountMenu.getByRole("menuitem", { name: "Sair" }).hover();
+  await expect(accountMenu).toBeVisible();
+
+  await page.mouse.move(10, 400);
+  await expect(accountMenu).toBeHidden();
+
+  await accountButton.focus();
+  await page.keyboard.press("Enter");
+  await expect(accountButton).toHaveAttribute("aria-expanded", "true");
+  await page.keyboard.press("Escape");
+  await expect(accountMenu).toBeHidden();
+  await expect(accountButton).toBeFocused();
+});
+
 test("filtra usuários da administração pelos seletores com busca", async ({ page }) => {
   user = { ...user, roles: ["ADMIN"] };
   await page.goto("/admin/usuarios");

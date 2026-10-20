@@ -1,14 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { IconType } from "react-icons";
 import { BrandMark } from "@/components/brand-mark";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useFieldPopover } from "@/components/use-field-popover";
 import { logout } from "@/lib/api";
 import {
   LuBell,
+  LuChevronDown,
   LuGift,
   LuHouse,
   LuLogIn,
@@ -24,6 +26,12 @@ const publicNavItems = [
   { label: "Contato", href: "/contato" },
   { label: "Sobre", href: "/sobre" },
 ];
+
+const profileMenuLinkClassName =
+  "flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-(--text-primary) transition-colors hover:bg-(--primary-soft)";
+const logoutMenuItemClassName =
+  "flex items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-(--error) transition-colors hover:bg-(--error-soft)";
+const hoverCloseDelayMs = 150;
 
 function NotificationsPlaceholder() {
   return (
@@ -86,20 +94,7 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
             {user ? (
               <>
                 <NotificationsPlaceholder />
-                <Link
-                  href="/perfil"
-                  className="rounded-2xl bg-(--primary) px-4.5 py-2.5 text-[13px] font-bold text-(--on-primary) transition-colors hover:bg-(--primary-hover)"
-                >
-                  Minha conta
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => void endSession()}
-                  className="flex min-h-11 items-center gap-1.5 text-sm font-semibold text-(--text-secondary) transition-colors hover:text-(--text-primary)"
-                >
-                  <LuLogOut aria-hidden="true" size={16} />
-                  Sair
-                </button>
+                <DesktopAccountMenu onLogout={() => void endSession()} />
                 {logoutError ? (
                   <p
                     role="alert"
@@ -141,11 +136,7 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
           role="menu"
           className="fixed bottom-19 right-3 z-30 flex w-44 flex-col gap-1 rounded-xl border border-(--border) bg-(--surface) p-1.5 shadow-[0_16px_40px_color-mix(in_srgb,var(--shadow)_35%,transparent)] md:hidden"
         >
-          <Link
-            role="menuitem"
-            href="/perfil"
-            className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-(--text-primary) transition-colors hover:bg-(--primary-soft)"
-          >
+          <Link role="menuitem" href="/perfil" className={profileMenuLinkClassName}>
             <LuUserRound aria-hidden="true" size={16} />
             Meu perfil
           </Link>
@@ -153,7 +144,7 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
             role="menuitem"
             type="button"
             onClick={() => void endSession()}
-            className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-(--error) transition-colors hover:bg-(--error-soft)"
+            className={logoutMenuItemClassName}
           >
             <LuLogOut aria-hidden="true" size={16} />
             Sair
@@ -161,6 +152,75 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
         </div>
       ) : null}
     </>
+  );
+}
+
+function DesktopAccountMenu({ onLogout }: { onLogout: () => void }) {
+  const { anchorRef, isOpen, open, close, rootProps, panelProps } = useFieldPopover<HTMLButtonElement>();
+  const closeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => () => clearTimeout(closeTimer.current), []);
+
+  function cancelScheduledClose() {
+    clearTimeout(closeTimer.current);
+  }
+
+  return (
+    <div
+      {...rootProps}
+      className="relative"
+      onPointerEnter={(event) => {
+        if (event.pointerType !== "mouse") return;
+        cancelScheduledClose();
+        if (!isOpen) open();
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType !== "mouse") return;
+        closeTimer.current = setTimeout(() => close(), hoverCloseDelayMs);
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && isOpen) {
+          event.stopPropagation();
+          close(true);
+        }
+      }}
+    >
+      <button
+        ref={anchorRef}
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+        aria-controls="desktop-profile-menu"
+        data-open={isOpen}
+        onClick={() => (isOpen ? close() : open())}
+        className="group flex items-center gap-1.5 rounded-2xl bg-(--primary) px-4.5 py-2.5 text-[13px] font-bold text-(--on-primary) transition-colors hover:bg-(--primary-hover)"
+      >
+        Minha conta
+        <LuChevronDown
+          aria-hidden="true"
+          size={15}
+          className="transition-transform duration-200 group-data-[open=true]:rotate-180 motion-reduce:transition-none"
+        />
+      </button>
+      <div {...panelProps} id="desktop-profile-menu" role="menu" data-align="end" className="field-popover flex w-44 flex-col gap-1 p-1.5">
+        <Link role="menuitem" href="/perfil" onClick={() => close()} className={profileMenuLinkClassName}>
+          <LuUserRound aria-hidden="true" size={16} />
+          Meu perfil
+        </Link>
+        <button
+          role="menuitem"
+          type="button"
+          onClick={() => {
+            close();
+            onLogout();
+          }}
+          className={logoutMenuItemClassName}
+        >
+          <LuLogOut aria-hidden="true" size={16} />
+          Sair
+        </button>
+      </div>
+    </div>
   );
 }
 
