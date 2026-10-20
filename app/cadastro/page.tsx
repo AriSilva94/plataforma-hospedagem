@@ -10,7 +10,7 @@ export default function RegisterPage() {
       sentConfirmation={{
         title: "Confira seu e-mail",
         description:
-          "Enviamos um link de confirmação para o e-mail informado. Abra o link para ativar sua conta; ele vale por 24 horas. Se não chegar em alguns minutos, veja a caixa de spam.",
+          "Enviamos um link para o e-mail informado. Abra o link para definir sua senha e ativar sua conta; ele vale por 24 horas. Se não chegar em alguns minutos, veja a caixa de spam.",
       }}
       fields={[
         {
@@ -24,13 +24,6 @@ export default function RegisterPage() {
           label: "E-mail",
           type: "email",
           autoComplete: "email",
-        },
-        {
-          name: "password",
-          label: "Senha",
-          type: "password",
-          autoComplete: "new-password",
-          hint: "Use pelo menos 12 caracteres.",
         },
       ]}
       links={[{ href: "/login", label: "Já tenho uma conta" }]}

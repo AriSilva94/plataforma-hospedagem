@@ -32,7 +32,6 @@ export const loginSchema = z.object({
 export const registerSchema = z.object({
   name: nameSchema,
   email: emailSchema,
-  password: registrationPasswordSchema,
 });
 
 export const earliestBirthDate = '1900-01-01';
@@ -89,6 +88,8 @@ export const resetPasswordSchema = z.object({
   token: linkTokenSchema,
   password: registrationPasswordSchema,
 });
+
+export const completeRegistrationSchema = resetPasswordSchema;
 
 const currentPasswordSchema = z
   .string({ error: 'Informe sua senha atual.' })

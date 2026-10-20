@@ -119,17 +119,19 @@ for (const path of [
   });
 }
 
-test("cadastro envia dados sem perfil e pede a confirmação do e-mail", async ({ page }) => {
+test("cadastro envia nome e e-mail sem senha e pede a confirmação do e-mail", async ({ page }) => {
   let submittedBody: unknown;
+  let csrfHeader: string | undefined;
   await page.route(`${apiUrl}/auth/register`, async (route) => {
     submittedBody = route.request().postDataJSON();
+    csrfHeader = route.request().headers()["x-csrf-protection"];
     await route.fulfill({ status: 202, body: JSON.stringify({}) });
   });
 
   await page.goto("/cadastro");
   await page.getByRole("textbox", { name: "Nome completo" }).fill("Ana Silva");
   await page.getByRole("textbox", { name: "E-mail" }).fill("ana@example.com");
-  await page.getByLabel("Senha", { exact: true }).fill("senha-segura1");
+  await expect(page.getByLabel("Senha", { exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: "Criar conta" }).click();
 
   await expect(page.getByRole("heading", { name: "Confira seu e-mail" })).toBeVisible();
@@ -138,8 +140,8 @@ test("cadastro envia dados sem perfil e pede a confirmação do e-mail", async (
   expect(submittedBody).toEqual({
     name: "Ana Silva",
     email: "ana@example.com",
-    password: "senha-segura1",
   });
+  expect(csrfHeader).toBe("1");
 });
 
 test("login mostra erro de e-mail inválido e não envia POST", async ({ page }) => {
@@ -190,24 +192,44 @@ test("cadastro mostra nome curto inválido e não envia POST", async ({ page }) 
 
   await expect(page.getByText("O nome deve ter pelo menos 2 caracteres.")).toBeVisible();
   await page.getByRole("textbox", { name: "E-mail" }).fill("ana@example.com");
-  await page.getByLabel("Senha", { exact: true }).fill("senha-com-12-caracteres");
   const expectNoPost = trackPostRequests(page, "/auth/register");
   await page.getByRole("button", { name: "Criar conta" }).click();
   await expectNoPost();
 });
 
-test("cadastro mostra senha curta inválida e não envia POST", async ({ page }) => {
-  await page.goto("/cadastro");
-  await page.getByRole("textbox", { name: "Nome completo" }).fill("Ana Silva");
-  await page.getByRole("textbox", { name: "E-mail" }).fill("ana@example.com");
+test("conclusão do cadastro envia o token do link com a senha definida e abre o perfil", async ({ page }) => {
+  let submittedBody: unknown;
+  await page.route(`${apiUrl}/auth/complete-registration`, async (route) => {
+    submittedBody = route.request().postDataJSON();
+    await route.fulfill({ status: 200, body: JSON.stringify({ user: {} }) });
+  });
+
+  await page.goto(`/concluir-cadastro#token=${validToken}`);
+  await page.getByLabel("Senha", { exact: true }).fill("senha-com-12-caracteres");
+  await page.getByRole("button", { name: "Ativar conta" }).click();
+
+  await expect(page).toHaveURL(/\/perfil$/);
+  expect(submittedBody).toEqual({ token: validToken, password: "senha-com-12-caracteres" });
+});
+
+test("conclusão do cadastro rejeita senha curta e não envia POST", async ({ page }) => {
+  await page.goto(`/concluir-cadastro#token=${validToken}`);
   const password = page.getByLabel("Senha", { exact: true });
   await password.fill("curta");
   await password.blur();
 
   await expect(page.getByText("A senha deve ter pelo menos 12 caracteres.")).toBeVisible();
-  const expectNoPost = trackPostRequests(page, "/auth/register");
-  await page.getByRole("button", { name: "Criar conta" }).click();
+  const expectNoPost = trackPostRequests(page, "/auth/complete-registration");
+  await page.getByRole("button", { name: "Ativar conta" }).click();
   await expectNoPost();
+});
+
+test("conclusão do cadastro sem token válido oferece novo cadastro em vez do formulário", async ({ page }) => {
+  await page.goto("/concluir-cadastro");
+
+  await expect(page.getByRole("heading", { name: "Link inválido" })).toBeVisible();
+  await expect(page.getByLabel("Senha", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("main").getByRole("link", { name: "Criar conta" })).toHaveAttribute("href", "/cadastro");
 });
 
 for (const path of ["/redefinir-senha?token=invalido", "/redefinir-senha"]) {
