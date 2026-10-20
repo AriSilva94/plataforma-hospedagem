@@ -9,6 +9,7 @@ import { AuthShell } from "@/components/auth-shell";
 import { FormFeedback } from "@/components/form-feedback";
 import { apiFetch, getErrorMessage } from "@/lib/api";
 import {
+  completeRegistrationSchema,
   forgotPasswordSchema,
   loginSchema,
   registerSchema,
@@ -24,6 +25,7 @@ const authSchemas = {
   "/auth/register": registerSchema,
   "/auth/forgot-password": forgotPasswordSchema,
   "/auth/reset-password": resetPasswordSchema,
+  "/auth/complete-registration": completeRegistrationSchema,
 };
 
 type AuthFormValues =
