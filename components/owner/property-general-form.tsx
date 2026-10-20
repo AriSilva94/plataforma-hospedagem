@@ -4,11 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { Combobox } from "@/components/combobox";
+import { Combobox, type ComboboxOption } from "@/components/combobox";
 import { FormActions, FormStatus } from "@/components/owner/form-actions";
 import { UnsavedChangesGuard } from "@/components/owner/unsaved-changes-guard";
 import { ChoiceGroup, optionsFrom } from "@/components/owner/choice-group";
 import { FieldError } from "@/components/field-error";
+import { PropertyTypeTag } from "@/components/property-type-tag";
 import { CharacterCount, FieldHint } from "@/components/owner/field-hint";
 import { OptionalDetails } from "@/components/owner/optional-details";
 import { fieldClassName, labelClassName, primaryButtonClassName, secondaryButtonClassName } from "@/components/owner/styles";
@@ -23,6 +24,7 @@ import {
   propertyFeatureGroups,
   propertyFeatureLabels,
   propertyTypeLabels,
+  propertyTypes,
   type PropertyDetail,
 } from "@/lib/properties";
 import { setupStepHref } from "@/lib/setup-steps";
@@ -38,6 +40,11 @@ function detailsSummary(property?: PropertyDetail): string {
 }
 
 const propertyTypeOptions = optionsFrom(propertyTypeLabels);
+
+function renderPropertyTypeOption(option: ComboboxOption) {
+  const type = propertyTypes.find((candidate) => candidate === option.value);
+  return type ? <PropertyTypeTag type={type} /> : option.label;
+}
 
 export function PropertyGeneralForm({ property, guided }: { property?: PropertyDetail; guided?: { nextHref: string } }) {
   const router = useRouter();
@@ -127,6 +134,7 @@ export function PropertyGeneralForm({ property, guided }: { property?: PropertyD
                   align="end"
                   invalid={Boolean(errors.type)}
                   describedBy={errors.type ? "property-type-error" : undefined}
+                  renderOption={renderPropertyTypeOption}
                 />
               )}
             />

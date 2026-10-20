@@ -10,6 +10,7 @@ export function OwnerPage({
   actions,
   wide = false,
   divider = true,
+  highlightTitle = false,
   children,
 }: {
   title: string;
@@ -19,6 +20,7 @@ export function OwnerPage({
   actions?: ReactNode;
   wide?: boolean;
   divider?: boolean;
+  highlightTitle?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -36,7 +38,7 @@ export function OwnerPage({
         <header className={`mt-1 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6 ${divider ? "border-b border-(--border) pb-5" : ""}`}>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-              <h1 className="wrap-break-word text-2xl font-extrabold tracking-tight text-(--text-primary) sm:text-3xl">{title}</h1>
+              <h1 className={`wrap-break-word text-2xl font-extrabold tracking-tight sm:text-3xl ${highlightTitle ? "text-(--primary-text)" : "text-(--text-primary)"}`}>{title}</h1>
               {badge}
             </div>
             {description ? <p className="mt-1.5 max-w-prose text-sm leading-relaxed text-(--text-secondary)">{description}</p> : null}

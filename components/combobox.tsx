@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type Ref } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode, type Ref } from "react";
 import type { IconType } from "react-icons";
 import { LuCheck, LuChevronDown, LuLoaderCircle, LuSearch } from "react-icons/lu";
 import { useFieldPopover } from "@/components/use-field-popover";
@@ -58,6 +58,7 @@ export function Combobox({
   loading = false,
   invalid = false,
   describedBy,
+  renderOption,
   ref,
 }: {
   id: string;
@@ -78,6 +79,7 @@ export function Combobox({
   loading?: boolean;
   invalid?: boolean;
   describedBy?: string;
+  renderOption?: (option: ComboboxOption) => ReactNode;
   ref?: Ref<HTMLButtonElement>;
 }) {
   const { anchorRef, isOpen, open, close, rootProps, panelProps } = useFieldPopover<HTMLButtonElement>();
@@ -166,7 +168,7 @@ export function Combobox({
           />
         ) : null}
         <span id={valueId} className={`min-w-0 flex-1 truncate ${selected ? "" : "text-(--text-secondary)"}`}>
-          {selected ? selected.label : placeholder}
+          {selected ? (renderOption?.(selected) ?? selected.label) : placeholder}
         </span>
         {selected?.detail ? (
           <span className="shrink-0 rounded-md bg-(--primary-soft) px-1.5 py-0.5 text-xs leading-4 font-bold tracking-wider text-(--primary-text) ring-1 ring-(--primary-border) ring-inset">
@@ -227,7 +229,7 @@ export function Combobox({
                 className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 text-sm text-(--text-primary) data-[active=true]:bg-(--text-primary)/8 aria-selected:font-semibold aria-selected:text-(--text-primary) sm:min-h-10"
               >
                 <span className="min-w-0 flex-1 truncate">
-                  <HighlightedLabel label={option.label} query={query} />
+                  {renderOption?.(option) ?? <HighlightedLabel label={option.label} query={query} />}
                 </span>
                 {option.detail ? (
                   <span

@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { LuBedDouble, LuHousePlus, LuMapPin, LuPlus } from "react-icons/lu";
-import { MotelTag } from "@/components/motel-tag";
 import { CoverImage } from "@/components/owner/cover-image";
 import { PropertyStatusBadge } from "@/components/owner/property-status-badge";
 import { primaryButtonClassName } from "@/components/owner/styles";
-import { formatCents, formatLocation, isMotel, type PropertySummary, propertyTypeLabels } from "@/lib/properties";
+import { PropertyTypeTag } from "@/components/property-type-tag";
+import { formatCents, formatLocation, type PropertySummary } from "@/lib/properties";
 
 export function OwnerPropertiesGrid({ properties }: { properties: PropertySummary[] }) {
   const newPropertyLink = (
@@ -44,15 +44,13 @@ export function OwnerPropertiesGrid({ properties }: { properties: PropertySummar
               <CoverImage url={property.coverUrl} alt="" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" />
               <div className="flex flex-1 flex-col gap-3 p-5">
                 <div className="flex items-start justify-between gap-3">
-                  <h2 className="min-w-0 wrap-break-word text-lg font-bold text-(--text-primary)">{property.title}</h2>
+                  <h2 className="min-w-0 wrap-break-word text-lg font-bold text-(--primary-text)">{property.title}</h2>
                   <PropertyStatusBadge status={property.status} />
                 </div>
-                <p className="flex flex-wrap items-center gap-2 text-sm text-(--text-secondary)">
-                  {isMotel(property.type) ? <MotelTag /> : propertyTypeLabels[property.type]}
-                </p>
+                <PropertyTypeTag type={property.type} />
                 <div className="mt-auto flex flex-col gap-2 border-t border-(--border) pt-3 text-sm text-(--text-secondary)">
                   <span className="flex items-center gap-2">
-                    <LuMapPin aria-hidden="true" size={15} className="shrink-0" />
+                    <LuMapPin aria-hidden="true" size={15} className="shrink-0 text-(--primary-text)" />
                     {formatLocation(property)}
                   </span>
                   <span className="flex items-center gap-2">

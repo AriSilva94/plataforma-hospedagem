@@ -4,13 +4,13 @@ import type { ReactNode } from "react";
 import { LuArrowDown, LuArrowLeft, LuMapPin } from "react-icons/lu";
 import { Chips } from "@/components/chips";
 import { FavoriteButton } from "@/components/favorite-button";
-import { MotelTag } from "@/components/motel-tag";
+import { PropertyTypeTag } from "@/components/property-type-tag";
 import { PropertyPhotoGrid } from "@/components/property-gallery";
 import { PublicLocation, PublicPropertyLoadNotice } from "@/components/public-property-parts";
 import { RoomCard } from "@/components/room-card";
 import { SiteHeader } from "@/components/site-header";
 import { getCurrentUser } from "@/lib/current-user";
-import { formatCents, formatLocation, isMotel, labelOf, propertyFeatureLabels, propertyTypeLabels, publicPropertyDetailSchema, sharedAreaTypeLabels } from "@/lib/properties";
+import { formatCents, formatLocation, labelOf, propertyFeatureLabels, publicPropertyDetailSchema, sharedAreaTypeLabels } from "@/lib/properties";
 import { getFavoriteRoomIds } from "@/lib/room-listings";
 import { getApiData } from "@/lib/server-api";
 
@@ -78,8 +78,8 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
           <PropertyPhotoGrid title={property.title} photos={photos} />
 
           <header className="py-8">
-            {isMotel(property.type) ? <MotelTag /> : <p className="text-sm font-semibold text-(--primary-text)">{propertyTypeLabels[property.type]}</p>}
-            <h1 className="mt-1 wrap-break-word text-3xl font-extrabold tracking-tight text-(--text-primary)">{property.title}</h1>
+            <PropertyTypeTag type={property.type} />
+            <h1 className="mt-2 wrap-break-word text-3xl font-extrabold tracking-tight text-(--text-primary)">{property.title}</h1>
             <p className="mt-3 flex items-center gap-2 text-sm text-(--text-secondary)">
               <LuMapPin aria-hidden="true" size={16} className="shrink-0" /> {formatLocation(property)}
             </p>

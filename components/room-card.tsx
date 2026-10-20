@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { LuBadgeCheck, LuHotel, LuImage, LuMapPin, LuStar } from "react-icons/lu";
-import { formatCents, formatLocation, isMotel, type PublicRoomCard } from "@/lib/properties";
+import { LuBadgeCheck, LuImage, LuMapPin, LuStar } from "react-icons/lu";
+import { PropertyTypeTag } from "@/components/property-type-tag";
+import { formatCents, formatLocation, type PublicRoomCard } from "@/lib/properties";
 
 const badgeClassName =
   "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold shadow-[0_2px_8px_color-mix(in_srgb,var(--shadow)_35%,transparent)]";
@@ -36,7 +37,7 @@ export function RoomCard({
           <span className="absolute left-2.5 top-2.5 inline-flex items-center rounded-full bg-(--background)/85 px-2.5 py-1 text-xs font-bold text-(--text-primary)">
             Indisponível no momento
           </span>
-        ) : room.verified || room.featured || isMotel(room.property.type) ? (
+        ) : room.verified || room.featured ? (
           <div className="absolute left-2.5 top-2.5 flex flex-col items-start gap-1.5">
             {room.verified ? (
               <span className={`${badgeClassName} bg-(--success-soft) text-(--success)`}>
@@ -50,24 +51,23 @@ export function RoomCard({
                 Destaque
               </span>
             ) : null}
-            {isMotel(room.property.type) ? (
-              <span className={`${badgeClassName} bg-(--lavender-soft) text-(--lavender)`}>
-                <LuHotel aria-hidden="true" size={12} />
-                Motel
-              </span>
-            ) : null}
           </div>
         ) : null}
       </div>
       <div className="flex grow flex-col p-4">
-        <h3 className="line-clamp-2 wrap-break-word text-base font-bold leading-snug text-(--text-primary)">
-          {room.title}
-        </h3>
+        <div className="flex items-start justify-between gap-2">
+          <h3
+            className={`line-clamp-2 min-w-0 wrap-break-word text-base font-bold leading-snug ${unavailable ? "text-(--text-secondary)" : "text-(--primary-text)"}`}
+          >
+            {room.title}
+          </h3>
+          <span className="shrink-0">
+            <PropertyTypeTag type={room.property.type} />
+          </span>
+        </div>
         <div className="mt-auto pt-2.5">
           <p className="text-[13px] text-(--text-secondary)">
-            <strong
-              className={`text-base ${unavailable ? "text-(--text-secondary)" : "text-(--primary-text)"}`}
-            >
+            <strong className={`text-base ${unavailable ? "text-(--text-secondary)" : "text-(--text-primary)"}`}>
               {formatCents(room.priceCents)}
             </strong>{" "}
             / diária
@@ -76,7 +76,7 @@ export function RoomCard({
             <LuMapPin
               aria-hidden="true"
               size={14}
-              className="mt-px shrink-0"
+              className={`mt-px shrink-0 ${unavailable ? "" : "text-(--primary-text)"}`}
             />
             <span className="line-clamp-1">{formatLocation(room.property)}</span>
           </p>

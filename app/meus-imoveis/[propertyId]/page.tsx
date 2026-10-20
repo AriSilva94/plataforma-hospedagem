@@ -2,11 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { LuArrowRight, LuChevronDown, LuCircleAlert, LuCircleCheck, LuEye, LuExternalLink, LuImage, LuPencil, LuPlus } from "react-icons/lu";
-import { MotelTag } from "@/components/motel-tag";
 import { OwnerDataNotice } from "@/components/owner/owner-notice";
 import { OwnerPage } from "@/components/owner/owner-page";
 import { PropertyStatusBadge, RoomVerification } from "@/components/owner/property-status-badge";
 import { StatusBadge } from "@/components/owner/status-badge";
+import { PropertyTypeTag } from "@/components/property-type-tag";
 import { PropertyStatusActions } from "@/components/owner/property-status-actions";
 import { RoomAvailabilityToggle } from "@/components/owner/room-availability-toggle";
 import { RoomPriceEditor } from "@/components/owner/room-price-editor";
@@ -19,13 +19,13 @@ import {
   formatCents,
   formatLocation,
   genderIdentityLabels,
-  isMotel,
   propertyDetailSchema,
   publishRequirements,
   propertyTypeLabels,
   sharedAreaTypeLabels,
   type PropertyDetail,
   type PropertyStatus,
+  type PropertyType,
 } from "@/lib/properties";
 
 type Room = PropertyDetail["rooms"][number];
@@ -81,14 +81,14 @@ function RoomRow({
   propertyId,
   propertyStatus,
   room,
-  motel,
+  propertyType,
   warnBeforePause,
   focusAfterChangeId,
 }: {
   propertyId: string;
   propertyStatus: PropertyStatus;
   room: Room;
-  motel: boolean;
+  propertyType: PropertyType;
   warnBeforePause: boolean;
   focusAfterChangeId?: string;
 }) {
@@ -114,7 +114,7 @@ function RoomRow({
           )}
         </div>
         <div className="min-w-0">
-          <h3 className="min-w-0 wrap-break-word font-bold text-(--text-primary) group-hover:text-(--primary-text)">{room.title}</h3>
+          <h3 className="min-w-0 wrap-break-word font-bold text-(--primary-text)">{room.title}</h3>
           <p className="mt-1 text-sm text-(--text-secondary)">
             {room.capacity === 1 ? "1 pessoa" : `${room.capacity} pessoas`} · Banheiro {bathroomTypeLabels[room.bathroomType].toLowerCase()}
           </p>
@@ -125,7 +125,7 @@ function RoomRow({
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <RoomVerification status={room.verificationStatus} rejectedReason={room.verificationRejectedReason} />
-            {motel ? <MotelTag /> : null}
+            <PropertyTypeTag type={propertyType} />
           </div>
         </div>
       </Link>
@@ -202,6 +202,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
     <OwnerPage
       wide
       title={property.title}
+      highlightTitle
       badge={
         property.status === "ACTIVE" && availableCount === 0 ? (
           <StatusBadge tone="warning">Publicado · fora da busca</StatusBadge>
@@ -335,7 +336,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
                     propertyId={property.id}
                     propertyStatus={property.status}
                     room={room}
-                    motel={isMotel(property.type)}
+                    propertyType={property.type}
                     warnBeforePause={warnBeforePause(room)}
                     focusAfterChangeId={roomFilter ? "rooms-heading" : undefined}
                   />
@@ -352,7 +353,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
               </summary>
               <ul className={`mt-2 ${roomListClassName}`}>
                 {archivedRooms.map((room) => (
-                  <RoomRow key={room.id} propertyId={property.id} propertyStatus={property.status} room={room} motel={isMotel(property.type)} warnBeforePause={false} />
+                  <RoomRow key={room.id} propertyId={property.id} propertyStatus={property.status} room={room} propertyType={property.type} warnBeforePause={false} />
                 ))}
               </ul>
             </details>
@@ -364,7 +365,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
             <h2 id="property-heading" className="font-bold text-(--text-primary)">
               O imóvel
             </h2>
-            {isMotel(property.type) ? <MotelTag /> : null}
+            <PropertyTypeTag type={property.type} />
           </div>
           {cover ? (
             <div className="relative mt-4 h-28 overflow-hidden rounded-xl bg-(--surface-raised)">

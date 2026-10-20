@@ -1,14 +1,15 @@
 import Link from "next/link";
 import type { IconType } from "react-icons";
 import { LuBadgeCheck, LuChevronRight, LuMapPin } from "react-icons/lu";
-import { MotelTag } from "@/components/motel-tag";
+import { PropertyTypeTag } from "@/components/property-type-tag";
 import { initialsOf } from "@/lib/initials";
+import type { PropertyType } from "@/lib/properties";
 
 export function HostCard({
   hostId,
   hostName,
   verified,
-  motel,
+  propertyType,
   roomTitle,
   location,
   highlights,
@@ -16,7 +17,7 @@ export function HostCard({
   hostId: string;
   hostName: string;
   verified: boolean;
-  motel: boolean;
+  propertyType: PropertyType;
   roomTitle: string;
   location: string;
   highlights?: { icon: IconType; label: string }[];
@@ -44,11 +45,9 @@ export function HostCard({
       </div>
 
       <div className="mt-6">
-        {motel ? (
-          <div className="mb-3">
-            <MotelTag />
-          </div>
-        ) : null}
+        <div className="mb-3">
+          <PropertyTypeTag type={propertyType} />
+        </div>
         <h1 className="wrap-break-word text-2xl font-extrabold tracking-tight text-(--text-primary)">{roomTitle}</h1>
         <p className="mt-2 flex items-center gap-2 text-sm text-(--text-secondary)">
           <LuMapPin aria-hidden="true" size={16} className="shrink-0" /> {location}

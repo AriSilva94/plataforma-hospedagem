@@ -669,6 +669,22 @@ test("cadastra motel como tipo do imóvel", async ({ page }) => {
   expect(ownerRequests[0]).toMatchObject({ method: "POST", url: "/owner/properties", body: { title: "Motel Central", type: "MOTEL" } });
 });
 
+test("cadastra apartamento buscando o tipo do imóvel", async ({ page }) => {
+  user = { ...user, ...completePersonalData, roles: ["OWNER"] };
+  await page.goto("/meus-imoveis/novo");
+  await page.getByRole("textbox", { name: "Título do anúncio" }).fill("Apartamento Central");
+  await page.getByRole("textbox", { name: /^Descrição do imóvel/ }).fill("Quartos perto do metrô.");
+  await page.getByRole("button", { name: /^Tipo do imóvel/ }).click();
+  await page.getByRole("combobox", { name: "Buscar tipo" }).fill("apart");
+  await expect(page.getByRole("option")).toHaveText(["Apartamento"]);
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("button", { name: /^Tipo do imóvel/ })).toHaveAccessibleName("Tipo do imóvel Apartamento");
+  await page.getByRole("button", { name: /^Salvar/ }).click();
+
+  await expect.poll(() => ownerRequests.length).toBe(1);
+  expect(ownerRequests[0]).toMatchObject({ method: "POST", url: "/owner/properties", body: { title: "Apartamento Central", type: "APARTMENT" } });
+});
+
 test("salva a UF do imóvel pelo seletor com busca", async ({ page }) => {
   user = { ...user, ...completePersonalData, roles: ["OWNER"] };
   await page.goto("/meus-imoveis/p1/editar?secao=localizacao");
