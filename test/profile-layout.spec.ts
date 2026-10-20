@@ -66,7 +66,7 @@ test.beforeAll(async () => {
     response.setHeader("Access-Control-Allow-Origin", "http://localhost:3001");
     response.setHeader("Access-Control-Allow-Credentials", "true");
     response.setHeader("Access-Control-Allow-Methods", "GET, PATCH, POST, PUT, OPTIONS");
-    response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    response.setHeader("Access-Control-Allow-Headers", "Content-Type, X-CSRF-Protection");
     response.setHeader("Content-Type", "application/json");
 
     if (request.method === "OPTIONS") {
