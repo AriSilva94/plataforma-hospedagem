@@ -25,7 +25,7 @@ function filterOptions(options: ComboboxOption[], query: string) {
   return [...startsWith, ...contains];
 }
 
-function HighlightedLabel({ label, query }: { label: string; query: string }) {
+export function HighlightedLabel({ label, query }: { label: string; query: string }) {
   const term = normalize(query.trim());
   const start = term ? normalize(label).indexOf(term) : -1;
   if (start < 0 || normalize(label).length !== label.length) return label;
@@ -156,7 +156,7 @@ export function Combobox({
           }
         }}
         onBlur={onBlur}
-        className={`group flex w-full items-center gap-3 rounded-xl border border-(--border-strong) bg-(--background) text-left text-(--text-primary) ${
+        className={`group flex w-full items-center gap-3 rounded-xl border border-(--border) bg-(--background) text-left text-(--text-primary) ${
           size === "compact" ? "px-3.5 py-2.5 text-base sm:text-sm" : "px-4 py-3"
         } outline-hidden transition-colors hover:border-(--text-secondary) focus-visible:border-(--primary) focus-visible:ring-2 focus-visible:ring-(--focus-ring) disabled:cursor-not-allowed disabled:border-(--border) disabled:bg-(--surface) disabled:hover:border-(--border) data-[invalid=true]:border-(--error) data-[invalid=true]:focus-visible:ring-(--error) data-[open=true]:border-(--primary)`}
       >

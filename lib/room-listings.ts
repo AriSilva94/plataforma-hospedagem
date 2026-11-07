@@ -1,4 +1,5 @@
 import { favoriteRoomIdsSchema } from "@/lib/favorites";
+import { locationQuery, type CityLocation } from "@/lib/home-search";
 import { publicRoomPageSchema, roomListingPageSize } from "@/lib/properties";
 import { getApiData } from "@/lib/server-api";
 
@@ -8,10 +9,11 @@ export async function getFavoriteRoomIds(signedIn: boolean): Promise<string[]> {
   return favorites.status === "ok" ? favorites.data.roomIds : [];
 }
 
-export async function getRoomListings(signedIn: boolean) {
+export async function getRoomListings(signedIn: boolean, location?: CityLocation) {
+  const filter = locationQuery(location);
   const [listing, featuredListing, favoriteRoomIds] = await Promise.all([
-    getApiData(`/rooms?limit=${roomListingPageSize}`, publicRoomPageSchema),
-    getApiData(`/rooms/featured?limit=${roomListingPageSize}`, publicRoomPageSchema),
+    getApiData(`/rooms?limit=${roomListingPageSize}${filter}`, publicRoomPageSchema),
+    getApiData(`/rooms/featured?limit=${roomListingPageSize}${filter}`, publicRoomPageSchema),
     getFavoriteRoomIds(signedIn),
   ]);
 

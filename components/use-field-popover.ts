@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type FocusEvent } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FocusEvent } from "react";
 
 type Side = "bottom" | "top";
 
@@ -14,17 +14,18 @@ export function useFieldPopover<Anchor extends HTMLElement>() {
   const [isOpen, setIsOpen] = useState(false);
   const [side, setSide] = useState<Side>("bottom");
 
-  const open = useCallback(() => {
+  const open = useCallback(() => setIsOpen(true), []);
+
+  useLayoutEffect(() => {
+    if (!isOpen) return;
     const anchor = anchorRef.current?.getBoundingClientRect();
     const panelHeight = panelRef.current?.offsetHeight ?? 0;
-    if (anchor) {
-      const bottomInset = window.matchMedia("(min-width: 48rem)").matches ? viewportMargin : mobileNavigationHeight;
-      const spaceBelow = window.innerHeight - anchor.bottom - bottomInset;
-      const spaceAbove = anchor.top - viewportMargin;
-      setSide(spaceBelow < panelHeight && spaceAbove > spaceBelow ? "top" : "bottom");
-    }
-    setIsOpen(true);
-  }, []);
+    if (!anchor) return;
+    const bottomInset = window.matchMedia("(min-width: 48rem)").matches ? viewportMargin : mobileNavigationHeight;
+    const spaceBelow = window.innerHeight - anchor.bottom - bottomInset;
+    const spaceAbove = anchor.top - viewportMargin;
+    setSide(spaceBelow < panelHeight && spaceAbove > spaceBelow ? "top" : "bottom");
+  }, [isOpen]);
 
   const close = useCallback((restoreFocus = false) => {
     setIsOpen(false);

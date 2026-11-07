@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { IconType } from "react-icons";
 import { LuBell, LuCalendarCheck, LuCircleCheck, LuHistory, LuMapPin, LuStar } from "react-icons/lu";
-import { BrandMark } from "@/components/brand-mark";
+import { SiteFooter } from "@/components/site-footer";
 import { FeaturedRooms } from "@/components/featured-rooms";
 import { RoomListing } from "@/components/room-listing";
 import { SiteHeader } from "@/components/site-header";
@@ -44,8 +44,6 @@ const ownerBenefits = [
 ];
 
 const sectionShell = "mx-auto w-full max-w-360 px-6 md:px-10 lg:px-12";
-const primaryAction = "inline-flex min-h-12 items-center justify-center rounded-2xl bg-(--primary) px-6 text-sm font-bold text-(--on-primary) transition-colors hover:bg-(--primary-hover) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)";
-const secondaryAction = "inline-flex min-h-12 items-center justify-center rounded-2xl border border-(--border-strong) px-6 text-sm font-semibold text-(--text-primary) transition-colors hover:bg-(--primary-soft) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)";
 
 export function PublicHome({
   user,
@@ -53,14 +51,13 @@ export function PublicHome({
   featuredListing,
   favoriteRoomIds,
 }: {
-  user?: { name: string; roles: string[] };
+  user: { name: string; roles: string[] };
   listing: PublicRoomPage | null;
   featuredListing: PublicRoomPage | null;
   favoriteRoomIds: string[];
 }) {
   const total = (listing?.total ?? 0) + (featuredListing?.total ?? 0);
   const featuredRooms = featuredListing?.items ?? [];
-  const announceHref = user ? "/meus-imoveis" : "/cadastro";
 
   return (
     <>
@@ -119,7 +116,7 @@ export function PublicHome({
                   </li>
                 ))}
               </ul>
-              <Link href={announceHref} className="mt-10 inline-flex min-h-12 items-center justify-center rounded-2xl bg-(--primary) px-6 text-sm font-bold text-(--on-primary) transition-colors hover:bg-(--primary-hover) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)">Anunciar meu espaço</Link>
+              <Link href="/meus-imoveis" className="mt-10 inline-flex min-h-12 items-center justify-center rounded-2xl bg-(--primary) px-6 text-sm font-bold text-(--on-primary) transition-colors hover:bg-(--primary-hover) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)">Anunciar meu espaço</Link>
             </div>
             <div className="relative min-h-64 lg:min-h-full">
               <Image src="/rooms/room2.png" alt="Quarto preparado para hóspedes" fill sizes="(min-width: 1024px) 42vw, 100vw" className="object-cover" />
@@ -148,35 +145,18 @@ export function PublicHome({
         {featuredRooms.length > 0 ? (
           <section aria-labelledby="destaques-titulo" className={`${sectionShell} pt-20 md:pt-28`}>
             <SectionHeading id="destaques-titulo" title="Quartos em destaque" text="Anúncios em evidência na DOMUS X." />
-            <FeaturedRooms rooms={featuredRooms} favoriteRoomIds={favoriteRoomIds} signedIn={Boolean(user)} />
+            <FeaturedRooms rooms={featuredRooms} favoriteRoomIds={favoriteRoomIds} signedIn />
           </section>
         ) : null}
 
         <section id="todos" aria-labelledby="todos-titulo" className={`${sectionShell} scroll-mt-24 pb-20 pt-20 md:pb-28 md:pt-28`}>
           <SectionHeading id="todos-titulo" title="Quartos disponíveis" text={total > 0 ? (total === 1 ? "1 quarto pronto para reserva." : `${total} quartos prontos para reserva.`) : undefined} />
-          <RoomListing initial={listing} favoriteRoomIds={favoriteRoomIds} signedIn={Boolean(user)} />
+          <RoomListing initial={listing} favoriteRoomIds={favoriteRoomIds} signedIn />
         </section>
 
-        {user ? null : (
-          <section aria-labelledby="cta-titulo" className="border-t border-(--border) bg-(--surface)">
-            <div className={`${sectionShell} py-16 text-center md:py-20`}>
-              <h2 id="cta-titulo" className="mx-auto max-w-xl text-balance text-3xl font-extrabold leading-tight tracking-[-0.02em] text-(--text-primary) md:text-4xl">Sua próxima estadia começa com uma conta.</h2>
-              <p className="mx-auto mt-4 max-w-120 leading-relaxed text-(--text-secondary)">Cadastre-se com e-mail ou com sua conta Google.</p>
-              <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
-                <Link href="/cadastro" className={primaryAction}>Criar conta</Link>
-                <Link href="/login" className={secondaryAction}>Entrar</Link>
-              </div>
-            </div>
-          </section>
-        )}
       </main>
 
-      <footer className="mb-18 border-t border-(--border) md:mb-0">
-        <div className={`${sectionShell} flex flex-col gap-3 py-8 text-sm text-(--text-secondary) sm:flex-row sm:items-center sm:justify-between`}>
-          <BrandMark size="sm" />
-          <p>© 2026 DOMUS X. Todos os direitos reservados.</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </>
   );
 }

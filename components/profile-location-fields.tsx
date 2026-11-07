@@ -14,7 +14,7 @@ const citiesSchema = z.array(z.string());
 
 type CitiesResult = { key: string; cities: string[] | null };
 
-function useCities(state: string) {
+export function useCities(state: string) {
   const [attempt, setAttempt] = useState(0);
   const [result, setResult] = useState<CitiesResult>();
   const key = `${state}:${attempt}`;

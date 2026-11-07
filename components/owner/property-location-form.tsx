@@ -4,8 +4,9 @@ import { useState } from "react";
 import { flushSync } from "react-dom";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { Combobox } from "@/components/combobox";
+import { useCities } from "@/components/profile-location-fields";
 import Link from "next/link";
 import { LuArrowLeft, LuEyeOff, LuLoaderCircle, LuMapPin } from "react-icons/lu";
 import { FormActions, FormStatus } from "@/components/owner/form-actions";
@@ -22,7 +23,7 @@ import {
 import { sendApiRequest, toErrorMessage } from "@/lib/api";
 import { brazilianStateOptions, brazilianStates, postalCodeAddressSchema, type PropertyDetail } from "@/lib/properties";
 
-type TextField = Exclude<keyof PropertyLocationInput, "state" | "referencePoints">;
+type TextField = Exclude<keyof PropertyLocationInput, "city" | "state" | "referencePoints">;
 
 const addressFields: { name: TextField; label: string; placeholder: string; autoComplete: string; className: string }[] = [
   { name: "postalCode", label: "CEP", placeholder: "00000-000", autoComplete: "postal-code", className: "col-span-3" },
@@ -30,7 +31,6 @@ const addressFields: { name: TextField; label: string; placeholder: string; auto
   { name: "number", label: "Número", placeholder: "Ex.: 120", autoComplete: "off", className: "col-span-2" },
   { name: "complement", label: "Complemento", placeholder: "Ex.: casa dos fundos, bloco B", autoComplete: "address-line2", className: "col-span-4 sm:col-span-3" },
   { name: "neighborhood", label: "Bairro", placeholder: "Ex.: Centro", autoComplete: "address-level3", className: "col-span-6 sm:col-span-3" },
-  { name: "city", label: "Cidade", placeholder: "Ex.: São Paulo", autoComplete: "address-level2", className: "col-span-3" },
 ];
 
 function formatPostalCode(value: string) {
@@ -59,6 +59,9 @@ export function PropertyLocationForm({ property, guided }: { property: PropertyD
     mode: "onBlur",
   });
   const { errors, isSubmitting, isDirty } = formState;
+  const state = useWatch({ control, name: "state" });
+  const cities = useCities(state);
+  const cityPlaceholder = !state ? "Selecione a UF" : cities.loading ? "Carregando..." : "Selecione";
 
   function isOutdated(digits: string) {
     return getValues("postalCode").replace(/\D/g, "") !== digits;
@@ -173,13 +176,15 @@ export function PropertyLocationForm({ property, guided }: { property: PropertyD
                     labelId="location-state-label"
                     value={field.value}
                     options={brazilianStateOptions}
-                    onChange={field.onChange}
+                    onChange={(value) => {
+                      field.onChange(value);
+                      setValue("city", "", { shouldDirty: true, shouldValidate: true });
+                    }}
                     onBlur={field.onBlur}
                     placeholder="Selecione"
                     searchLabel="Buscar estado"
                     emptyMessage="Nenhum estado encontrado."
                     size="compact"
-                    align="end"
                     disabled={isLookingUpPostalCode}
                     invalid={Boolean(errors.state)}
                     describedBy={errors.state ? "location-state-error" : undefined}
@@ -188,6 +193,48 @@ export function PropertyLocationForm({ property, guided }: { property: PropertyD
               />
             </div>
             <FieldError id="location-state-error" message={errors.state?.message} />
+          </div>
+          <div className="col-span-3">
+            <label id="location-city-label" htmlFor="location-city" className={labelClassName}>Cidade</label>
+            <div className="mt-1.5">
+              <Controller
+                control={control}
+                name="city"
+                render={({ field }) => (
+                  <Combobox
+                    ref={field.ref}
+                    id="location-city"
+                    labelId="location-city-label"
+                    value={field.value}
+                    options={
+                      cities.cities.length > 0 || !field.value
+                        ? cities.cities.map((city) => ({ value: city, label: city }))
+                        : [{ value: field.value, label: field.value }]
+                    }
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    placeholder={cityPlaceholder}
+                    searchLabel="Buscar cidade"
+                    emptyMessage="Nenhuma cidade encontrada."
+                    size="compact"
+                    align="end"
+                    disabled={isLookingUpPostalCode || !state || cities.loading || cities.failed}
+                    loading={cities.loading}
+                    invalid={Boolean(errors.city)}
+                    describedBy={cities.failed ? "location-city-status" : errors.city ? "location-city-error" : undefined}
+                  />
+                )}
+              />
+            </div>
+            <FieldError id="location-city-error" message={errors.city?.message} />
+            {cities.failed ? (
+              <p id="location-city-status" role="alert" className="mt-2 text-xs leading-relaxed text-(--warning)">
+                Não foi possível carregar as cidades.{" "}
+                <button type="button" onClick={cities.retry} className="font-bold underline underline-offset-2">
+                  Tentar novamente
+                </button>
+              </p>
+            ) : null}
           </div>
         </div>
       </section>

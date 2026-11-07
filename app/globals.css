@@ -741,7 +741,19 @@ body.scroll-locked {
     opacity 200ms cubic-bezier(0.16, 1, 0.3, 1),
     transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
     filter 200ms cubic-bezier(0.16, 1, 0.3, 1),
-    visibility 0s;
+    display 0s allow-discrete;
+}
+
+@starting-style {
+  .field-popover[data-state="open"] {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(-0.5rem) scale(0.97);
+  }
+
+  .field-popover[data-state="open"][data-side="top"] {
+    transform: translateY(0.5rem) scale(0.97);
+  }
 }
 
 .field-popover[data-side="top"] {
@@ -756,7 +768,7 @@ body.scroll-locked {
 }
 
 .field-popover[data-state="closed"] {
-  visibility: hidden;
+  display: none;
   opacity: 0;
   filter: blur(6px);
   transform: translateY(-0.5rem) scale(0.97);
@@ -765,11 +777,40 @@ body.scroll-locked {
     opacity 130ms ease-in,
     transform 130ms ease-in,
     filter 130ms ease-in,
-    visibility 0s linear 130ms;
+    display 0s linear 130ms allow-discrete;
 }
 
 .field-popover[data-state="closed"][data-side="top"] {
   transform: translateY(0.5rem) scale(0.97);
+}
+
+@utility step-bar {
+  --arrow: 0.625rem;
+  display: flex;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: var(--border-accent);
+  padding: 1px;
+
+  @media (width >= 64rem) {
+    --arrow: 0.875rem;
+  }
+}
+
+@utility step-segment {
+  clip-path: polygon(0 0, calc(100% - var(--arrow)) 0, 100% 50%, calc(100% - var(--arrow)) 100%, 0 100%, var(--arrow) 50%);
+}
+
+@utility step-start {
+  clip-path: polygon(0 0, calc(100% - var(--arrow)) 0, 100% 50%, calc(100% - var(--arrow)) 100%, 0 100%);
+}
+
+@utility step-end {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, var(--arrow) 50%);
+}
+
+@utility step-overlap {
+  margin-left: calc(2px - var(--arrow));
 }
 
 .field-scroll {

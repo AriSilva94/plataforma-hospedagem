@@ -62,7 +62,7 @@ export function RoomVerificationActions({ room }: { room: Room }) {
             placeholder="Motivo da rejeição"
             aria-label="Motivo da rejeição"
             rows={2}
-            className="w-full rounded-xl border border-(--border-strong) bg-(--background) px-3 py-2 text-sm text-(--text-primary) outline-hidden focus:border-(--primary)"
+            className="w-full rounded-xl border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--text-primary) outline-hidden transition-colors placeholder:text-(--text-secondary) hover:border-(--text-secondary) focus:border-(--primary)"
           />
           <div className="flex gap-2">
             <button

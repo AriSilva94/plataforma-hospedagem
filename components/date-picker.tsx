@@ -26,7 +26,7 @@ const monthHeadingClassName = `${headingButtonClassName} text-(--text-primary) h
 const yearHeadingClassName = `${headingButtonClassName} text-(--primary-text) tabular-nums hover:bg-(--primary-soft)`;
 const headingChevronClassName = "opacity-60 transition-opacity group-hover/heading:opacity-100";
 const gridButtonClassName =
-  "rounded-lg text-sm font-semibold text-(--on-primary) outline-hidden transition-colors hover:bg-(--primary-soft) focus-visible:ring-2 focus-visible:ring-(--focus-ring) disabled:cursor-not-allowed disabled:text-(--text-secondary) disabled:opacity-60 disabled:hover:bg-transparent data-[selected=true]:bg-(--primary) data-[selected=true]:text-(--on-primary) data-[selected=true]:hover:bg-(--primary-hover)";
+  "rounded-lg text-sm font-semibold text-(--text-primary) outline-hidden transition-colors hover:bg-(--primary-soft) focus-visible:ring-2 focus-visible:ring-(--focus-ring) disabled:cursor-not-allowed disabled:text-(--text-secondary) disabled:opacity-60 disabled:hover:bg-transparent data-[selected=true]:bg-(--primary) data-[selected=true]:text-(--on-primary) data-[selected=true]:hover:bg-(--primary-hover)";
 
 function pad(value: number) {
   return String(value).padStart(2, "0");
@@ -77,6 +77,7 @@ export function DatePicker({
   disabled = false,
   invalid = false,
   describedBy,
+  startView = "years",
   ref,
 }: {
   id: string;
@@ -90,6 +91,7 @@ export function DatePicker({
   disabled?: boolean;
   invalid?: boolean;
   describedBy?: string;
+  startView?: View;
   ref?: Ref<HTMLInputElement>;
 }) {
   const { anchorRef, panelRef, isOpen, open, close, rootProps, panelProps } = useFieldPopover<HTMLButtonElement>();
@@ -119,8 +121,9 @@ export function DatePicker({
   }, [isOpen, view, focusedIso, panelRef]);
 
   function openCalendar() {
-    setView(selected ? "days" : "years");
-    if (selected) setCursor({ year: selected.year, month: selected.month });
+    const start = selected ?? (startView === "days" ? minDate : undefined);
+    setView(start ? "days" : "years");
+    if (start) setCursor({ year: start.year, month: start.month });
     setFocusedIso(selected ? value : "");
     open();
   }
@@ -184,7 +187,7 @@ export function DatePicker({
         data-open={isOpen}
         data-invalid={invalid}
         data-disabled={disabled}
-        className="group flex items-center rounded-xl border border-(--border-strong) bg-(--background) transition-colors hover:border-(--text-secondary) focus-within:border-(--primary) focus-within:ring-2 focus-within:ring-(--focus-ring) data-[disabled=true]:cursor-not-allowed data-[disabled=true]:border-(--border) data-[disabled=true]:bg-(--surface) data-[invalid=true]:border-(--error) data-[invalid=true]:focus-within:ring-(--error) data-[open=true]:border-(--primary)"
+        className="group flex items-center rounded-xl border border-(--border) bg-(--background) transition-colors hover:border-(--text-secondary) focus-within:border-(--primary) focus-within:ring-2 focus-within:ring-(--focus-ring) data-[disabled=true]:cursor-not-allowed data-[disabled=true]:border-(--border) data-[disabled=true]:bg-(--surface) data-[invalid=true]:border-(--error) data-[invalid=true]:focus-within:ring-(--error) data-[open=true]:border-(--primary)"
       >
         <button
           ref={anchorRef}

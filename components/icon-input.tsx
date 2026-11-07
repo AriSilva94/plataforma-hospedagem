@@ -13,7 +13,7 @@ export function IconInput({ icon: Icon, ...props }: Omit<ComponentProps<"input">
       />
       <input
         {...props}
-        className="w-full rounded-xl border border-(--border-strong) bg-(--background) py-3 pr-4 pl-11 text-(--text-primary) outline-hidden transition-colors hover:border-(--text-secondary) focus:border-(--primary) focus-visible:ring-2 focus-visible:ring-(--focus-ring) disabled:cursor-not-allowed disabled:border-(--border) disabled:bg-(--surface) disabled:text-(--text-secondary) aria-invalid:border-(--error) aria-invalid:focus:border-(--error) aria-invalid:focus-visible:ring-(--error)"
+        className="w-full rounded-xl border border-(--border) bg-(--background) py-3 pr-4 pl-11 text-(--text-primary) outline-hidden transition-colors placeholder:text-(--text-secondary) hover:border-(--text-secondary) focus:border-(--primary) focus-visible:ring-2 focus-visible:ring-(--focus-ring) disabled:cursor-not-allowed disabled:border-(--border) disabled:bg-(--surface) disabled:text-(--text-secondary) aria-invalid:border-(--error) aria-invalid:focus:border-(--error) aria-invalid:focus-visible:ring-(--error)"
       />
     </div>
   );

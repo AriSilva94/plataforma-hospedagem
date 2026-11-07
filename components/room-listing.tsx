@@ -4,9 +4,20 @@ import { useEffect, useRef, useState } from "react";
 import { FavoriteButton } from "@/components/favorite-button";
 import { RoomCard } from "@/components/room-card";
 import { apiFetch } from "@/lib/api";
+import { locationQuery, type CityLocation } from "@/lib/home-search";
 import { publicRoomPageSchema, roomListingPageSize, type PublicRoomPage } from "@/lib/properties";
 
-export function RoomListing({ initial, favoriteRoomIds, signedIn }: { initial: PublicRoomPage | null; favoriteRoomIds: string[]; signedIn: boolean }) {
+export function RoomListing({
+  initial,
+  favoriteRoomIds,
+  signedIn,
+  location,
+}: {
+  initial: PublicRoomPage | null;
+  favoriteRoomIds: string[];
+  signedIn: boolean;
+  location?: CityLocation;
+}) {
   const [favorites] = useState(() => new Set(favoriteRoomIds));
   const [items, setItems] = useState(initial?.items ?? []);
   const [nextCursor, setNextCursor] = useState(initial?.nextCursor ?? null);
@@ -23,7 +34,7 @@ export function RoomListing({ initial, favoriteRoomIds, signedIn }: { initial: P
     setLoading(true);
     setError(undefined);
     try {
-      const response = await apiFetch(`/rooms?limit=${roomListingPageSize}&cursor=${encodeURIComponent(cursor)}`);
+      const response = await apiFetch(`/rooms?limit=${roomListingPageSize}&cursor=${encodeURIComponent(cursor)}${locationQuery(location)}`);
       if (!response.ok) throw new Error();
       const next = publicRoomPageSchema.parse(await response.json());
       setItems((current) => [...current, ...next.items.filter((item) => !current.some((existing) => existing.id === item.id))]);
