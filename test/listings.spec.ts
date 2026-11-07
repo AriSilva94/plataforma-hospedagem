@@ -101,3 +101,51 @@ test("filtro de cidade mostra a cidade vinda da URL", async ({ page }) => {
 
   await expect(page.getByRole("combobox", { name: "Cidade" })).toHaveValue("Curitiba, PR");
 });
+
+test("filtros chegam à API: diária máxima e tipo restringem os cards", async ({ page }) => {
+  await page.goto("/anuncios?preco_max=500");
+  const prices = await page.locator("[data-room-content] section > ul > li strong").allTextContents();
+  expect(prices.length).toBeGreaterThan(0);
+  for (const price of prices) {
+    expect(Number(price.replace(/[^\d,]/g, "").replace(",", "."))).toBeLessThanOrEqual(500);
+  }
+
+  await page.goto("/anuncios?tipo=casa");
+  const cards = page.locator("[data-room-content] section > ul > li");
+  await expect(cards.first()).toBeVisible();
+  const total = await cards.count();
+  await expect(cards.filter({ hasText: "Casa" })).toHaveCount(total);
+});
+
+test("filtros aplicados em sequência rápida não se perdem", async ({ page }) => {
+  await page.goto("/anuncios");
+  const filters = page.getByRole("region", { name: "Filtros" });
+
+  await filters.locator("label:visible", { hasText: "Casa" }).click();
+  await filters.locator("label:visible", { hasText: "Motel" }).click();
+  await filters.getByRole("button", { name: /^Mais filtros/ }).click();
+  await filters.locator("label:visible", { hasText: "Mulher trans" }).click();
+
+  await expect(page).toHaveURL(/tipo=casa%2Cmotel&publico=mulher-trans$/);
+});
+
+test("diária fora da escala do slider é ignorada", async ({ page }) => {
+  await page.goto("/anuncios?preco_max=5000");
+  const slider = page.getByRole("region", { name: "Filtros" }).getByRole("slider", { name: "Diária" });
+  await expect(slider).toHaveAttribute("aria-valuetext", "Qualquer valor");
+  await expect(page.getByRole("button", { name: "Limpar filtros" })).toHaveCount(0);
+});
+
+test("cidade da URL é validada: nome oficial no título e aviso para cidade inexistente", async ({ page }) => {
+  await page.goto("/anuncios?cidade=sao%20paulo&uf=SP");
+  await expect(page).toHaveTitle("Quartos em São Paulo – SP | DOMUS X");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Quartos em São Paulo – SP");
+  await expect(page.getByRole("combobox", { name: "Cidade" })).toHaveValue("São Paulo, SP");
+
+  await page.goto("/anuncios?cidade=Ligue%2099999-0000&uf=SP");
+  await expect(page).toHaveTitle("Anúncios | DOMUS X");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Anúncios");
+  await expect(page.getByText("Não encontramos essa cidade. Mostrando todos os anúncios.")).toBeVisible();
+  await expect(page.getByText("Ligue 99999-0000")).toHaveCount(0);
+  await expect(page.getByText("Não foi possível carregar")).toHaveCount(0);
+});

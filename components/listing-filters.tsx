@@ -8,20 +8,11 @@ import { propertyTypeIcons } from "@/components/property-type-tag";
 import { useFieldPopover } from "@/components/use-field-popover";
 import { fromLocationValue } from "@/lib/home-search";
 import { genderIdentityLabels, propertyTypeLabels, type GenderIdentity, type PropertyType } from "@/lib/properties";
-import {
-  activeFilterCount,
-  audienceSlugs,
-  formatPrice,
-  priceRangeMax,
-  priceRangeStep,
-  propertyTypeSlugs,
-  type RoomFilters,
-} from "@/lib/room-filters";
+import { activeFilterCount, filtersSearch, formatPrice, priceRangeMax, priceRangeStep, type RoomFilters } from "@/lib/room-filters";
 
-const filterParams = ["cidade", "uf", "tipo", "preco_max", "publico"];
-const refinementParams = { tipo: undefined, preco_max: undefined, publico: undefined };
 const keyboardCommitDelayMs = 400;
 const activeTriggerClassName = "border-(--primary) bg-(--primary-soft) text-(--primary-text)";
+const idleTriggerClassName = "border-(--border) text-(--text-primary) hover:border-(--text-secondary)";
 const collapsedActiveClassName = "max-xl:border-(--primary) max-xl:bg-(--primary-soft) max-xl:text-(--primary-text)";
 const inlineActiveClassName = "xl:border-(--primary) xl:bg-(--primary-soft) xl:text-(--primary-text)";
 
@@ -50,8 +41,7 @@ const propertyTypes = Object.keys(propertyTypeLabels) as PropertyType[];
 const audiences = Object.keys(genderIdentityLabels) as GenderIdentity[];
 const clearedRefinements: Partial<RoomFilters> = { types: [], maxPrice: undefined, audience: undefined };
 
-type ParamChanges = Record<string, string | undefined>;
-type Apply = (changes: ParamChanges, next: Partial<RoomFilters>) => void;
+type Apply = (next: Partial<RoomFilters>) => void;
 
 function AudienceField({ idPrefix, audience, apply }: { idPrefix: string; audience?: GenderIdentity; apply: Apply }) {
   const options: { value?: GenderIdentity; label: string }[] = [{ label: "Todos" }, ...audiences.map((value) => ({ value, label: genderIdentityLabels[value] }))];
@@ -69,7 +59,7 @@ function AudienceField({ idPrefix, audience, apply }: { idPrefix: string; audien
               type="radio"
               name={`${idPrefix}-publico`}
               checked={audience === value}
-              onChange={() => apply({ publico: value ? audienceSlugs[value] : undefined }, { audience: value })}
+              onChange={() => apply({ audience: value })}
               className="sr-only"
             />
             {label}
@@ -83,7 +73,7 @@ function AudienceField({ idPrefix, audience, apply }: { idPrefix: string; audien
 function TypeField({ types, apply, inline = false }: { types: PropertyType[]; apply: Apply; inline?: boolean }) {
   function toggle(type: PropertyType) {
     const next = types.includes(type) ? types.filter((item) => item !== type) : [...types, type];
-    apply({ tipo: next.map((item) => propertyTypeSlugs[item]).join(",") || undefined }, { types: next });
+    apply({ types: next });
   }
 
   return (
@@ -197,7 +187,7 @@ function MoreFilters({ view, apply }: { view: RoomFilters; apply: Apply }) {
         aria-expanded={isOpen}
         aria-controls="filtros-mais-painel"
         onClick={() => (isOpen ? close() : open())}
-        className={`inline-flex min-h-11 min-w-40 items-center justify-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors ${isOpen ? activeTriggerClassName : "border-(--border) text-(--text-primary) hover:border-(--text-secondary)"} ${collapsedCount > 0 ? collapsedActiveClassName : ""} ${audienceCount > 0 ? inlineActiveClassName : ""} ${focusClassName}`}
+        className={`inline-flex min-h-11 min-w-40 items-center justify-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors ${isOpen ? activeTriggerClassName : idleTriggerClassName} ${collapsedCount > 0 ? collapsedActiveClassName : ""} ${audienceCount > 0 ? inlineActiveClassName : ""} ${focusClassName}`}
       >
         <LuSlidersHorizontal aria-hidden="true" size={18} />
         <span className="xl:hidden">Filtros</span>
@@ -227,9 +217,10 @@ export function ListingFilters({ filters, total }: { filters: RoomFilters; total
   const [stuck, setStuck] = useState(false);
   const sheetRef = useRef<HTMLDialogElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const { location } = view;
-  const hasFilters = filterParams.some((param) => searchParams.has(param));
   const refinementCount = activeFilterCount(view);
+  const hasFilters = Boolean(location) || refinementCount > 0;
 
   useEffect(() => {
     const sheet = sheetRef.current;
@@ -242,28 +233,26 @@ export function ListingFilters({ filters, total }: { filters: RoomFilters; total
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!sentinel) return;
+    const section = sectionRef.current;
+    if (!sentinel || !section) return;
+    const stickyTop = parseFloat(getComputedStyle(section).top) || 0;
     const observer = new IntersectionObserver(([entry]) => setStuck(entry ? !entry.isIntersecting : false), {
-      rootMargin: "-86px 0px 0px 0px",
+      rootMargin: `-${stickyTop + 1}px 0px 0px 0px`,
     });
     observer.observe(sentinel);
     return () => observer.disconnect();
   }, []);
 
-  const apply: Apply = (changes, next) => {
-    const params = new URLSearchParams(searchParams.toString());
-    for (const [key, value] of Object.entries(changes)) {
-      if (value) params.set(key, value);
-      else params.delete(key);
-    }
-    const query = params.toString();
+  const apply: Apply = (next) => {
+    const merged = { ...view, ...next };
+    const query = filtersSearch(searchParams.toString(), merged);
     startTransition(() => {
-      setView({ ...view, ...next });
+      setView(merged);
       router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
     });
   };
 
-  const commitPrice = (max: number | undefined) => apply({ preco_max: max?.toString() }, { maxPrice: max });
+  const commitPrice = (max: number | undefined) => apply({ maxPrice: max });
 
   const resultsLabel = isPending
     ? "Atualizando…"
@@ -277,6 +266,7 @@ export function ListingFilters({ filters, total }: { filters: RoomFilters; total
     <>
       <div ref={sentinelRef} aria-hidden="true" className="mt-6 h-px" />
       <section
+        ref={sectionRef}
         aria-labelledby="filtros-titulo"
         data-stuck={stuck}
         data-filters-pending={isPending}
@@ -287,35 +277,24 @@ export function ListingFilters({ filters, total }: { filters: RoomFilters; total
         </h2>
 
         <div className="flex items-end gap-2 md:gap-3">
-          <div className="flex min-w-0 flex-1 items-end gap-2">
-            <div className="min-w-0 flex-1">
-              <label htmlFor="filtro-cidade" className={labelClassName}>
-                Cidade
-              </label>
-              <CitySearchInput
-                key={location ? `${location.city}|${location.state}` : ""}
-                id="filtro-cidade"
-                defaultValue={location}
-                required={false}
-                placeholder="Digite uma cidade"
-                compact
-                onChange={(value) => {
-                  if (!value) return;
-                  const next = fromLocationValue(value);
-                  apply({ cidade: next.city, uf: next.state }, { location: next });
-                }}
-              />
-            </div>
-            {location ? (
-              <button
-                type="button"
-                onClick={() => apply({ cidade: undefined, uf: undefined }, { location: undefined })}
-                aria-label="Limpar cidade"
-                className={`inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-(--border) text-(--text-secondary) transition-colors hover:border-(--text-secondary) hover:text-(--text-primary) ${focusClassName}`}
-              >
-                <LuX aria-hidden="true" size={18} />
-              </button>
-            ) : null}
+          <div className="min-w-0 flex-1">
+            <label htmlFor="filtro-cidade" className={labelClassName}>
+              Cidade
+            </label>
+            <CitySearchInput
+              key={location ? `${location.city}|${location.state}` : ""}
+              id="filtro-cidade"
+              defaultValue={location}
+              required={false}
+              placeholder="Digite uma cidade"
+              compact
+              onChange={(value) => {
+                if (!value) return;
+                const next = fromLocationValue(value);
+                apply({ location: next });
+              }}
+              onClear={location ? () => apply({ location: undefined }) : undefined}
+            />
           </div>
 
           <div className="hidden min-w-0 flex-1 md:block">
@@ -328,23 +307,22 @@ export function ListingFilters({ filters, total }: { filters: RoomFilters; total
 
           <MoreFilters view={view} apply={apply} />
 
-          {hasFilters ? (
-            <button
-              type="button"
-              onClick={() => apply(Object.fromEntries(filterParams.map((param) => [param, undefined])), { location: undefined, ...clearedRefinements })}
-              aria-label="Limpar filtros"
-              className={`hidden min-h-11 shrink-0 items-center gap-1.5 rounded-xl px-2.5 text-sm font-semibold text-(--text-secondary) transition-colors hover:bg-(--text-primary)/5 hover:text-(--text-primary) md:inline-flex ${focusClassName}`}
-            >
-              <LuX aria-hidden="true" size={16} />
-              Limpar
-            </button>
-          ) : null}
+          <button
+            type="button"
+            disabled={!hasFilters}
+            onClick={() => apply({ location: undefined, ...clearedRefinements })}
+            aria-label="Limpar filtros"
+            className={`hidden min-h-11 shrink-0 items-center gap-1.5 rounded-xl px-2.5 text-sm font-semibold text-(--text-secondary) transition-colors hover:bg-(--text-primary)/5 hover:text-(--text-primary) md:inline-flex ${hasFilters ? "" : "invisible"} ${focusClassName}`}
+          >
+            <LuX aria-hidden="true" size={16} />
+            Limpar
+          </button>
 
           <button
             type="button"
             aria-haspopup="dialog"
             onClick={() => setSheetOpen(true)}
-            className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border px-3.5 text-sm font-semibold transition-colors sm:px-4 md:hidden ${refinementCount > 0 ? "border-(--primary) bg-(--primary-soft) text-(--primary-text)" : "border-(--border) text-(--text-primary) hover:border-(--text-secondary)"} ${focusClassName}`}
+            className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border px-3.5 text-sm font-semibold transition-colors sm:px-4 md:hidden ${refinementCount > 0 ? activeTriggerClassName : idleTriggerClassName} ${focusClassName}`}
           >
             <LuSlidersHorizontal aria-hidden="true" size={18} />
             <span className="sr-only sm:not-sr-only">Filtros</span>
@@ -385,7 +363,7 @@ export function ListingFilters({ filters, total }: { filters: RoomFilters; total
                 {refinementCount > 0 ? (
                   <button
                     type="button"
-                    onClick={() => apply(refinementParams, clearedRefinements)}
+                    onClick={() => apply(clearedRefinements)}
                     className={`min-h-12 rounded-xl px-3 text-sm font-semibold text-(--text-secondary) underline underline-offset-2 hover:text-(--text-primary) ${focusClassName}`}
                   >
                     Limpar

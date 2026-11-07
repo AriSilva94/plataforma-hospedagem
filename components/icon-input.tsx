@@ -3,7 +3,12 @@ import type { IconType } from "react-icons";
 
 export const fieldLabelClassName = "mb-2 block text-sm font-semibold text-(--text-secondary)";
 
-export function IconInput({ icon: Icon, compact = false, ...props }: Omit<ComponentProps<"input">, "className"> & { icon: IconType; compact?: boolean }) {
+export function IconInput({
+  icon: Icon,
+  compact = false,
+  trailingSpace = false,
+  ...props
+}: Omit<ComponentProps<"input">, "className"> & { icon: IconType; compact?: boolean; trailingSpace?: boolean }) {
   return (
     <div className="group relative">
       <Icon
@@ -13,7 +18,7 @@ export function IconInput({ icon: Icon, compact = false, ...props }: Omit<Compon
       />
       <input
         {...props}
-        className={`w-full rounded-xl border border-(--border) bg-(--background) ${compact ? "py-2.25" : "py-3"} pr-4 pl-11 text-(--text-primary) outline-hidden transition-colors placeholder:text-(--text-secondary) hover:border-(--text-secondary) focus:border-(--primary) focus-visible:ring-2 focus-visible:ring-(--focus-ring) disabled:cursor-not-allowed disabled:border-(--border) disabled:bg-(--surface) disabled:text-(--text-secondary) aria-invalid:border-(--error) aria-invalid:focus:border-(--error) aria-invalid:focus-visible:ring-(--error)`}
+        className={`w-full rounded-xl border border-(--border) bg-(--background) ${compact ? "py-2.25" : "py-3"} ${trailingSpace ? "pr-11" : "pr-4"} pl-11 text-(--text-primary) outline-hidden transition-colors placeholder:text-(--text-secondary) hover:border-(--text-secondary) focus:border-(--primary) focus-visible:ring-2 focus-visible:ring-(--focus-ring) disabled:cursor-not-allowed disabled:border-(--border) disabled:bg-(--surface) disabled:text-(--text-secondary) aria-invalid:border-(--error) aria-invalid:focus:border-(--error) aria-invalid:focus-visible:ring-(--error)`}
       />
     </div>
   );

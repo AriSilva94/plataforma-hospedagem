@@ -7,19 +7,23 @@ import { RoomListing } from "@/components/room-listing";
 import { SiteHeader } from "@/components/site-header";
 import { getCurrentUser } from "@/lib/current-user";
 import { listingLocation } from "@/lib/home-search";
-import { getRoomListings } from "@/lib/room-listings";
+import { getRoomListings, resolveCity } from "@/lib/room-listings";
 import { parseRoomFilters, roomFiltersQuery } from "@/lib/room-filters";
 
 export async function generateMetadata({ searchParams }: PageProps<"/anuncios">): Promise<Metadata> {
   const { cidade, uf } = await searchParams;
-  const location = listingLocation(cidade, uf);
+  const requested = listingLocation(cidade, uf);
+  const location = requested ? await resolveCity(requested.city, requested.state) : null;
   return { title: location ? `Quartos em ${location.city} – ${location.state} | DOMUS X` : "Anúncios | DOMUS X" };
 }
 
 export default async function AnnouncementsPage({ searchParams }: PageProps<"/anuncios">) {
   const [{ user }, params] = await Promise.all([getCurrentUser(), searchParams]);
-  const filters = parseRoomFilters(params);
-  const { location } = filters;
+  const requestedFilters = parseRoomFilters(params);
+  const requested = requestedFilters.location;
+  const location = requested ? await resolveCity(requested.city, requested.state) : null;
+  const cityNotFound = Boolean(requested) && !location;
+  const filters = { ...requestedFilters, location: location ?? undefined };
   const filterQuery = roomFiltersQuery(filters);
   const { listing, featuredListing, favoriteRoomIds } = await getRoomListings(Boolean(user), filterQuery);
 
@@ -40,12 +44,18 @@ export default async function AnnouncementsPage({ searchParams }: PageProps<"/an
 
         <ListingFilters filters={filters} total={listing ? total : undefined} />
 
+        {cityNotFound ? (
+          <p role="status" className="mt-4 rounded-xl border border-(--warning)/38 bg-(--warning-soft) px-4 py-3 text-sm font-semibold text-(--warning)">
+            Não encontramos essa cidade. Mostrando todos os anúncios.
+          </p>
+        ) : null}
+
         <div data-room-results className="grid">
           <div data-room-content className="col-start-1 row-start-1 min-w-0">
             {filterQuery && listing && total === 0 ? (
               <div className="mx-auto mt-10 flex max-w-xl flex-col items-center gap-3 rounded-2xl border border-dashed border-(--border) p-6 text-center">
                 <p className="text-sm text-(--text-secondary)">
-                  {filterQuery === roomFiltersQuery({ location, types: [] }) ? `Nenhum quarto disponível em ${locationLabel} ainda.` : "Nenhum quarto encontrado com esses filtros."}
+                  {filterQuery === roomFiltersQuery({ location: filters.location, types: [] }) ? `Nenhum quarto disponível em ${locationLabel} ainda.` : "Nenhum quarto encontrado com esses filtros."}
                 </p>
                 <Link
                   href="/anuncios"

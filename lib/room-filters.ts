@@ -8,20 +8,19 @@ export type RoomFilters = {
   audience?: GenderIdentity;
 };
 
-export const propertyTypeSlugs: Record<PropertyType, string> = {
+const propertyTypeSlugs: Record<PropertyType, string> = {
   HOUSE: "casa",
   APARTMENT: "apartamento",
   MOTEL: "motel",
 };
 
-export const audienceSlugs: Record<GenderIdentity, string> = {
+const audienceSlugs: Record<GenderIdentity, string> = {
   MAN: "homem",
   WOMAN: "mulher",
   TRANS_WOMAN: "mulher-trans",
   TRANS_MAN: "homem-trans",
 };
 
-export const maxFilterPrice = 100_000;
 export const priceRangeMax = 2_000;
 export const priceRangeStep = 10;
 
@@ -41,7 +40,22 @@ function fromSlug<T extends string>(slugs: Record<T, string>, slug: string) {
 
 function price(value: unknown) {
   const parsed = typeof value === "string" && /^\d+$/.test(value) ? Number(value) : NaN;
-  return parsed <= maxFilterPrice ? parsed : undefined;
+  return parsed >= priceRangeStep && parsed < priceRangeMax ? parsed : undefined;
+}
+
+const filterSearchKeys = ["cidade", "uf", "tipo", "preco_max", "publico"];
+
+export function filtersSearch(current: string, { location, types, maxPrice, audience }: RoomFilters) {
+  const params = new URLSearchParams(current);
+  for (const key of filterSearchKeys) params.delete(key);
+  if (location) {
+    params.set("cidade", location.city);
+    params.set("uf", location.state);
+  }
+  if (types.length) params.set("tipo", types.map((type) => propertyTypeSlugs[type]).join(","));
+  if (maxPrice !== undefined) params.set("preco_max", String(maxPrice));
+  if (audience) params.set("publico", audienceSlugs[audience]);
+  return params.toString();
 }
 
 export function parseRoomFilters(params: Record<string, string | string[] | undefined>): RoomFilters {
