@@ -80,3 +80,17 @@ test("home não gera rolagem horizontal no mobile", async ({ page }) => {
   await expect(page.getByRole("link", { name: "Entrar" }).first()).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
+
+test("rodapé leva às políticas de privacidade e de cookies e ao site do desenvolvedor", async ({ page }) => {
+  await page.goto("/");
+  const footer = page.getByRole("contentinfo");
+
+  await expect(footer.getByRole("link", { name: "AriSilva.tech" })).toHaveAttribute("href", "https://arisilva.tech/pt-br");
+  await expect(footer.getByRole("link", { name: "AriSilva.tech" })).toHaveAttribute("target", "_blank");
+
+  await footer.getByRole("link", { name: "Política de Privacidade" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Política de Privacidade");
+
+  await page.getByRole("contentinfo").getByRole("link", { name: "Cookies" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Política de Cookies");
+});
