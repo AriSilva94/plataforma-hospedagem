@@ -54,6 +54,9 @@ export function CitySearchInput({
   placeholder,
   invalid,
   describedBy,
+  defaultValue,
+  required = true,
+  compact = false,
   ref,
 }: {
   id: string;
@@ -62,12 +65,15 @@ export function CitySearchInput({
   placeholder: string;
   invalid?: boolean;
   describedBy?: string;
+  defaultValue?: CityLocation;
+  required?: boolean;
+  compact?: boolean;
   ref?: Ref<HTMLInputElement>;
 }) {
   const { anchorRef, isOpen, open, close, rootProps, panelProps } = useFieldPopover<HTMLInputElement>();
   const listRef = useRef<HTMLUListElement>(null);
-  const [text, setText] = useState("");
-  const [selectedText, setSelectedText] = useState<string>();
+  const [text, setText] = useState(defaultValue ? cityLabel(defaultValue) : "");
+  const [selectedText, setSelectedText] = useState(defaultValue ? cityLabel(defaultValue) : undefined);
   const [activeIndex, setActiveIndex] = useState(0);
   const term = selectedText === text ? "" : text.trim();
   const { shownTerm, cities, loading, failed } = useCitySuggestions(term);
@@ -122,13 +128,14 @@ export function CitySearchInput({
         }}
         id={id}
         icon={LuMapPin}
+        compact={compact}
         type="text"
         role="combobox"
         aria-autocomplete="list"
         aria-expanded={showPanel}
         aria-controls={listId}
         aria-activedescendant={activeCity ? `${id}-opcao-${activeIndex}` : undefined}
-        aria-required="true"
+        aria-required={required ? "true" : undefined}
         aria-invalid={invalid ? "true" : undefined}
         aria-describedby={describedBy}
         autoComplete="off"
