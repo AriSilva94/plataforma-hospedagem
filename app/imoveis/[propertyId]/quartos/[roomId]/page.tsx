@@ -28,6 +28,7 @@ import {
   roomAmenityIcons,
   sharedAreaTypeIcons,
 } from "@/lib/amenity-icons";
+import { roomAvailabilitySchema } from "@/lib/availability";
 import { getCurrentUser } from "@/lib/current-user";
 import {
   bathroomTypeLabels,
@@ -94,9 +95,10 @@ export default async function PublicRoomPage({
   params,
 }: PageProps<"/imoveis/[propertyId]/quartos/[roomId]">) {
   const { propertyId, roomId } = await params;
-  const [{ user }, result] = await Promise.all([
+  const [{ user }, result, availabilityResult] = await Promise.all([
     getCurrentUser(),
     getApiData(`/properties/${propertyId}`, publicPropertyDetailSchema),
+    getApiData(`/rooms/${roomId}/availability`, roomAvailabilitySchema),
   ]);
 
   if (result.status !== "ok") {
@@ -342,7 +344,14 @@ export default async function PublicRoomPage({
                 </div>
 
                 <div className="mt-4">
-                  <StayPicker capacity={room.capacity} />
+                  <StayPicker
+                    capacity={room.capacity}
+                    availability={
+                      availabilityResult.status === "ok"
+                        ? availabilityResult.data
+                        : undefined
+                    }
+                  />
                 </div>
               </div>
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { LuChevronLeft, LuChevronRight, LuMinus, LuPlus, LuX } from "react-icons/lu";
 import { useFieldPopover } from "@/components/use-field-popover";
+import { isBlockedDay, isOutsideWindow, parseIsoDate, type RoomAvailability } from "@/lib/availability";
 
 const dayInMs = 86_400_000;
 const weekdays = ["D", "S", "T", "Q", "Q", "S", "S"];
@@ -30,16 +31,16 @@ function addMonths(month: Date, offset: number) {
   return new Date(month.getFullYear(), month.getMonth() + offset, 1);
 }
 
-function MonthGrid({
+export function MonthGrid({
   month,
-  today,
+  isDisabled,
   checkIn,
   rangeEnd,
   onSelect,
   onHover,
 }: {
   month: Date;
-  today: Date;
+  isDisabled: (day: Date) => boolean;
   checkIn?: Date;
   rangeEnd?: Date;
   onSelect: (day: Date) => void;
@@ -80,7 +81,7 @@ function MonthGrid({
             >
               <button
                 type="button"
-                disabled={day < today}
+                disabled={isDisabled(day)}
                 data-selected={selected}
                 aria-pressed={selected}
                 aria-label={longDateFormatter.format(day)}
@@ -99,10 +100,20 @@ function MonthGrid({
   );
 }
 
-export function StayPicker({ capacity }: { capacity: number }) {
+function firstBlockedAfter(checkIn: Date, availability: RoomAvailability) {
+  const windowEnd = parseIsoDate(availability.windowEnd);
+  const day = new Date(checkIn);
+  do {
+    day.setDate(day.getDate() + 1);
+  } while (day <= windowEnd && !isBlockedDay(day, availability));
+  return day;
+}
+
+export function StayPicker({ capacity, availability }: { capacity: number; availability?: RoomAvailability }) {
   const { anchorRef, isOpen, open, close, rootProps, panelProps } = useFieldPopover<HTMLButtonElement>();
-  const [today, setToday] = useState(startOfToday);
-  const [visibleMonth, setVisibleMonth] = useState(() => startOfMonth(startOfToday()));
+  const [clientToday, setClientToday] = useState(startOfToday);
+  const today = availability ? parseIsoDate(availability.today) : clientToday;
+  const [visibleMonth, setVisibleMonth] = useState(() => startOfMonth(today));
   const [checkIn, setCheckIn] = useState<Date>();
   const [checkOut, setCheckOut] = useState<Date>();
   const [hovered, setHovered] = useState<Date>();
@@ -112,11 +123,20 @@ export function StayPicker({ capacity }: { capacity: number }) {
   const rangeEnd = checkOut ?? previewEnd;
   const nights = checkIn && checkOut ? Math.round((checkOut.getTime() - checkIn.getTime()) / dayInMs) : 0;
   const choosingCheckOut = isOpen && Boolean(checkIn) && !checkOut;
+  const lastMonth = availability ? startOfMonth(parseIsoDate(availability.windowEnd)) : undefined;
+
+  function isDayDisabled(day: Date) {
+    if (day < today) return true;
+    if (!availability) return false;
+    if (isOutsideWindow(day, availability) || isBlockedDay(day, availability)) return true;
+    if (!checkIn || checkOut || day <= checkIn) return false;
+    return day > firstBlockedAfter(checkIn, availability);
+  }
 
   function openCalendar() {
     const currentDay = startOfToday();
-    setToday(currentDay);
-    setVisibleMonth(startOfMonth(checkIn ?? currentDay));
+    setClientToday(currentDay);
+    setVisibleMonth(startOfMonth(checkIn ?? (availability ? today : currentDay)));
     open();
   }
 
@@ -201,13 +221,14 @@ export function StayPicker({ capacity }: { capacity: number }) {
                     <button
                       type="button"
                       aria-label="Próximo mês"
+                      disabled={lastMonth !== undefined && visibleMonth >= lastMonth}
                       onClick={() => setVisibleMonth(addMonths(visibleMonth, 1))}
                       className={`${navigationButtonClassName} ${index === 0 ? "md:invisible" : ""}`}
                     >
                       <LuChevronRight aria-hidden="true" size={18} />
                     </button>
                   </div>
-                  <MonthGrid key={month.getTime()} month={month} today={today} checkIn={checkIn} rangeEnd={rangeEnd} onSelect={selectDay} onHover={setHovered} />
+                  <MonthGrid key={month.getTime()} month={month} isDisabled={isDayDisabled} checkIn={checkIn} rangeEnd={rangeEnd} onSelect={selectDay} onHover={setHovered} />
                 </div>
               ))}
             </div>
