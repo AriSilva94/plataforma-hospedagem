@@ -46,3 +46,8 @@ const dayLabelFormatter = new Intl.DateTimeFormat("pt-BR", { day: "numeric", mon
 export function dayButton(page: Page, date: Date) {
   return page.getByRole("button", { name: dayLabelFormatter.format(date), exact: true });
 }
+
+export function ownerDayButton(page: Page, date: Date) {
+  const label = dayLabelFormatter.format(date).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return page.getByRole("button", { name: new RegExp(`^${label}, (bloqueado|livre)$`) });
+}
