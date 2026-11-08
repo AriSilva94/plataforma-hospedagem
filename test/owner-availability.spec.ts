@@ -78,6 +78,18 @@ test.describe("disponibilidade do dono", () => {
     }
   });
 
+  test("arrastar para dias fora do período não os bloqueia", async ({ page }) => {
+    test.skip(parseIsoDate(today).getDate() === 1, "dia anterior a hoje não está no mesmo mês");
+    const first = ownerDayButton(page, parseIsoDate(today));
+    const past = ownerDayButton(page, addDays(today, -1));
+    await first.hover();
+    await page.mouse.down();
+    await past.hover();
+    await page.mouse.up();
+    await expect(past).toHaveAttribute("aria-pressed", "false");
+    await expect(page.getByText("1 alteração não salva", { exact: true })).toBeVisible();
+  });
+
   test("chip de dia da semana bloqueia todas as ocorrências e ignora toque", async ({ page }) => {
     const sunday = addDays(today, (7 - parseIsoDate(today).getDay()) % 7);
     await page.getByRole("button", { name: "Dom", exact: true }).click();

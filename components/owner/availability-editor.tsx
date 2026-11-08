@@ -91,7 +91,10 @@ export function AvailabilityEditor({ roomId, initial }: { roomId: string; initia
     setHint(`${weekdayNames[day.getDay()]} estão bloqueados toda semana. Desmarque abaixo para liberar.`);
   }
 
+  const isInWindow = (day: Date) => day >= today && day <= windowEnd;
+
   function startDrag(day: Date) {
+    if (!isInWindow(day)) return;
     clearFeedback();
     if (draft.weekdays.has(day.getDay())) {
       showWeeklyHint(day);
@@ -108,10 +111,11 @@ export function AvailabilityEditor({ roomId, initial }: { roomId: string; initia
 
   function extendDrag(day: Date) {
     const current = drag.current;
-    if (!current) return;
+    if (!current || !isInWindow(day)) return;
     const dates = new Set(current.base);
     for (const iso of datesBetween(current.anchor, toIsoDate(day))) {
-      if (draft.weekdays.has(parseIsoDate(iso).getDay())) continue;
+      const date = parseIsoDate(iso);
+      if (!isInWindow(date) || draft.weekdays.has(date.getDay())) continue;
       if (current.blocked) dates.add(iso);
       else dates.delete(iso);
     }
