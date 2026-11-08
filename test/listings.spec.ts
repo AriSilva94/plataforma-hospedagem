@@ -205,4 +205,17 @@ test.describe("filtro entrada", () => {
     await expect(page.getByRole("heading", { name: "Todos os anúncios" })).toBeVisible();
     await expect(card).toHaveCount(0);
   });
+
+  test("entrada aparece no subtítulo e é removida por Limpar filtros", async ({ page }) => {
+    const date = addDays(today, 8);
+    const [year, month, day] = date.split("-");
+    await page.goto(`/anuncios?${cityQuery}&entrada=${date}`);
+    await expect(page.getByText(`Entrada em ${day}/${month}/${year}.`)).toBeVisible();
+
+    const clear = page.getByRole("button", { name: "Limpar filtros" });
+    await expect(clear).toBeEnabled();
+    await clear.click();
+    await expect(page).toHaveURL(/\/anuncios$/);
+    await expect(page.getByText("Entrada em")).toHaveCount(0);
+  });
 });

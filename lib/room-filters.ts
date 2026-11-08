@@ -31,8 +31,8 @@ export function formatPrice(value: number) {
   return currency.format(value);
 }
 
-export function activeFilterCount({ types, maxPrice, audience }: RoomFilters) {
-  return [types.length > 0, maxPrice !== undefined, audience !== undefined].filter(Boolean).length;
+export function activeFilterCount({ types, maxPrice, audience, checkIn }: RoomFilters) {
+  return [types.length > 0, maxPrice !== undefined, audience !== undefined, checkIn !== undefined].filter(Boolean).length;
 }
 
 function fromSlug<T extends string>(slugs: Record<T, string>, slug: string) {
@@ -46,7 +46,7 @@ function price(value: unknown) {
 
 const filterSearchKeys = ["cidade", "uf", "tipo", "preco_max", "publico"];
 
-export function filtersSearch(current: string, { location, types, maxPrice, audience }: RoomFilters) {
+export function filtersSearch(current: string, { location, types, maxPrice, audience, checkIn }: RoomFilters) {
   const params = new URLSearchParams(current);
   for (const key of filterSearchKeys) params.delete(key);
   if (location) {
@@ -56,6 +56,8 @@ export function filtersSearch(current: string, { location, types, maxPrice, audi
   if (types.length) params.set("tipo", types.map((type) => propertyTypeSlugs[type]).join(","));
   if (maxPrice !== undefined) params.set("preco_max", String(maxPrice));
   if (audience) params.set("publico", audienceSlugs[audience]);
+  if (checkIn) params.set("entrada", checkIn);
+  else params.delete("entrada");
   return params.toString();
 }
 

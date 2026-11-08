@@ -29,6 +29,7 @@ export default async function AnnouncementsPage({ searchParams }: PageProps<"/an
 
   const featuredRooms = featuredListing?.items ?? [];
   const total = (listing?.total ?? 0) + (featuredListing?.total ?? 0);
+  const checkInLabel = filters.checkIn?.split("-").reverse().join("/");
   const locationLabel = location ? `${location.city} – ${location.state}` : undefined;
 
   return (
@@ -38,7 +39,7 @@ export default async function AnnouncementsPage({ searchParams }: PageProps<"/an
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-(--text-primary)">{locationLabel ? `Quartos em ${locationLabel}` : "Anúncios"}</h1>
           {total > 0 ? (
-            <p className="mt-1 text-sm text-(--text-secondary)">{total === 1 ? "1 quarto disponível." : `${total} quartos disponíveis.`}</p>
+            <p className="mt-1 text-sm text-(--text-secondary)">{total === 1 ? "1 quarto disponível." : `${total} quartos disponíveis.`}{checkInLabel ? ` Entrada em ${checkInLabel}.` : ""}</p>
           ) : null}
         </div>
 

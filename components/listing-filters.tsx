@@ -39,7 +39,7 @@ const typeChipClassNames: Record<PropertyType, { chip: string; icon: string }> =
 
 const propertyTypes = Object.keys(propertyTypeLabels) as PropertyType[];
 const audiences = Object.keys(genderIdentityLabels) as GenderIdentity[];
-const clearedRefinements: Partial<RoomFilters> = { types: [], maxPrice: undefined, audience: undefined };
+const clearedRefinements: Partial<RoomFilters> = { types: [], maxPrice: undefined, audience: undefined, checkIn: undefined };
 
 type Apply = (next: Partial<RoomFilters>) => void;
 
