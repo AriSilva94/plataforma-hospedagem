@@ -1,4 +1,4 @@
-import { expect, request, type APIRequestContext } from "@playwright/test";
+import { expect, request, type APIRequestContext, type Page } from "@playwright/test";
 
 export const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3030";
 
@@ -34,4 +34,15 @@ export async function getPublicAvailability(roomId: string): Promise<{ today: st
   const availability = await (await api.get(`/rooms/${roomId}/availability`)).json();
   await api.dispose();
   return availability;
+}
+
+export async function getOwnerAvailability(api: APIRequestContext, roomId: string): Promise<AvailabilityBody> {
+  const { blockedWeekdays, blockedDates } = await (await api.get(`/owner/rooms/${roomId}/availability`)).json();
+  return { blockedWeekdays, blockedDates };
+}
+
+const dayLabelFormatter = new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "short", year: "numeric" });
+
+export function dayButton(page: Page, date: Date) {
+  return page.getByRole("button", { name: dayLabelFormatter.format(date), exact: true });
 }
