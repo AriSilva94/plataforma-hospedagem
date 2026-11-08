@@ -1,4 +1,20 @@
-import { expect, test } from "@playwright/test";
+import { expect, request, test } from "@playwright/test";
+import { parseIsoDate, toIsoDate } from "@/lib/availability";
+import {
+  apiUrl,
+  findSeedRoom,
+  getOwnerAvailability,
+  getPublicAvailability,
+  loginAsOwner,
+  replaceAvailability,
+  type AvailabilityBody,
+} from "./support/availability-api";
+
+function addDays(isoDate: string, offset: number) {
+  const date = parseIsoDate(isoDate);
+  date.setDate(date.getDate() + offset);
+  return toIsoDate(date);
+}
 
 test("filtro de cidade dos anúncios aplica, mantém outros parâmetros e limpa", async ({ page }) => {
   await page.route("**/locations/cities?*", (route) => route.fulfill({ json: [{ city: "Curitiba", state: "PR" }] }));
@@ -148,4 +164,45 @@ test("cidade da URL é validada: nome oficial no título e aviso para cidade ine
   await expect(page.getByText("Não encontramos essa cidade. Mostrando todos os anúncios.")).toBeVisible();
   await expect(page.getByText("Ligue 99999-0000")).toHaveCount(0);
   await expect(page.getByText("Não foi possível carregar")).toHaveCount(0);
+});
+
+test.describe("filtro entrada", () => {
+  let room: Awaited<ReturnType<typeof findSeedRoom>>;
+  let owner: Awaited<ReturnType<typeof loginAsOwner>>;
+  let roomId: string;
+  let today: string;
+  let cityQuery: string;
+  let previous: AvailabilityBody;
+
+  test.beforeAll(async () => {
+    room = await findSeedRoom();
+    owner = await loginAsOwner(room.ownerEmail);
+
+    const api = await request.newContext({ baseURL: apiUrl });
+    const { items } = (await (await api.get("/rooms?limit=1")).json()) as { items: { id: string; property: { city: string; state: string } }[] };
+    await api.dispose();
+    roomId = items[0].id;
+    today = (await getPublicAvailability(roomId)).today;
+    previous = await getOwnerAvailability(owner, roomId);
+    cityQuery = new URLSearchParams({ cidade: items[0].property.city, uf: items[0].property.state }).toString();
+
+    await replaceAvailability(owner, roomId, { blockedWeekdays: [], blockedDates: [addDays(today, 9)] });
+  });
+
+  test.afterAll(async () => {
+    await replaceAvailability(owner, roomId, previous);
+    await owner.dispose();
+  });
+
+  test("entrada na URL filtra quartos bloqueados naquela data", async ({ page }) => {
+    const card = page.locator(`a[href="/imoveis/${room.propertyId}/quartos/${roomId}"]`);
+
+    await page.goto(`/anuncios?${cityQuery}&entrada=${addDays(today, 8)}`);
+    await expect(page.getByRole("heading", { name: "Todos os anúncios" })).toBeVisible();
+    await expect(card.first()).toBeVisible();
+
+    await page.goto(`/anuncios?${cityQuery}&entrada=${addDays(today, 9)}`);
+    await expect(page.getByRole("heading", { name: "Todos os anúncios" })).toBeVisible();
+    await expect(card).toHaveCount(0);
+  });
 });

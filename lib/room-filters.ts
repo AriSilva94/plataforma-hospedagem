@@ -6,6 +6,7 @@ export type RoomFilters = {
   types: PropertyType[];
   maxPrice?: number;
   audience?: GenderIdentity;
+  checkIn?: string;
 };
 
 const propertyTypeSlugs: Record<PropertyType, string> = {
@@ -66,10 +67,11 @@ export function parseRoomFilters(params: Record<string, string | string[] | unde
     types: [...new Set(types)],
     maxPrice,
     audience: typeof params.publico === "string" ? fromSlug(audienceSlugs, params.publico) : undefined,
+    checkIn: typeof params.entrada === "string" && /^\d{4}-\d{2}-\d{2}$/.test(params.entrada) ? params.entrada : undefined,
   };
 }
 
-export function roomFiltersQuery({ location, types, maxPrice, audience }: RoomFilters) {
+export function roomFiltersQuery({ location, types, maxPrice, audience, checkIn }: RoomFilters) {
   const params = new URLSearchParams();
   if (location) {
     params.set("city", location.city);
@@ -78,6 +80,7 @@ export function roomFiltersQuery({ location, types, maxPrice, audience }: RoomFi
   if (types.length) params.set("types", types.join(","));
   if (maxPrice !== undefined) params.set("maxPriceCents", String(maxPrice * 100));
   if (audience) params.set("audience", audience);
+  if (checkIn) params.set("checkIn", checkIn);
   const query = params.toString();
   return query ? `&${query}` : "";
 }
