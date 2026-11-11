@@ -69,7 +69,7 @@ export function RoomAvailabilityToggle({
 
   return (
     <div>
-      <Switch checked={available} disabled={pending} onChange={requestChange}>
+      <Switch checked={available} disabled={pending} onChange={requestChange} className="@2xl:min-h-9 @2xl:gap-3">
         <span className="sr-only">Quarto {roomTitle}: </span>
         <span className="text-sm font-semibold text-(--text-primary)">Reservável</span>
         <span className="sr-only">. </span>

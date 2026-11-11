@@ -29,7 +29,3 @@ export function listingLocation(cidade: unknown, uf: unknown): CityLocation | un
   const state = uf.trim().toUpperCase();
   return city && brazilianStates.some((item) => item === state) ? { city, state } : undefined;
 }
-
-export function locationQuery(location: CityLocation | undefined) {
-  return location ? `&${new URLSearchParams({ city: location.city, state: location.state }).toString()}` : "";
-}

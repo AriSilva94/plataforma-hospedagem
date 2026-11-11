@@ -1,4 +1,5 @@
-import { LuBedDouble, LuImages } from "react-icons/lu";
+import { LuBedDouble, LuCalendarDays, LuImages } from "react-icons/lu";
+import { AvailabilityEditor } from "@/components/owner/availability-editor";
 import { MediaGallery } from "@/components/owner/media-gallery";
 import { OwnerDataNotice } from "@/components/owner/owner-notice";
 import { OwnerPage } from "@/components/owner/owner-page";
@@ -6,6 +7,7 @@ import { RoomCompletenessHints, RoomCompletenessSummary } from "@/components/own
 import { RoomForm } from "@/components/owner/room-form";
 import { RoomStatusStrip } from "@/components/owner/room-status-strip";
 import { SectionTabs } from "@/components/owner/section-tabs";
+import { roomAvailabilitySchema } from "@/lib/availability";
 import { roomCriterionSection } from "@/lib/completeness";
 import { getApiData } from "@/lib/server-api";
 import { bathroomTypeLabels, formatCents, roomDetailSchema } from "@/lib/properties";
@@ -13,6 +15,7 @@ import { bathroomTypeLabels, formatCents, roomDetailSchema } from "@/lib/propert
 const sections = [
   { id: "dados", label: "Dados e preço", icon: LuBedDouble },
   { id: "fotos", label: "Fotos", icon: LuImages },
+  { id: "disponibilidade", label: "Disponibilidade", icon: LuCalendarDays },
 ] as const;
 
 export default async function EditRoomPage({ params, searchParams }: PageProps<"/meus-imoveis/[propertyId]/quartos/[roomId]">) {
@@ -27,6 +30,7 @@ export default async function EditRoomPage({ params, searchParams }: PageProps<"
     return <OwnerDataNotice status={result.status} retryHref={`/meus-imoveis/${propertyId}/quartos/${roomId}?secao=${section}`} />;
   }
 
+  const availability = section === "disponibilidade" ? await getApiData(`/owner/rooms/${roomId}/availability`, roomAvailabilitySchema) : undefined;
   const room = result.data;
   const summary = [
     room.capacity === 1 ? "1 pessoa" : `${room.capacity} pessoas`,
@@ -34,7 +38,7 @@ export default async function EditRoomPage({ params, searchParams }: PageProps<"
     `Banheiro ${bathroomTypeLabels[room.bathroomType].toLowerCase()}`,
   ].join(" · ");
   const showCompleteness = room.status !== "INACTIVE";
-  const pendingSections = new Set(showCompleteness ? room.completenessMissing.map(roomCriterionSection) : []);
+  const pendingSections = new Set<string | undefined>(showCompleteness ? room.completenessMissing.map(roomCriterionSection) : []);
 
   return (
     <OwnerPage
@@ -66,6 +70,10 @@ export default async function EditRoomPage({ params, searchParams }: PageProps<"
       {section === "dados" ? <RoomForm propertyId={propertyId} room={room} /> : null}
       {section === "fotos" ? (
         <MediaGallery basePath={`/owner/rooms/${room.id}`} initialMedia={room.media} allowVideo={false} maxImages={20} />
+      ) : null}
+      {availability?.status === "ok" ? <AvailabilityEditor roomId={room.id} initial={availability.data} /> : null}
+      {availability && availability.status !== "ok" ? (
+        <OwnerDataNotice status={availability.status} retryHref={`/meus-imoveis/${propertyId}/quartos/${roomId}?secao=${section}`} />
       ) : null}
     </OwnerPage>
   );

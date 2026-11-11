@@ -4,19 +4,18 @@ import { useEffect, useRef, useState } from "react";
 import { FavoriteButton } from "@/components/favorite-button";
 import { RoomCard } from "@/components/room-card";
 import { apiFetch } from "@/lib/api";
-import { locationQuery, type CityLocation } from "@/lib/home-search";
 import { publicRoomPageSchema, roomListingPageSize, type PublicRoomPage } from "@/lib/properties";
 
 export function RoomListing({
   initial,
   favoriteRoomIds,
   signedIn,
-  location,
+  filterQuery = "",
 }: {
   initial: PublicRoomPage | null;
   favoriteRoomIds: string[];
   signedIn: boolean;
-  location?: CityLocation;
+  filterQuery?: string;
 }) {
   const [favorites] = useState(() => new Set(favoriteRoomIds));
   const [items, setItems] = useState(initial?.items ?? []);
@@ -34,7 +33,7 @@ export function RoomListing({
     setLoading(true);
     setError(undefined);
     try {
-      const response = await apiFetch(`/rooms?limit=${roomListingPageSize}&cursor=${encodeURIComponent(cursor)}${locationQuery(location)}`);
+      const response = await apiFetch(`/rooms?limit=${roomListingPageSize}&cursor=${encodeURIComponent(cursor)}${filterQuery}`);
       if (!response.ok) throw new Error();
       const next = publicRoomPageSchema.parse(await response.json());
       setItems((current) => [...current, ...next.items.filter((item) => !current.some((existing) => existing.id === item.id))]);

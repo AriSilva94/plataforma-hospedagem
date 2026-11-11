@@ -36,7 +36,7 @@ export function VisitorHome() {
             {steps.map(({ icon: Icon, title, text }, index) => (
               <li
                 key={title}
-                className={`flex h-[4.5rem] min-w-0 flex-1 flex-col items-center justify-center gap-1 bg-(--surface-accent) text-center lg:flex-row lg:justify-start lg:text-left pr-[calc(var(--arrow)+0.375rem)] pl-[calc(var(--arrow)+0.625rem)] max-lg:first:pl-3.5 lg:h-11 lg:gap-2.5 xl:h-14 ${stepShapes[index]}`}
+                className={`flex h-18 min-w-0 flex-1 flex-col items-center justify-center gap-1 bg-(--surface-accent) text-center lg:flex-row lg:justify-start lg:text-left pr-[calc(var(--arrow)+0.375rem)] pl-[calc(var(--arrow)+0.625rem)] max-lg:first:pl-3.5 lg:h-11 lg:gap-2.5 xl:h-14 ${stepShapes[index]}`}
               >
                 <span aria-hidden="true" className="flex size-6 shrink-0 items-center justify-center rounded-full bg-(--surface) text-(--primary-text) ring-1 ring-(--primary-border) lg:size-7 xl:size-9">
                   <Icon className="size-3.5 xl:size-4.5" />

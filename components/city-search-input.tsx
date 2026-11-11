@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent, type Ref } from "react";
-import { LuLoaderCircle, LuMapPin } from "react-icons/lu";
+import { LuLoaderCircle, LuMapPin, LuX } from "react-icons/lu";
 import { HighlightedLabel } from "@/components/combobox";
 import { IconInput } from "@/components/icon-input";
 import { useFieldPopover } from "@/components/use-field-popover";
@@ -54,6 +54,10 @@ export function CitySearchInput({
   placeholder,
   invalid,
   describedBy,
+  defaultValue,
+  required = true,
+  compact = false,
+  onClear,
   ref,
 }: {
   id: string;
@@ -62,12 +66,16 @@ export function CitySearchInput({
   placeholder: string;
   invalid?: boolean;
   describedBy?: string;
+  defaultValue?: CityLocation;
+  required?: boolean;
+  compact?: boolean;
+  onClear?: () => void;
   ref?: Ref<HTMLInputElement>;
 }) {
   const { anchorRef, isOpen, open, close, rootProps, panelProps } = useFieldPopover<HTMLInputElement>();
   const listRef = useRef<HTMLUListElement>(null);
-  const [text, setText] = useState("");
-  const [selectedText, setSelectedText] = useState<string>();
+  const [text, setText] = useState(defaultValue ? cityLabel(defaultValue) : "");
+  const [selectedText, setSelectedText] = useState(defaultValue ? cityLabel(defaultValue) : undefined);
   const [activeIndex, setActiveIndex] = useState(0);
   const term = selectedText === text ? "" : text.trim();
   const { shownTerm, cities, loading, failed } = useCitySuggestions(term);
@@ -122,13 +130,15 @@ export function CitySearchInput({
         }}
         id={id}
         icon={LuMapPin}
+        compact={compact}
+        trailingSpace={Boolean(onClear)}
         type="text"
         role="combobox"
         aria-autocomplete="list"
         aria-expanded={showPanel}
         aria-controls={listId}
         aria-activedescendant={activeCity ? `${id}-opcao-${activeIndex}` : undefined}
-        aria-required="true"
+        aria-required={required ? "true" : undefined}
         aria-invalid={invalid ? "true" : undefined}
         aria-describedby={describedBy}
         autoComplete="off"
@@ -153,8 +163,18 @@ export function CitySearchInput({
         <LuLoaderCircle
           aria-hidden="true"
           size={18}
-          className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 animate-spin text-(--text-secondary) motion-reduce:animate-none"
+          className={`pointer-events-none absolute top-1/2 ${onClear ? "right-11" : "right-4"} -translate-y-1/2 animate-spin text-(--text-secondary) motion-reduce:animate-none`}
         />
+      ) : null}
+      {onClear ? (
+        <button
+          type="button"
+          onClick={onClear}
+          aria-label="Limpar cidade"
+          className="absolute top-1/2 right-1.5 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-(--text-secondary) transition-colors hover:bg-(--text-primary)/5 hover:text-(--text-primary) focus-visible:outline-2 focus-visible:outline-(--focus-ring)"
+        >
+          <LuX aria-hidden="true" size={16} />
+        </button>
       ) : null}
 
       <div {...panelProps} data-state={showPanel ? "open" : "closed"} className="field-popover w-full overflow-hidden">
