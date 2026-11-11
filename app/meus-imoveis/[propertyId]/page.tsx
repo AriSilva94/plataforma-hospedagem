@@ -4,14 +4,16 @@ import type { ReactNode } from "react";
 import { LuArrowRight, LuChevronDown, LuCircleAlert, LuCircleCheck, LuEye, LuExternalLink, LuImage, LuPencil, LuPlus } from "react-icons/lu";
 import { OwnerDataNotice } from "@/components/owner/owner-notice";
 import { OwnerPage } from "@/components/owner/owner-page";
-import { PropertyStatusBadge, RoomVerification } from "@/components/owner/property-status-badge";
+import { PropertyStatusBadge, roomVerificationTones } from "@/components/owner/property-status-badge";
 import { StatusBadge } from "@/components/owner/status-badge";
 import { PropertyTypeTag } from "@/components/property-type-tag";
 import { PropertyStatusActions } from "@/components/owner/property-status-actions";
 import { RoomAvailabilityToggle } from "@/components/owner/room-availability-toggle";
 import { RoomPriceEditor } from "@/components/owner/room-price-editor";
+import { RoomWeekStrip } from "@/components/owner/room-week-strip";
 import { cardClassName, primaryButtonClassName, secondaryButtonClassName } from "@/components/owner/styles";
 import { getApiData } from "@/lib/server-api";
+import { roomAvailabilitySchema, type RoomAvailability } from "@/lib/availability";
 import { completenessHint, isRoomCriterion } from "@/lib/completeness";
 import { firstPendingStep, requirementLabels, setupStepHref } from "@/lib/setup-steps";
 import {
@@ -22,6 +24,7 @@ import {
   propertyDetailSchema,
   publishRequirements,
   propertyTypeLabels,
+  roomVerificationStatusLabels,
   sharedAreaTypeLabels,
   type PropertyDetail,
   type PropertyStatus,
@@ -81,82 +84,129 @@ function RoomRow({
   propertyId,
   propertyStatus,
   room,
+  availability,
   propertyType,
   warnBeforePause,
   focusAfterChangeId,
+  guestPreviewHref,
 }: {
   propertyId: string;
   propertyStatus: PropertyStatus;
   room: Room;
+  availability?: RoomAvailability;
   propertyType: PropertyType;
   warnBeforePause: boolean;
   focusAfterChangeId?: string;
+  guestPreviewHref?: string;
 }) {
   const complete = room.completenessScore >= 100;
   const missingInRoom = room.completenessMissing.find(isRoomCriterion);
   const nextStep = missingInRoom ? completenessHint(missingInRoom, propertyId, room.id).label : "pendências no imóvel";
   const roomHref = `/meus-imoveis/${propertyId}/quartos/${room.id}`;
+  const completenessLabel = complete ? "Anúncio completo" : `Anúncio ${room.completenessScore}% · ${nextStep}`;
   return (
-    <li className="flex flex-col gap-3 p-4 @2xl:flex-row @2xl:items-center @2xl:gap-6 @2xl:px-5">
-      <Link
-        href={roomHref}
-        className="group flex min-w-0 flex-1 items-center gap-4 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--focus-ring)"
-      >
-        <div
-          className={`relative size-20 shrink-0 overflow-hidden rounded-xl bg-(--surface-raised) ${room.status === "AVAILABLE" ? "" : "opacity-50 grayscale"}`}
+    <li className="flex flex-col @md:flex-row">
+      <div className="relative h-44 w-full shrink-0 @md:h-auto @md:min-h-44 @md:w-44 @2xl:w-60">
+        <Link
+          href={roomHref}
+          tabIndex={-1}
+          aria-hidden="true"
+          className="group absolute inset-0 block overflow-hidden bg-(--surface-raised)"
         >
-          {room.coverUrl ? (
-            <Image src={room.coverUrl} alt="" fill sizes="80px" className="object-cover" />
-          ) : (
-            <div className="flex size-full items-center justify-center text-(--text-secondary)">
-              <LuImage aria-hidden="true" size={22} />
-            </div>
-          )}
-        </div>
-        <div className="min-w-0">
-          <h3 className="min-w-0 wrap-break-word font-bold text-(--primary-text)">{room.title}</h3>
-          <p className="mt-1 text-sm text-(--text-secondary)">
-            {room.capacity === 1 ? "1 pessoa" : `${room.capacity} pessoas`} · Banheiro {bathroomTypeLabels[room.bathroomType].toLowerCase()}
-          </p>
-          <p className="mt-0.5 truncate text-[13px] text-(--text-secondary)">{room.acceptedAudiences.map((audience) => genderIdentityLabels[audience]).join(", ")}</p>
-          <p className={`mt-1.5 flex items-center gap-1.5 text-xs font-semibold ${complete ? "text-(--success)" : "text-(--warning)"}`}>
-            {complete ? <LuCircleCheck aria-hidden="true" size={14} /> : <LuCircleAlert aria-hidden="true" size={14} />}
-            {complete ? "Anúncio completo" : `Anúncio ${room.completenessScore}% · ${nextStep}`}
-          </p>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <RoomVerification status={room.verificationStatus} rejectedReason={room.verificationRejectedReason} />
+          <span className={`absolute inset-0 ${room.status === "AVAILABLE" ? "" : "opacity-50 grayscale"}`}>
+            {room.coverUrl ? (
+              <Image
+                src={room.coverUrl}
+                alt=""
+                fill
+                sizes="(min-width: 64rem) 240px, 100vw"
+                className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+              />
+            ) : (
+              <span className="flex size-full items-center justify-center text-(--text-secondary)">
+                <LuImage aria-hidden="true" size={26} />
+              </span>
+            )}
+          </span>
+          <span className="absolute inset-x-0 top-0 h-16 bg-linear-to-b from-black/60 to-transparent" />
+          <span className={`absolute top-2.5 left-2.5 flex flex-wrap gap-1.5 ${guestPreviewHref ? "right-12" : "right-2.5"}`}>
+            <StatusBadge tone={roomVerificationTones[room.verificationStatus]}>{roomVerificationStatusLabels[room.verificationStatus]}</StatusBadge>
             <PropertyTypeTag type={propertyType} />
-          </div>
+          </span>
+          <span className="absolute inset-x-0 bottom-0 flex items-center gap-1.5 bg-linear-to-t from-black/80 to-transparent px-3 pt-8 pb-2.5 text-xs font-semibold text-white">
+            <span className={complete ? "text-(--success)" : "text-(--warning)"}>
+              {complete ? <LuCircleCheck aria-hidden="true" size={14} /> : <LuCircleAlert aria-hidden="true" size={14} />}
+            </span>
+            {completenessLabel}
+          </span>
+        </Link>
+        {guestPreviewHref ? (
+          <Link
+            href={guestPreviewHref}
+            target="_blank"
+            title="Ver como o hóspede vê"
+            aria-label={`Ver ${room.title} como o hóspede vê (abre em nova aba)`}
+            className="absolute top-2 right-2 inline-flex size-9 items-center justify-center rounded-full bg-black/55 text-white transition-colors hover:bg-black/75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
+          >
+            <LuEye aria-hidden="true" size={16} />
+          </Link>
+        ) : null}
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-4 p-4 @2xl:flex-row @2xl:items-start @2xl:gap-6 @2xl:px-5">
+        <div className="flex min-w-0 flex-1 flex-col gap-3 @2xl:self-stretch">
+          <Link
+            href={roomHref}
+            className="group block min-w-0 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--focus-ring)"
+          >
+            <h3 className="min-w-0 wrap-break-word font-bold text-(--primary-text) underline-offset-4 group-hover:underline">{room.title}</h3>
+            <p className="mt-1 text-sm text-(--text-secondary)">
+              {room.capacity === 1 ? "1 pessoa" : `${room.capacity} pessoas`} · Banheiro {bathroomTypeLabels[room.bathroomType].toLowerCase()}
+            </p>
+            <p className="mt-0.5 truncate text-[13px] text-(--text-secondary)">
+              {room.acceptedAudiences.map((audience) => genderIdentityLabels[audience]).join(", ")}
+            </p>
+            <span className="sr-only">
+              {completenessLabel} · {roomVerificationStatusLabels[room.verificationStatus]} · {propertyTypeLabels[propertyType]}
+            </span>
+          </Link>
+          {room.verificationStatus === "REJECTED" && room.verificationRejectedReason ? (
+            <p className="text-[13px] text-(--text-secondary)">{room.verificationRejectedReason}</p>
+          ) : null}
+          {availability ? (
+            <div className="mt-auto">
+              <RoomWeekStrip href={`${roomHref}?secao=disponibilidade`} availability={availability} roomTitle={room.title} />
+            </div>
+          ) : null}
         </div>
-      </Link>
-      <div className="flex items-center justify-between gap-4 border-t border-(--border) pt-3 @2xl:justify-end @2xl:border-0 @2xl:pt-0">
-        {room.status === "INACTIVE" ? (
-          <p className="text-lg font-extrabold text-(--text-secondary)">
-            {formatCents(room.priceCents)} <span className="text-sm font-semibold">/ diária</span>
-          </p>
-        ) : (
-          <RoomPriceEditor roomId={room.id} roomTitle={room.title} priceCents={room.priceCents} />
-        )}
-        <div className="min-w-0 flex-1 @2xl:w-44 @2xl:flex-none">
+        <div className="flex items-center justify-between gap-4 border-t border-(--border) pt-3 @2xl:w-fit @2xl:shrink-0 @2xl:flex-col @2xl:items-stretch @2xl:gap-0 @2xl:border-0 @2xl:pt-0">
           {room.status === "INACTIVE" ? (
-            <Link
-              href={roomHref}
-              aria-label={`Abrir ${room.title} para reativar`}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg text-sm font-semibold text-(--primary-text) underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-(--focus-ring)"
-            >
-              Abrir para reativar
-              <LuArrowRight aria-hidden="true" size={14} />
-            </Link>
+            <p className="text-lg font-extrabold text-(--text-secondary)">
+              {formatCents(room.priceCents)} <span className="text-sm font-semibold">/ diária</span>
+            </p>
           ) : (
-            <RoomAvailabilityToggle
-              roomId={room.id}
-              roomTitle={room.title}
-              status={room.status}
-              propertyStatus={propertyStatus}
-              warnBeforePause={warnBeforePause}
-              focusAfterChangeId={focusAfterChangeId}
-            />
+            <RoomPriceEditor roomId={room.id} roomTitle={room.title} priceCents={room.priceCents} />
           )}
+          <div className="min-w-0 flex-1 @2xl:flex-none">
+            {room.status === "INACTIVE" ? (
+              <Link
+                href={roomHref}
+                aria-label={`Abrir ${room.title} para reativar`}
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-lg text-sm font-semibold text-(--primary-text) underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-(--focus-ring)"
+              >
+                Abrir para reativar
+                <LuArrowRight aria-hidden="true" size={14} />
+              </Link>
+            ) : (
+              <RoomAvailabilityToggle
+                roomId={room.id}
+                roomTitle={room.title}
+                status={room.status}
+                propertyStatus={propertyStatus}
+                warnBeforePause={warnBeforePause}
+                focusAfterChangeId={focusAfterChangeId}
+              />
+            )}
+          </div>
         </div>
       </div>
     </li>
@@ -181,6 +231,13 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
   const address = privateAddress(property);
   const listedRooms = property.rooms.filter((room) => room.status !== "INACTIVE");
   const archivedRooms = property.rooms.filter((room) => room.status === "INACTIVE");
+  const availabilityByRoom = new Map<string, RoomAvailability>();
+  await Promise.all(
+    listedRooms.map(async (room) => {
+      const roomAvailability = await getApiData(`/owner/rooms/${room.id}/availability`, roomAvailabilitySchema);
+      if (roomAvailability.status === "ok") availabilityByRoom.set(room.id, roomAvailability.data);
+    }),
+  );
   const availableCount = listedRooms.filter((room) => room.status === "AVAILABLE").length;
   const visible = property.status === "ACTIVE" && availableCount > 0;
   const warning = visibilityWarning(property, availableCount);
@@ -336,9 +393,11 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
                     propertyId={property.id}
                     propertyStatus={property.status}
                     room={room}
+                    availability={availabilityByRoom.get(room.id)}
                     propertyType={property.type}
                     warnBeforePause={warnBeforePause(room)}
                     focusAfterChangeId={roomFilter ? "rooms-heading" : undefined}
+                    guestPreviewHref={property.status === "ACTIVE" && room.status === "AVAILABLE" ? `/imoveis/${property.id}/quartos/${room.id}?previa=1` : undefined}
                   />
                 ))}
               </ul>
