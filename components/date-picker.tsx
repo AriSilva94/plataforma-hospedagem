@@ -281,7 +281,7 @@ export function DatePicker({
                 </span>
               ))}
             </div>
-            <div className="grid grid-cols-7 gap-y-0.5">
+            <div className="grid grid-cols-7 grid-rows-[repeat(6,2.5rem)] gap-y-0.5">
               {Array.from({ length: leadingBlanks }, (_, index) => (
                 <span key={index} />
               ))}
