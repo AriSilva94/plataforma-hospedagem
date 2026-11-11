@@ -12,10 +12,12 @@ export function RoomCard({
   room,
   action,
   unavailable = false,
+  href = `/imoveis/${room.property.id}/quartos/${room.id}`,
 }: {
   room: PublicRoomCard;
   action?: ReactNode;
   unavailable?: boolean;
+  href?: string;
 }) {
   const content = (
     <>
@@ -93,7 +95,7 @@ export function RoomCard({
         </div>
       ) : (
         <Link
-          href={`/imoveis/${room.property.id}/quartos/${room.id}`}
+          href={href}
           className="group flex h-full flex-col overflow-hidden rounded-2xl bg-(--surface) border border-(--border-accent) transition-[border-color,box-shadow] duration-200 hover:border-(--primary)/40 hover:shadow-[0_14px_28px_-16px_color-mix(in_srgb,var(--shadow)_45%,transparent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
         >
           {content}

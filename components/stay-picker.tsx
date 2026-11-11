@@ -14,7 +14,7 @@ const shortDateFormatter = new Intl.DateTimeFormat("pt-BR");
 const navigationButtonClassName =
   "flex size-9 shrink-0 items-center justify-center rounded-xl text-(--text-secondary) outline-hidden transition-colors hover:bg-(--primary-soft) hover:text-(--text-primary) focus-visible:ring-2 focus-visible:ring-(--focus-ring) disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent";
 const fieldButtonClassName =
-  "flex min-w-0 flex-col items-start px-3 py-2.5 text-left outline-hidden transition-colors hover:bg-(--primary-soft) focus-visible:ring-2 focus-visible:ring-(--focus-ring) focus-visible:ring-inset data-[active=true]:bg-(--primary-soft) data-[active=true]:ring-2 data-[active=true]:ring-(--primary) data-[active=true]:ring-inset";
+  "flex min-w-0 flex-col items-start px-3 py-2.5 text-left outline-hidden transition-colors hover:bg-(--primary-soft) focus-visible:ring-2 focus-visible:ring-(--focus-ring) focus-visible:ring-inset data-[active=true]:bg-(--primary-soft) data-[active=true]:ring-2 data-[active=true]:ring-(--primary) data-[active=true]:ring-inset disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-transparent";
 const stepperButtonClassName =
   "flex size-9 items-center justify-center rounded-full border border-(--border) text-(--text-primary) outline-hidden transition-colors hover:border-(--text-secondary) focus-visible:ring-2 focus-visible:ring-(--focus-ring) disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-(--border)";
 
@@ -34,6 +34,7 @@ function addMonths(month: Date, offset: number) {
 export function MonthGrid({
   month,
   isDisabled,
+  isBlocked,
   checkIn,
   rangeEnd,
   onSelect,
@@ -41,6 +42,7 @@ export function MonthGrid({
 }: {
   month: Date;
   isDisabled: (day: Date) => boolean;
+  isBlocked?: (day: Date) => boolean;
   checkIn?: Date;
   rangeEnd?: Date;
   onSelect: (day: Date) => void;
@@ -67,7 +69,7 @@ export function MonthGrid({
           </span>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-y-0.5">
+      <div className="grid grid-cols-7 grid-rows-[repeat(6,2.5rem)] gap-y-0.5 md:grid-rows-[repeat(6,2.25rem)]">
         {Array.from({ length: month.getDay() }, (_, index) => (
           <span key={index} />
         ))}
@@ -83,12 +85,13 @@ export function MonthGrid({
                 type="button"
                 disabled={isDisabled(day)}
                 data-selected={selected}
+                data-blocked={isBlocked?.(day) ?? false}
                 aria-pressed={selected}
                 aria-label={longDateFormatter.format(day)}
                 onClick={() => onSelect(day)}
                 onPointerEnter={() => onHover(day)}
                 onFocus={() => onHover(day)}
-                className="flex size-10 items-center md:size-9 justify-center rounded-full text-sm font-semibold text-(--text-primary) tabular-nums outline-hidden transition-colors hover:ring-1 hover:ring-(--text-primary) focus-visible:ring-2 focus-visible:ring-(--focus-ring) disabled:cursor-not-allowed disabled:text-(--text-secondary) disabled:line-through disabled:opacity-50 disabled:hover:ring-0 data-[selected=true]:bg-(--primary) data-[selected=true]:text-(--on-primary)"
+                className="flex size-10 items-center md:size-9 justify-center rounded-full text-sm font-semibold text-(--text-primary) tabular-nums outline-hidden transition-colors hover:ring-1 hover:ring-(--text-primary) focus-visible:ring-2 focus-visible:ring-(--focus-ring) disabled:cursor-not-allowed disabled:text-(--text-secondary) disabled:line-through disabled:opacity-50 disabled:hover:ring-0 data-[blocked=true]:bg-(--error)/15 data-[blocked=true]:text-(--error) data-[blocked=true]:disabled:opacity-100 data-[selected=true]:bg-(--primary) data-[selected=true]:text-(--on-primary)"
               >
                 {day.getDate()}
               </button>
@@ -109,7 +112,7 @@ function firstBlockedAfter(checkIn: Date, availability: RoomAvailability) {
   return day;
 }
 
-export function StayPicker({ capacity, availability }: { capacity: number; availability?: RoomAvailability }) {
+export function StayPicker({ capacity, availability, disabled = false }: { capacity: number; availability?: RoomAvailability; disabled?: boolean }) {
   const { anchorRef, isOpen, open, close, rootProps, panelProps } = useFieldPopover<HTMLButtonElement>();
   const [clientToday, setClientToday] = useState(startOfToday);
   const today = availability ? parseIsoDate(availability.today) : clientToday;
@@ -131,6 +134,10 @@ export function StayPicker({ capacity, availability }: { capacity: number; avail
     if (isOutsideWindow(day, availability) || isBlockedDay(day, availability)) return true;
     if (!checkIn || checkOut || day <= checkIn) return false;
     return day > firstBlockedAfter(checkIn, availability);
+  }
+
+  function isDayBlocked(day: Date) {
+    return Boolean(availability) && day >= today && !isOutsideWindow(day, availability!) && isBlockedDay(day, availability!);
   }
 
   function openCalendar() {
@@ -174,6 +181,7 @@ export function StayPicker({ capacity, availability }: { capacity: number; avail
             aria-haspopup="dialog"
             aria-expanded={isOpen}
             data-active={isOpen && !choosingCheckOut}
+            disabled={disabled}
             onClick={() => (isOpen ? close() : openCalendar())}
             className={`${fieldButtonClassName} rounded-tl-xl`}
           >
@@ -185,6 +193,7 @@ export function StayPicker({ capacity, availability }: { capacity: number; avail
             aria-haspopup="dialog"
             aria-expanded={isOpen}
             data-active={choosingCheckOut}
+            disabled={disabled}
             onClick={() => (isOpen ? close() : openCalendar())}
             className={`${fieldButtonClassName} rounded-tr-xl`}
           >
@@ -194,13 +203,27 @@ export function StayPicker({ capacity, availability }: { capacity: number; avail
         </div>
 
         <div {...panelProps} data-align="end" role="dialog" aria-label="Selecionar datas da estadia" className="field-popover w-full p-4 md:w-160 md:p-5">
-          <div aria-live="polite">
-            <p className="text-base font-bold text-(--text-primary)">
-              {nights ? `${nights} ${nights === 1 ? "noite" : "noites"}` : checkIn ? "Selecione o checkout" : "Selecione o check-in"}
-            </p>
-            <p className="text-sm text-(--text-secondary)">
-              {checkIn && checkOut ? `${longDateFormatter.format(checkIn)} – ${longDateFormatter.format(checkOut)}` : "Adicione as datas da viagem"}
-            </p>
+          <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+            <div aria-live="polite">
+              <p className="text-base font-bold text-(--text-primary)">
+                {nights ? `${nights} ${nights === 1 ? "noite" : "noites"}` : checkIn ? "Selecione o checkout" : "Selecione o check-in"}
+              </p>
+              <p className="text-sm text-(--text-secondary)">
+                {checkIn && checkOut ? `${longDateFormatter.format(checkIn)} – ${longDateFormatter.format(checkOut)}` : "Adicione as datas da viagem"}
+              </p>
+            </div>
+            {availability ? (
+              <div aria-hidden="true" className="flex items-center gap-3 text-xs font-semibold whitespace-nowrap text-(--text-primary)">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="size-3.5 rounded-full border-2 border-(--border-strong) bg-(--surface)" />
+                  Disponível
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="size-3.5 rounded-full border-2 border-(--error) bg-(--error)/15" />
+                  Indisponível
+                </span>
+              </div>
+            ) : null}
           </div>
 
           {isOpen ? (
@@ -228,7 +251,7 @@ export function StayPicker({ capacity, availability }: { capacity: number; avail
                       <LuChevronRight aria-hidden="true" size={18} />
                     </button>
                   </div>
-                  <MonthGrid key={month.getTime()} month={month} isDisabled={isDayDisabled} checkIn={checkIn} rangeEnd={rangeEnd} onSelect={selectDay} onHover={setHovered} />
+                  <MonthGrid key={month.getTime()} month={month} isDisabled={isDayDisabled} isBlocked={isDayBlocked} checkIn={checkIn} rangeEnd={rangeEnd} onSelect={selectDay} onHover={setHovered} />
                 </div>
               ))}
             </div>
@@ -267,14 +290,17 @@ export function StayPicker({ capacity, availability }: { capacity: number; avail
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button type="button" aria-label="Remover hóspede" disabled={guests <= 1} onClick={() => setGuests(guests - 1)} className={stepperButtonClassName}>
+          <button type="button" aria-label="Remover hóspede" disabled={disabled || guests <= 1} onClick={() => setGuests(guests - 1)} className={stepperButtonClassName}>
             <LuMinus aria-hidden="true" size={16} />
           </button>
-          <button type="button" aria-label="Adicionar hóspede" disabled={guests >= capacity} onClick={() => setGuests(guests + 1)} className={stepperButtonClassName}>
+          <button type="button" aria-label="Adicionar hóspede" disabled={disabled || guests >= capacity} onClick={() => setGuests(guests + 1)} className={stepperButtonClassName}>
             <LuPlus aria-hidden="true" size={16} />
           </button>
         </div>
       </div>
+      {disabled ? (
+        <p className="border-t border-(--border) px-3 py-2.5 text-xs text-(--text-secondary)">Na prévia não é possível escolher datas nem hóspedes.</p>
+      ) : null}
     </div>
   );
 }

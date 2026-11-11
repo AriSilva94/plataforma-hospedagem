@@ -7,7 +7,6 @@ import {
   LuBath,
   LuCalendarDays,
   LuFlag,
-  LuMegaphone,
   LuTag,
   LuUsers,
 } from "react-icons/lu";
@@ -18,6 +17,8 @@ import { IconList } from "@/components/icon-list";
 import { PageNotice } from "@/components/page-notice";
 import { PropertyPhotoGrid } from "@/components/property-gallery";
 import {
+  OwnerPreviewBanner,
+  PublicListingAside,
   PublicLocation,
   PublicPropertyLoadNotice,
 } from "@/components/public-property-parts";
@@ -93,8 +94,10 @@ export async function generateMetadata({
 
 export default async function PublicRoomPage({
   params,
+  searchParams,
 }: PageProps<"/imoveis/[propertyId]/quartos/[roomId]">) {
-  const { propertyId, roomId } = await params;
+  const [{ propertyId, roomId }, { previa }] = await Promise.all([params, searchParams]);
+  const preview = previa === "1";
   const [{ user }, result, availabilityResult] = await Promise.all([
     getCurrentUser(),
     getApiData(`/properties/${propertyId}`, publicPropertyDetailSchema),
@@ -155,10 +158,11 @@ export default async function PublicRoomPage({
   return (
     <>
       <SiteHeader user={user} />
+      {preview ? <OwnerPreviewBanner propertyId={property.id} /> : null}
       <main className="px-4 pt-6 pb-28 sm:px-6 md:pt-10 md:pb-16">
         <div className="mx-auto max-w-6xl">
           <Link
-            href={`/imoveis/${property.id}`}
+            href={`/imoveis/${property.id}${preview ? "?previa=1" : ""}`}
             className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-secondary) transition-colors hover:text-(--text-primary)"
           >
             <LuArrowLeft aria-hidden="true" size={16} /> {property.title}
@@ -298,19 +302,7 @@ export default async function PublicRoomPage({
               </section>
             </div>
 
-            <aside className="flex flex-col gap-4 lg:sticky lg:top-24">
-              <Link
-                href="/meus-imoveis/novo"
-                className="flex items-center gap-2 rounded-2xl border border-(--success)/35 bg-(--success-soft) px-4 py-3 text-sm font-semibold text-(--success) transition-colors hover:border-(--success)/60"
-              >
-                <LuMegaphone
-                  aria-hidden="true"
-                  size={16}
-                  className="shrink-0"
-                />{" "}
-                100% Gratuito — Anuncie seu espaço
-              </Link>
-
+            <PublicListingAside preview={preview}>
               <div className="rounded-2xl border border-(--border) bg-(--surface) p-5">
                 <div className="flex items-center justify-between gap-3">
                   <div>
@@ -345,6 +337,7 @@ export default async function PublicRoomPage({
 
                 <div className="mt-4">
                   <StayPicker
+                    disabled={preview}
                     capacity={room.capacity}
                     availability={
                       availabilityResult.status === "ok"
@@ -361,7 +354,7 @@ export default async function PublicRoomPage({
               >
                 <LuFlag aria-hidden="true" size={14} /> Reportar anúncio inativo
               </a>
-            </aside>
+            </PublicListingAside>
           </div>
         </div>
       </main>
