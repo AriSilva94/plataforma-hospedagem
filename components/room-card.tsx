@@ -13,15 +13,17 @@ export function RoomCard({
   action,
   unavailable = false,
   href = `/imoveis/${room.property.id}/quartos/${room.id}`,
+  fill = false,
 }: {
   room: PublicRoomCard;
   action?: ReactNode;
   unavailable?: boolean;
   href?: string;
+  fill?: boolean;
 }) {
   const content = (
     <>
-      <div className="relative aspect-4/3 bg-(--surface-raised)">
+      <div className={`relative bg-(--surface-raised) ${fill ? "min-h-32 flex-1" : "aspect-4/3"}`}>
         {room.coverUrl ? (
           <Image
             src={room.coverUrl}
@@ -56,7 +58,7 @@ export function RoomCard({
           </div>
         ) : null}
       </div>
-      <div className="flex grow flex-col p-4">
+      <div className={`flex flex-col p-4 ${fill ? "" : "grow"}`}>
         <div className="flex items-start justify-between gap-2">
           <h3
             className={`line-clamp-2 min-w-0 wrap-break-word text-base font-bold leading-snug ${unavailable ? "text-(--text-secondary)" : "text-(--primary-text)"}`}

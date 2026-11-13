@@ -75,7 +75,7 @@ export function RoomListing({
                     roomTitle={room.title}
                     initialFavorited={favorites.has(room.id)}
                     signedIn={signedIn}
-                    loginReturnPath="/#todos"
+                    loginReturnPath="/anuncios"
                   />
                 }
               />

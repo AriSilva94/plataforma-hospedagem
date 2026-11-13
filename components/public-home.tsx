@@ -1,13 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { ReactNode } from "react";
 import type { IconType } from "react-icons";
-import { LuBell, LuCalendarCheck, LuCircleCheck, LuHistory, LuMapPin, LuStar } from "react-icons/lu";
-import { SiteFooter } from "@/components/site-footer";
+import { LuBedDouble, LuBell, LuCalendarCheck, LuCircleCheck, LuHistory, LuHouse, LuListChecks, LuMapPin, LuStar } from "react-icons/lu";
 import { FeaturedRooms } from "@/components/featured-rooms";
-import { RoomListing } from "@/components/room-listing";
+import { HomeTabs, type HomeTab } from "@/components/home-tabs";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import type { PublicRoomPage } from "@/lib/properties";
+import type { PublicRoomCard, PublicRoomPage } from "@/lib/properties";
 
 const assurances: { icon: IconType; label: string }[] = [
   { icon: LuMapPin, label: "Localização aproximada" },
@@ -18,22 +17,10 @@ const assurances: { icon: IconType; label: string }[] = [
   { icon: LuBell, label: "Avise-me quando liberar" },
 ];
 
-const journey: { title: string; text: string; demo: ReactNode }[] = [
-  {
-    title: "Compare quarto a quarto",
-    text: "Cada quarto tem preço, características e calendário próprios. Você vê o que está livre sem perguntar “ainda tem vaga?”.",
-    demo: <CalendarDemo />,
-  },
-  {
-    title: "Reserve e pague sem comprovante",
-    text: "O anfitrião aceita ou recusa a solicitação. O pagamento é confirmado pela plataforma e a reserva é atualizada automaticamente.",
-    demo: <ReservationDemo />,
-  },
-  {
-    title: "Renove a diária com prioridade",
-    text: "Durante a estadia, quem está no quarto tem prioridade para confirmar a próxima diária até o horário-limite. Sem renovação, o quarto é liberado.",
-    demo: <RenewalDemo />,
-  },
+const journey = [
+  { title: "Compare quarto a quarto", text: "Cada quarto tem preço, características e calendário próprios.", demo: <CalendarDemo /> },
+  { title: "Reserve e pague sem comprovante", text: "O anfitrião aceita ou recusa. O pagamento é confirmado pela plataforma.", demo: <ReservationDemo /> },
+  { title: "Renove a diária com prioridade", text: "Quem está no quarto confirma a próxima diária até o horário-limite.", demo: <RenewalDemo /> },
 ];
 
 const ownerBenefits = [
@@ -43,7 +30,7 @@ const ownerBenefits = [
   "Receba os pagamentos e acompanhe cada cobrança.",
 ];
 
-const sectionShell = "mx-auto w-full max-w-360 px-6 md:px-10 lg:px-12";
+const actionFocus = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)";
 
 export function PublicHome({
   user,
@@ -59,113 +46,106 @@ export function PublicHome({
   const total = (listing?.total ?? 0) + (featuredListing?.total ?? 0);
   const featuredRooms = featuredListing?.items ?? [];
 
+  const tabs: HomeTab[] = [
+    ...(featuredRooms.length > 0
+      ? [
+          {
+            id: "destaques",
+            label: "Em destaque",
+            icon: <LuStar aria-hidden="true" size={16} />,
+            panel: <RoomsPanel summary="Anúncios em evidência na DOMUS X." rooms={featuredRooms} favoriteRoomIds={favoriteRoomIds} />,
+          },
+        ]
+      : []),
+    {
+      id: "disponiveis",
+      label: "Disponíveis",
+      icon: <LuBedDouble aria-hidden="true" size={16} />,
+      panel: (
+        <RoomsPanel
+          summary={
+            !listing
+              ? "Não foi possível carregar os quartos agora. Tente novamente em alguns instantes."
+              : listing.items.length === 0
+                ? "Nenhum quarto disponível no momento."
+                : "Quartos prontos para reserva."
+          }
+          rooms={listing?.items ?? []}
+          favoriteRoomIds={favoriteRoomIds}
+        />
+      ),
+    },
+    { id: "como-funciona", label: "Como funciona", icon: <LuListChecks aria-hidden="true" size={16} />, panel: <JourneyPanel /> },
+    { id: "anunciar", label: "Anunciar", icon: <LuHouse aria-hidden="true" size={16} />, panel: <OwnerPanel /> },
+  ];
+
   return (
-    <>
+    <div className="flex flex-1 flex-col screenfit:h-dvh screenfit:flex-none">
       <SiteHeader user={user} />
 
-      <main>
-        <section id="inicio" className="relative isolate overflow-hidden">
-          <Image src="/rooms/room1.png" alt="" fill priority sizes="100vw" className="-z-10 object-cover opacity-20 dark:mix-blend-luminosity" />
-          <div aria-hidden="true" className="absolute inset-0 -z-10 bg-linear-to-b from-transparent from-45% to-(--background)/70" />
-
-          <div className={`${sectionShell} flex flex-col items-center pb-32 pt-16 text-center md:pb-44 md:pt-24`}>
-            <p className="rounded-full bg-(--primary-soft) px-4 py-1.5 text-sm font-bold text-(--primary-text)">
-              {total > 1 ? `${total} quartos disponíveis agora` : "Reserva independente por quarto"}
-            </p>
-            <h1 className="mt-6 max-w-4xl text-balance text-[2.5rem] font-extrabold leading-[1.05] tracking-[-0.03em] text-(--text-primary) sm:text-6xl lg:text-7xl">
+      <main className="mx-auto flex min-h-0 w-full max-w-360 flex-1 flex-col gap-3 px-6 py-3 short:max-sm:gap-2 short:max-sm:py-2 md:gap-6 md:px-10 md:py-6 short:md:gap-4 short:md:py-4 lg:px-12">
+        <HomeTabs tabs={tabs}>
+          <div>
+            <h1 className="text-balance text-[1.375rem] short:max-sm:text-xl font-extrabold leading-tight tracking-[-0.02em] text-(--text-primary) sm:text-2xl md:text-3xl">
               Encontre o quarto livre sem precisar perguntar.
             </h1>
-            <p className="mt-6 max-w-2xl text-pretty text-lg leading-relaxed text-(--text-secondary)">
-              A DOMUS X reúne imóveis com quartos e suítes reserváveis de forma independente. Veja o que está disponível, reserve, pague e renove a diária em um só lugar.
+            <p className="mt-1 text-sm text-(--text-secondary) short:max-sm:hidden">
+              {total > 1 ? `${total} quartos disponíveis agora.` : "Reserva independente por quarto."}
             </p>
-            <div className="mt-9 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
-              <a href="#todos" className="inline-flex min-h-13 items-center justify-center rounded-2xl bg-(--primary) px-7 text-base font-bold text-(--on-primary) transition-colors hover:bg-(--primary-hover) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)">
-                Ver quartos disponíveis
-              </a>
-              <a href="#proprietarios" className="inline-flex min-h-13 items-center justify-center rounded-2xl border border-(--border-strong) px-7 text-base font-semibold text-(--text-primary) transition-colors hover:bg-(--primary-soft) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)">
-                Quero anunciar meu espaço
-              </a>
-            </div>
           </div>
-
-          <div aria-hidden="true" className="absolute -bottom-px left-1/2 h-14 w-[140%] -translate-x-1/2 translate-y-1/2 rounded-[50%] bg-(--background) md:h-28" />
-        </section>
-
-        <section aria-labelledby="seguranca-titulo" className="pb-16 pt-6 md:pb-20 md:pt-4">
-          <div className={sectionShell}>
-            <SectionHeading id="seguranca-titulo" title="Discrição e segurança fazem parte do fluxo" text="As páginas públicas mostram só a região do imóvel. O endereço exato não é exposto." />
-          </div>
-          <div className="marquee mt-10">
-            <div className="marquee-track">
-              <AssuranceList />
-              <AssuranceList duplicate />
-            </div>
-          </div>
-        </section>
-
-        <section id="proprietarios" aria-labelledby="proprietarios-titulo" className={`${sectionShell} scroll-mt-24`}>
-          <div className="grid overflow-hidden rounded-[1.75rem] border border-(--primary-border) bg-(--primary-soft) lg:grid-cols-[minmax(0,1.15fr)_minmax(0,.85fr)]">
-            <div className="px-6 py-10 md:px-10 lg:px-14 lg:py-16">
-              <h2 id="proprietarios-titulo" className="max-w-xl text-balance text-3xl font-extrabold leading-[1.1] tracking-[-0.02em] text-(--text-primary) md:text-5xl">Anuncie o imóvel. Alugue cada quarto do seu jeito.</h2>
-              <p className="mt-5 max-w-120 text-lg leading-relaxed text-(--text-secondary)">Um único anúncio para o imóvel, com quartos e suítes que você gerencia de forma independente.</p>
-              <ul className="mt-8 grid gap-3.5 sm:grid-cols-2 sm:gap-x-8">
-                {ownerBenefits.map((benefit) => (
-                  <li key={benefit} className="flex gap-3 text-(--text-primary)">
-                    <LuCircleCheck aria-hidden="true" size={20} className="mt-0.5 shrink-0 text-(--primary-text)" />
-                    <span className="leading-relaxed">{benefit}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link href="/meus-imoveis" className="mt-10 inline-flex min-h-12 items-center justify-center rounded-2xl bg-(--primary) px-6 text-sm font-bold text-(--on-primary) transition-colors hover:bg-(--primary-hover) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)">Anunciar meu espaço</Link>
-            </div>
-            <div className="relative min-h-64 lg:min-h-full">
-              <Image src="/rooms/room2.png" alt="Quarto preparado para hóspedes" fill sizes="(min-width: 1024px) 42vw, 100vw" className="object-cover" />
-            </div>
-          </div>
-        </section>
-
-        <section id="como-funciona" aria-labelledby="jornada-titulo" className={`${sectionShell} scroll-mt-24 pt-20 md:pt-28`}>
-          <SectionHeading id="jornada-titulo" title="Da busca à próxima diária" text="Cada etapa da estadia acontece dentro da plataforma, com o estado da reserva sempre visível." />
-          <ol className="mt-10 grid gap-4 md:mt-12 lg:grid-cols-3">
-            {journey.map((step, index) => (
-              <li key={step.title} className="flex flex-col rounded-2xl bg-(--surface) p-6 md:p-7">
-                <div className="flex items-center gap-3.5">
-                  <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-full bg-(--primary) text-base font-extrabold text-(--on-primary)">{index + 1}</span>
-                  <h3 className="text-lg font-bold leading-snug text-(--text-primary)">{step.title}</h3>
-                </div>
-                <p className="mt-4 leading-relaxed text-(--text-secondary)">{step.text}</p>
-                <div aria-hidden="true" className="mt-auto pt-6">
-                  <div className="border-t border-(--border) pt-5">{step.demo}</div>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        {featuredRooms.length > 0 ? (
-          <section aria-labelledby="destaques-titulo" className={`${sectionShell} pt-20 md:pt-28`}>
-            <SectionHeading id="destaques-titulo" title="Quartos em destaque" text="Anúncios em evidência na DOMUS X." />
-            <FeaturedRooms rooms={featuredRooms} favoriteRoomIds={favoriteRoomIds} signedIn />
-          </section>
-        ) : null}
-
-        <section id="todos" aria-labelledby="todos-titulo" className={`${sectionShell} scroll-mt-24 pb-20 pt-20 md:pb-28 md:pt-28`}>
-          <SectionHeading id="todos-titulo" title="Quartos disponíveis" text={total > 0 ? (total === 1 ? "1 quarto pronto para reserva." : `${total} quartos prontos para reserva.`) : undefined} />
-          <RoomListing initial={listing} favoriteRoomIds={favoriteRoomIds} signedIn />
-        </section>
-
+        </HomeTabs>
       </main>
 
       <SiteFooter />
+    </div>
+  );
+}
+
+function RoomsPanel({ summary, rooms, favoriteRoomIds }: { summary: string; rooms: PublicRoomCard[]; favoriteRoomIds: string[] }) {
+  return (
+    <>
+      <div className="flex items-baseline justify-between gap-4">
+        <p className="text-sm text-(--text-secondary)">{summary}</p>
+        <Link href="/anuncios" className={`shrink-0 text-sm font-bold text-(--primary-text) underline underline-offset-2 ${actionFocus}`}>
+          Ver todos os anúncios
+        </Link>
+      </div>
+      {rooms.length > 0 ? <FeaturedRooms rooms={rooms} favoriteRoomIds={favoriteRoomIds} signedIn fill className="mt-3 md:mt-4" /> : null}
     </>
   );
 }
 
-function SectionHeading({ id, title, text }: { id: string; title: string; text?: string }) {
+function JourneyPanel() {
   return (
-    <div className="mx-auto max-w-2xl text-center">
-      <h2 id={id} className="text-balance text-3xl font-extrabold leading-tight tracking-[-0.02em] text-(--text-primary) md:text-[2.75rem]">{title}</h2>
-      {text ? <p className="mt-3 text-pretty text-lg leading-relaxed text-(--text-secondary)">{text}</p> : null}
+    <div className="flex min-h-0 flex-1 flex-col gap-3 short:max-sm:gap-2 md:gap-6 short:md:gap-4">
+      <ol className="grid min-h-0 flex-1 divide-y divide-(--border) rounded-2xl border border-(--border-accent) bg-(--surface) [scrollbar-width:none] rail:snap-x rail:snap-mandatory rail:auto-cols-[84%] rail:grid-flow-col rail:grid-rows-[auto_1fr] rail:divide-x rail:divide-y-0 rail:overflow-x-auto md:grid-cols-3 md:grid-rows-[auto_1fr] md:divide-x md:divide-y-0 rows:grid-cols-1! rows:grid-rows-none! rows:divide-x-0! rows:divide-y! [&::-webkit-scrollbar]:hidden">
+        {journey.map((step, index) => (
+          <li
+            key={step.title}
+            className="flex min-h-0 flex-col justify-center px-4 py-2 short:max-sm:py-1 rail:row-span-2 rail:grid rail:snap-start rail:grid-rows-subgrid rail:p-4 short:rail:p-3.5 md:row-span-2 md:grid md:grid-rows-subgrid md:p-4 lg:p-5 short:lg:p-3.5 rows:row-span-1! rows:flex! rows:flex-row! rows:items-stretch rows:justify-center! rows:gap-6 rows:py-3!"
+          >
+            <div className="flex items-center gap-3 rail:items-start md:max-lg:flex-col md:max-lg:items-start md:max-lg:gap-2 lg:items-start lg:gap-3.5 rows:flex-1 rows:flex-row! rows:self-center rows:gap-3.5!">
+              <span aria-hidden="true" className="flex size-7 shrink-0 items-center justify-center rounded-full bg-(--primary) text-sm font-extrabold text-(--on-primary) sm:size-8">
+                {index + 1}
+              </span>
+              <div>
+                <h2 className="text-[15px] font-bold leading-snug text-(--text-primary) sm:text-base">{step.title}</h2>
+                <p className="mt-1 text-[13px] leading-relaxed text-(--text-secondary) sm:text-sm [@media(max-height:39.99rem)]:max-md:hidden">{step.text}</p>
+              </div>
+            </div>
+            <div aria-hidden="true" className="mt-3 short:rail:mt-2 hidden min-h-29 short:rail:min-h-27 flex-1 items-center justify-center overflow-hidden rounded-xl bg-(--surface-accent) px-4 py-2.5 short:py-1.5 demo:flex screenfit:min-h-0 md:max-lg:mt-2 md:max-lg:py-1.5 lg:mt-4 short:lg:mt-2 xl:tall:py-4 rows:mt-0!">
+              <div className="w-full max-w-64 rail:sm:tall:scale-125 short:lg:scale-90 2xl:tall:scale-125 2xl:[@media(min-height:60rem)]:scale-[1.45]">{step.demo}</div>
+            </div>
+          </li>
+        ))}
+      </ol>
+
+      <section aria-label="Garantias da plataforma" className="marquee">
+        <div className="marquee-track">
+          <AssuranceList />
+          <AssuranceList duplicate />
+        </div>
+      </section>
     </div>
   );
 }
@@ -191,35 +171,29 @@ const calendarRows: { room: string; days: boolean[] }[] = [
 
 function CalendarDemo() {
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-2">
       {calendarRows.map(({ room, days }) => (
         <div key={room} className="flex items-center gap-3">
-          <span className="w-16 shrink-0 text-xs font-semibold text-(--text-secondary)">{room}</span>
+          <span className="w-16 shrink-0 text-xs font-semibold text-(--text-secondary) md:max-lg:w-13">{room}</span>
           <div className="grid flex-1 grid-cols-7 gap-1">
             {days.map((free, day) => (
-              <span key={day} className={`h-6 rounded-md ${free ? "bg-(--success)/35" : "bg-(--text-primary)/6"}`} />
+              <span key={day} className={`h-5 rounded-md ${free ? "bg-(--success)/35" : "bg-(--text-primary)/8"}`} />
             ))}
           </div>
         </div>
       ))}
-      <div className="mt-1 flex gap-4 text-xs text-(--text-secondary)">
+      <div className="mt-1 flex gap-4 text-xs text-(--text-secondary) short:max-md:hidden">
         <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-sm bg-(--success)/35" />Livre</span>
-        <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-sm bg-(--text-primary)/6" />Ocupado</span>
+        <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-sm bg-(--text-primary)/8" />Ocupado</span>
       </div>
     </div>
   );
 }
 
 function ReservationDemo() {
-  const stages = [
-    { label: "Solicitada", done: true },
-    { label: "Aceita pelo anfitrião", done: true },
-    { label: "Pagamento confirmado", done: true },
-  ];
-
   return (
-    <ul className="flex flex-col gap-3">
-      {stages.map(({ label }) => (
+    <ul className="flex flex-col gap-2.5">
+      {["Solicitada", "Aceita pelo anfitrião", "Pagamento confirmado"].map((label) => (
         <li key={label} className="flex items-center gap-3 text-sm font-semibold text-(--text-primary)">
           <span className="flex size-6 items-center justify-center rounded-full bg-(--primary) text-(--on-primary)">
             <LuCircleCheck size={14} />
@@ -235,8 +209,43 @@ function RenewalDemo() {
   return (
     <div>
       <p className="text-sm text-(--text-secondary)">Próxima diária da Suíte 1</p>
-      <p className="mt-1 text-lg font-bold text-(--text-primary)">Confirme até <span className="tabular-nums">12:00</span></p>
-      <span className="mt-4 flex items-center justify-center rounded-2xl bg-(--primary) px-4 py-3 text-sm font-bold text-(--on-primary)">Renovar diária</span>
+      <p className="mt-0.5 text-base font-bold text-(--text-primary)">Confirme até <span className="tabular-nums">12:00</span></p>
+      <span className="mt-3 flex items-center justify-center rounded-xl bg-(--primary) px-4 py-2.5 text-sm font-bold text-(--on-primary)">Renovar diária</span>
+    </div>
+  );
+}
+
+function OwnerPanel() {
+  return (
+    <div className="grid flex-1 overflow-hidden rounded-[1.75rem] border border-(--primary-border) bg-(--primary-soft) lg:grid-cols-[minmax(0,1.15fr)_minmax(0,.85fr)]">
+      <div className="flex flex-col justify-center px-5 py-5 md:px-10 lg:px-12 xl:px-14">
+        <div className="@container">
+          <h2 className="text-[clamp(0.8125rem,6.2cqi,3rem)] font-extrabold leading-[1.1] tracking-[-0.02em] text-(--text-primary)">
+            <span className="block">Anuncie o imóvel.</span>
+            <span className="block">Alugue cada quarto do seu jeito.</span>
+          </h2>
+        </div>
+        <p className="mt-3 hidden max-w-140 leading-relaxed text-(--text-secondary) sm:tall:block 2xl:text-lg">
+          Um único anúncio para o imóvel, com quartos e suítes que você gerencia de forma independente.
+        </p>
+        <ul className="mt-4 grid gap-2 sm:grid-cols-2 sm:gap-x-8 2xl:mt-6 2xl:gap-y-3">
+          {ownerBenefits.map((benefit) => (
+            <li key={benefit} className="flex gap-2.5 text-sm text-(--text-primary) 2xl:text-base">
+              <LuCircleCheck aria-hidden="true" size={18} className="mt-0.5 shrink-0 text-(--primary-text)" />
+              <span className="leading-relaxed">{benefit}</span>
+            </li>
+          ))}
+        </ul>
+        <Link
+          href="/meus-imoveis"
+          className={`mt-5 inline-flex min-h-12 items-center justify-center self-start rounded-2xl bg-(--primary) px-6 text-sm font-bold text-(--on-primary) transition-colors hover:bg-(--primary-hover) 2xl:mt-8 ${actionFocus}`}
+        >
+          Anunciar meu espaço
+        </Link>
+      </div>
+      <div className="relative hidden lg:block">
+        <Image src="/rooms/room2.png" alt="Quarto preparado para hóspedes" fill sizes="42vw" className="object-cover" />
+      </div>
     </div>
   );
 }

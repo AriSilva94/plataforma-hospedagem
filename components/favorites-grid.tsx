@@ -14,7 +14,7 @@ export function FavoritesGrid({ items, loginReturnPath = "/favoritos" }: { items
           Toque no coração de um quarto para guardar aqui e comparar com calma depois.
         </p>
         <Link
-          href="/#todos"
+          href="/anuncios"
           className="mt-6 inline-flex min-h-11 items-center rounded-2xl bg-(--primary) px-5 text-sm font-bold text-(--on-primary) transition-colors hover:bg-(--primary-hover) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
         >
           Ver quartos disponíveis
