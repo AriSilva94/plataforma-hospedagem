@@ -1,6 +1,28 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where([data-theme="dark"] *));
+@custom-variant tall (@media (min-height: 48rem));
+@custom-variant short (@media (max-height: 47.99rem));
+@custom-variant screenfit {
+  @media (min-width: 48rem) and (min-height: 48rem), (min-width: 64rem) and (min-height: 43.75rem), (min-width: 80rem) and (min-height: 37.5rem) {
+    @slot;
+  }
+}
+@custom-variant demo {
+  @media (min-width: 22.5rem) and (max-width: 47.99rem) and (min-height: 41.5rem), (max-width: 22.49rem) and (min-height: 47.5rem), (min-width: 48rem) and (max-width: 63.99rem) and (min-height: 48rem), (min-width: 64rem) and (max-width: 79.99rem) and (min-height: 43.75rem), (min-width: 80rem) and (min-height: 37.5rem) {
+    @slot;
+  }
+}
+@custom-variant rows {
+  @media (min-width: 48rem) and (max-width: 63.99rem) and (min-height: 62rem) {
+    @slot;
+  }
+}
+@custom-variant rail {
+  @media (max-width: 47.99rem) and (min-height: 40rem) {
+    @slot;
+  }
+}
 
 :root {
   color-scheme: light;
@@ -672,58 +694,6 @@ body.scroll-locked {
   }
 }
 
-.marquee {
-  overflow: hidden;
-  mask-image: linear-gradient(90deg, transparent, var(--black) 10%, var(--black) 90%, transparent);
-}
-
-.marquee-track {
-  display: flex;
-  width: max-content;
-  animation: marquee-slide 48s linear infinite;
-}
-
-.marquee:hover .marquee-track {
-  animation-play-state: paused;
-}
-
-.marquee-group {
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: 3.5rem;
-  padding-right: 3.5rem;
-}
-
-@keyframes marquee-slide {
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .marquee {
-    mask-image: none;
-  }
-
-  .marquee-track {
-    width: auto;
-    animation: none;
-  }
-
-  .marquee-group {
-    flex: 1;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1rem 2.5rem;
-    padding: 0 1.5rem;
-  }
-
-  .marquee-group[aria-hidden="true"] {
-    display: none;
-  }
-}
-
 .field-popover {
   position: absolute;
   top: calc(100% + 0.5rem);
@@ -831,12 +801,7 @@ body.scroll-locked {
 
 @media (prefers-reduced-motion: reduce) {
   .field-popover,
-  .field-popover[data-align="end"] {
-  right: 0;
-  left: auto;
-}
-
-.field-popover[data-state="closed"] {
+  .field-popover[data-state="closed"] {
     filter: none;
     transform: none;
     transition: none;
@@ -1081,5 +1046,57 @@ main:has([data-filters-pending="true"]) [data-room-content] {
   [data-room-content] :is(section > ul, section > div > ul) > li:nth-child(n) {
     animation: room-fade-in 320ms ease-out backwards;
     animation-delay: 0ms;
+  }
+}
+
+.marquee {
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, var(--black) 10%, var(--black) 90%, transparent);
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-slide 48s linear infinite;
+}
+
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+.marquee-group {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 3.5rem;
+  padding-right: 3.5rem;
+}
+
+@keyframes marquee-slide {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee {
+    mask-image: none;
+  }
+
+  .marquee-track {
+    width: auto;
+    animation: none;
+  }
+
+  .marquee-group {
+    flex: 1;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem 2.5rem;
+    padding: 0 1.5rem;
+  }
+
+  .marquee-group[aria-hidden="true"] {
+    display: none;
   }
 }

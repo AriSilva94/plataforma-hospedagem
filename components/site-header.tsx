@@ -79,17 +79,17 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
             </div>
           )}
         </div>
-        <div className="mx-auto hidden h-18 w-full max-w-360 items-center px-6 md:grid md:grid-cols-[auto_1fr_auto] md:gap-6 md:px-10 lg:px-12">
+        <div className="mx-auto hidden h-18 w-full max-w-360 items-center px-6 md:grid md:grid-cols-[auto_1fr_auto] md:gap-4 md:px-10 lg:gap-6 lg:px-12">
           <BrandMark size="md" href="/" />
           <nav
             aria-label="Navegação principal"
-            className="flex items-center justify-center gap-5.5 text-sm font-semibold text-(--text-secondary)"
+            className="flex items-center justify-center gap-4 text-sm lg:gap-5.5 font-semibold text-(--text-secondary)"
           >
             {publicNavItems.map((item) => (
               <NavItem key={item.label} {...item} active={item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)} />
             ))}
           </nav>
-          <div className="relative flex items-center justify-end gap-4">
+          <div className="relative flex items-center justify-end gap-2 lg:gap-4">
             <ThemeToggle />
             {user ? (
               <>
@@ -193,7 +193,7 @@ function DesktopAccountMenu({ onLogout }: { onLogout: () => void }) {
         aria-controls="desktop-profile-menu"
         data-open={isOpen}
         onClick={() => (isOpen ? close() : open())}
-        className="group flex items-center gap-1.5 rounded-2xl bg-(--primary) px-4.5 py-2.5 text-[13px] font-bold text-(--on-primary) transition-colors hover:bg-(--primary-hover)"
+        className="group flex items-center gap-1.5 rounded-2xl bg-(--primary) px-4.5 py-2.5 text-[13px] font-bold whitespace-nowrap text-(--on-primary) transition-colors hover:bg-(--primary-hover)"
       >
         Minha conta
         <LuChevronDown

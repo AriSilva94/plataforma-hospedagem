@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FavoriteButton } from "@/components/favorite-button";
 import { RoomCard } from "@/components/room-card";
 import { apiFetch } from "@/lib/api";
@@ -29,7 +29,7 @@ export function RoomListing({
     loadingRef.current = loading;
   }, [loading]);
 
-  async function loadMore(cursor: string) {
+  const loadMore = useCallback(async (cursor: string) => {
     setLoading(true);
     setError(undefined);
     try {
@@ -43,7 +43,7 @@ export function RoomListing({
     } finally {
       setLoading(false);
     }
-  }
+  }, [filterQuery]);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -59,7 +59,7 @@ export function RoomListing({
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [nextCursor]);
+  }, [nextCursor, loadMore]);
 
   return (
     <>
@@ -75,7 +75,7 @@ export function RoomListing({
                     roomTitle={room.title}
                     initialFavorited={favorites.has(room.id)}
                     signedIn={signedIn}
-                    loginReturnPath="/#todos"
+                    loginReturnPath="/anuncios"
                   />
                 }
               />
