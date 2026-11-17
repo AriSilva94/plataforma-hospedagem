@@ -76,7 +76,7 @@ export function PublicHome({
       ),
     },
     { id: "como-funciona", label: "Como funciona", icon: <LuListChecks aria-hidden="true" size={16} />, panel: <JourneyPanel /> },
-    { id: "anunciar", label: "Anunciar", icon: <LuHouse aria-hidden="true" size={16} />, panel: <OwnerPanel /> },
+    { id: "anunciar", label: "Anunciar", icon: <LuHouse aria-hidden="true" size={16} />, panel: <OwnerPanel />, desktopOnly: true },
   ];
 
   return (

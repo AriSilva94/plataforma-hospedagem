@@ -2,7 +2,11 @@
 
 import { useState, type KeyboardEvent, type ReactNode } from "react";
 
-export type HomeTab = { id: string; label: string; icon: ReactNode; panel: ReactNode };
+export type HomeTab = { id: string; label: string; icon: ReactNode; panel: ReactNode; desktopOnly?: boolean };
+
+const inactiveTabClassName = "text-(--text-secondary) hover:bg-(--primary-soft) hover:text-(--text-primary)";
+const desktopOnlyInactiveTabClassName =
+  "bg-(--primary-soft) font-extrabold text-(--primary-text) ring-2 ring-(--primary) ring-inset hover:bg-(--primary) hover:text-(--on-primary)";
 
 export function HomeTabs({ tabs, children }: { tabs: HomeTab[]; children: ReactNode }) {
   const [activeId, setActiveId] = useState(tabs[0].id);
@@ -25,7 +29,7 @@ export function HomeTabs({ tabs, children }: { tabs: HomeTab[]; children: ReactN
           role="tablist"
           aria-label="Seções da home"
           onKeyDown={moveWithArrows}
-          className={`w-full shrink-0 gap-1 rounded-[1.625rem] border border-(--border) bg-(--surface) p-1 sm:flex lg:w-auto ${tabs.length > 3 ? "grid grid-cols-2" : "flex"}`}
+          className={`w-full shrink-0 gap-1 rounded-[1.625rem] border border-(--border) bg-(--surface) p-1 sm:flex lg:w-auto ${tabs.filter((tab) => !tab.desktopOnly).length > 3 ? "grid grid-cols-2" : "flex"}`}
         >
           {tabs.map((tab) => {
             const active = tab.id === activeId;
@@ -39,7 +43,7 @@ export function HomeTabs({ tabs, children }: { tabs: HomeTab[]; children: ReactN
                 aria-controls={`painel-${tab.id}`}
                 tabIndex={active ? 0 : -1}
                 onClick={() => setActiveId(tab.id)}
-                className={`inline-flex min-h-11 flex-auto items-center justify-center gap-2 rounded-full px-2 text-center text-[13px] leading-tight font-bold transition-colors sm:px-4 sm:text-sm sm:whitespace-nowrap lg:flex-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) ${active ? "bg-(--primary) text-(--on-primary)" : "text-(--text-secondary) hover:bg-(--primary-soft) hover:text-(--text-primary)"}`}
+                className={`${tab.desktopOnly ? "hidden md:inline-flex" : "inline-flex"} min-h-11 flex-auto items-center justify-center gap-2 rounded-full px-2 text-center text-[13px] leading-tight font-bold transition-colors sm:px-4 sm:text-sm sm:whitespace-nowrap lg:flex-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) ${active ? "bg-(--primary) text-(--on-primary)" : tab.desktopOnly ? desktopOnlyInactiveTabClassName : inactiveTabClassName}`}
               >
                 <span className="hidden sm:inline-flex">{tab.icon}</span>
                 {tab.label}
