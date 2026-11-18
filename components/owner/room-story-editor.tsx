@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { LuImagePlus, LuLoaderCircle, LuTrash2 } from "react-icons/lu";
+import type { IconType } from "react-icons";
+import { LuClock, LuEye, LuImagePlus, LuLoaderCircle, LuTrash2, LuUsers } from "react-icons/lu";
 import { FormFeedback } from "@/components/form-feedback";
 import { StatusBadge } from "@/components/owner/status-badge";
 import { cardClassName, secondaryButtonClassName } from "@/components/owner/styles";
@@ -101,16 +102,17 @@ export function RoomStoryEditor({
       {currentStatus === "REJECTED" && rejectedReason && media.length > 0 ? <p className="text-sm text-(--error)">Motivo da recusa: {rejectedReason}</p> : null}
 
       {currentStatus === "APPROVED" && expiresAt && media.length > 0 ? (
-        <div className="flex flex-col gap-1 text-sm text-(--text-secondary)">
-          <p>
-            {expired
-              ? `Este story expirou em ${formatDateTime(expiresAt)}. Envie uma nova mídia ou aguarde a administração renovar a aprovação.`
-              : `Visível na home até ${formatDateTime(expiresAt)}.`}
-          </p>
-          <p className="font-semibold text-(--text-primary)">
-            {views.unique === 1 ? "1 visualização única" : `${views.unique} visualizações únicas`} · {views.total} no total
-          </p>
-        </div>
+        <section aria-labelledby="story-metricas-titulo" className="flex flex-col gap-2.5">
+          <h3 id="story-metricas-titulo" className="text-sm font-bold text-(--text-primary)">
+            Desempenho do story
+          </h3>
+          <dl className="grid divide-y divide-(--border) overflow-hidden rounded-2xl border border-(--border-accent) bg-(--surface-accent) sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            <StoryMetric icon={LuClock} label={expired ? "Expirou em" : "Visível até"} value={formatDateTime(expiresAt)} />
+            <StoryMetric icon={LuUsers} label="Visualizações únicas" value={String(views.unique)} emphasized />
+            <StoryMetric icon={LuEye} label="Visualizações no total" value={String(views.total)} emphasized />
+          </dl>
+          {expired ? <p className="text-sm text-(--text-secondary)">Envie uma nova mídia ou aguarde a administração renovar a aprovação.</p> : null}
+        </section>
       ) : null}
 
       <ul className="grid grid-cols-3 gap-3 sm:max-w-md">
@@ -147,5 +149,19 @@ export function RoomStoryEditor({
 
       {error ? <FormFeedback tone="error">{error}</FormFeedback> : null}
     </section>
+  );
+}
+
+function StoryMetric({ icon: Icon, label, value, emphasized = false }: { icon: IconType; label: string; value: string; emphasized?: boolean }) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2.5 sm:flex-col sm:items-start sm:justify-center sm:gap-2 sm:py-3">
+      <dt className="flex min-w-0 items-center gap-3 text-sm whitespace-nowrap text-(--text-secondary) sm:whitespace-normal">
+        <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-full bg-(--surface) text-(--primary-text) ring-1 ring-(--primary-border)">
+          <Icon size={16} />
+        </span>
+        {label}
+      </dt>
+      <dd className={emphasized ? "text-2xl font-extrabold tabular-nums text-(--text-primary)" : "text-sm font-bold whitespace-nowrap tabular-nums text-(--text-primary)"}>{value}</dd>
+    </div>
   );
 }
