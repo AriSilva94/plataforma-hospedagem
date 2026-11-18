@@ -2,6 +2,7 @@ import { AdminFilters } from "@/components/admin/admin-filters";
 import { AdminSelect } from "@/components/admin/admin-select";
 import { AdminList, AdminPagination } from "@/components/admin/admin-list";
 import { RoomFeaturingActions } from "@/components/admin/room-featuring-actions";
+import { RoomStoryActions } from "@/components/admin/room-story-actions";
 import { AdminRoomCard } from "@/components/admin/admin-room-card";
 import { OwnerPage } from "@/components/owner/owner-page";
 import { StatusBadge } from "@/components/owner/status-badge";
@@ -19,6 +20,10 @@ import {
   type FeaturingStatus,
 } from "@/lib/admin";
 import { getApiData } from "@/lib/server-api";
+import { storyStatuses } from "@/lib/properties";
+import { storyStatusLabels } from "@/lib/stories";
+
+const storyTones = { PENDING: "warning", APPROVED: "success", REJECTED: "danger" } as const;
 
 const featuringTones: Record<FeaturingStatus, "success" | "warning" | "neutral"> = {
   ACTIVE: "success",
@@ -31,9 +36,10 @@ export default async function AdminFeaturingPage({ searchParams }: PageProps<"/a
   const params = await searchParams;
   const search = searchParam(params.busca);
   const status = featuringStatuses.find((item) => item === params.situacao);
+  const storyStatus = storyStatuses.find((item) => item === params.story);
   const page = pageParam(params.pagina);
 
-  const result = await getApiData(`/admin/rooms?${queryString({ q: search, featuring: status, page, limit: ADMIN_PAGE_SIZE })}`, adminRoomPageSchema);
+  const result = await getApiData(`/admin/rooms?${queryString({ q: search, featuring: status, storyStatus, page, limit: ADMIN_PAGE_SIZE })}`, adminRoomPageSchema);
 
   if (result.status !== "ok") {
     return <PageNotice title="Destaques" description="Não foi possível carregar os quartos agora. Tente novamente em alguns instantes." actionLabel="Tentar novamente" actionHref="/admin/destaques" />;
@@ -45,10 +51,11 @@ export default async function AdminFeaturingPage({ searchParams }: PageProps<"/a
     <OwnerPage
       title="Destaques"
       back={{ href: "/admin", label: "Painel administrativo" }}
-      description="Defina o período em que cada quarto aparece primeiro na home. Quartos fora da home não aparecem, mesmo destacados."
+      description="Defina o período do destaque e analise os stories enviados pelos anunciantes. O story só aparece na home com o story aprovado, o destaque ativo e o quarto elegível."
     >
       <AdminFilters search={search} placeholder="Quarto, imóvel ou cidade">
         <AdminSelect name="situacao" label="Situação" value={status ?? ""} options={featuringStatuses.map((item) => ({ value: item, label: featuringStatusLabels[item] }))} />
+        <AdminSelect name="story" label="Story" value={storyStatus ?? ""} options={storyStatuses.map((item) => ({ value: item, label: storyStatusLabels[item] }))} />
       </AdminFilters>
 
       <AdminList total={total} singular="quarto encontrado" plural="quartos encontrados" emptyMessage="Nenhum quarto encontrado com esses filtros.">
@@ -56,14 +63,28 @@ export default async function AdminFeaturingPage({ searchParams }: PageProps<"/a
           <AdminRoomCard
             key={room.id}
             room={room}
-            badges={<StatusBadge tone={featuringTones[room.featuringStatus]}>{featuringStatusLabels[room.featuringStatus]}</StatusBadge>}
-            details={<p className="mt-2 text-sm text-(--text-secondary)">{periodText(room)}</p>}
+            badges={
+              <>
+                <StatusBadge tone={featuringTones[room.featuringStatus]}>{featuringStatusLabels[room.featuringStatus]}</StatusBadge>
+                {room.storyMedia.length > 0 ? <StatusBadge tone={storyTones[room.storyStatus]}>{`Story: ${storyStatusLabels[room.storyStatus].toLowerCase()}`}</StatusBadge> : null}
+              </>
+            }
+            details={
+              <>
+                <p className="mt-2 text-sm text-(--text-secondary)">{periodText(room)}</p>
+                {room.storyMedia.length > 0 ? (
+                  <div className="mt-3">
+                    <RoomStoryActions room={room} />
+                  </div>
+                ) : null}
+              </>
+            }
             aside={<RoomFeaturingActions room={room} />}
           />
         ))}
       </AdminList>
 
-      <AdminPagination path="/admin/destaques" params={{ busca: search, situacao: status }} page={page} total={total} />
+      <AdminPagination path="/admin/destaques" params={{ busca: search, situacao: status, story: storyStatus }} page={page} total={total} />
     </OwnerPage>
   );
 }

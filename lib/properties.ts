@@ -4,6 +4,7 @@ export const propertyTypes = ["HOUSE", "APARTMENT", "MOTEL"] as const;
 export const propertyStatuses = ["DRAFT", "ACTIVE", "UNAVAILABLE"] as const;
 export const roomStatuses = ["AVAILABLE", "UNAVAILABLE", "INACTIVE"] as const;
 export const roomVerificationStatuses = ["PENDING", "VERIFIED", "REJECTED"] as const;
+export const storyStatuses = ["PENDING", "APPROVED", "REJECTED"] as const;
 export const bathroomTypes = ["PRIVATE", "SHARED"] as const;
 export const genderIdentities = ["MAN", "WOMAN", "TRANS_WOMAN", "TRANS_MAN"] as const;
 export const sharedAreaTypes = ["LIVING_ROOM", "KITCHEN", "SHARED_BATHROOM", "LAUNDRY", "OUTDOOR_AREA", "GARAGE", "OTHER"] as const;
@@ -261,6 +262,9 @@ export const roomDetailSchema = z.object({
   completenessScore: z.number(),
   completenessMissing: z.array(z.enum(completenessCriteria)),
   media: z.array(mediaSchema),
+  storyMedia: z.array(mediaSchema),
+  storyStatus: z.enum(storyStatuses),
+  storyRejectedReason: z.string().nullable(),
   verificationStatus: z.enum(roomVerificationStatuses),
   verificationRejectedReason: z.string().nullable(),
   property: z.object({ id: z.string(), title: z.string(), status: z.enum(propertyStatuses), availableRoomCount: z.number() }),

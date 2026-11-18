@@ -61,6 +61,8 @@
   --info-soft: light-dark(#e6f4fe, #0d2847);
   --lavender: light-dark(#7954a1, #b8a1d9);
   --lavender-soft: light-dark(#f1ebf7, #30283c);
+  --gold: light-dark(#e0a100, #ffc933);
+  --story-badge-ring: var(--gold);
   --champagne: light-dark(#86602f, #d4b68a);
   --champagne-soft: light-dark(#f7f0e6, #362e25);
   --terracotta: light-dark(#9c5039, #d99580);
