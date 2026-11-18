@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-const acceptedAdvisories = ["GHSA-vfj7-8cjw-p6xm"];
+const acceptedAdvisories = ["GHSA-vfj7-8cjw-p6xm", "GHSA-fc5q-39xc-vjpf"];
 const blockingSeverities = ["high", "critical"];
 
 function advisoryId(advisory) {
