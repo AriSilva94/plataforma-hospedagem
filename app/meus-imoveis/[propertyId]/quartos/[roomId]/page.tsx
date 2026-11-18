@@ -12,6 +12,7 @@ import { roomAvailabilitySchema } from "@/lib/availability";
 import { roomCriterionSection } from "@/lib/completeness";
 import { getApiData } from "@/lib/server-api";
 import { bathroomTypeLabels, formatCents, roomDetailSchema } from "@/lib/properties";
+import { isStoryExpired } from "@/lib/stories";
 
 const sections = [
   { id: "dados", label: "Dados e preço", icon: LuBedDouble },
@@ -73,7 +74,7 @@ export default async function EditRoomPage({ params, searchParams }: PageProps<"
       {section === "fotos" ? (
         <MediaGallery basePath={`/owner/rooms/${room.id}`} initialMedia={room.media} allowVideo maxImages={20} maxVideos={3} />
       ) : null}
-      {section === "story" ? <RoomStoryEditor roomId={room.id} initialMedia={room.storyMedia} status={room.storyStatus} rejectedReason={room.storyRejectedReason} /> : null}
+      {section === "story" ? <RoomStoryEditor roomId={room.id} initialMedia={room.storyMedia} status={room.storyStatus} rejectedReason={room.storyRejectedReason} expiresAt={room.storyExpiresAt} expired={isStoryExpired(room.storyExpiresAt)} views={room.storyViews} /> : null}
       {availability?.status === "ok" ? <AvailabilityEditor roomId={room.id} initial={availability.data} /> : null}
       {availability && availability.status !== "ok" ? (
         <OwnerDataNotice status={availability.status} retryHref={`/meus-imoveis/${propertyId}/quartos/${roomId}?secao=${section}`} />

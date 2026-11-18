@@ -34,3 +34,7 @@ export const storySchema = z.object({
 export const storyListSchema = z.object({ items: z.array(storySchema) });
 
 export type Story = z.infer<typeof storySchema>;
+
+export function isStoryExpired(expiresAt: string | null): boolean {
+  return expiresAt !== null && new Date(expiresAt).getTime() <= Date.now();
+}

@@ -304,6 +304,8 @@ export const roomDetailSchema = z.object({
   storyMedia: z.array(mediaSchema),
   storyStatus: z.enum(storyStatuses),
   storyRejectedReason: z.string().nullable(),
+  storyExpiresAt: z.string().nullable(),
+  storyViews: z.object({ unique: z.number(), total: z.number() }),
   verificationStatus: z.enum(roomVerificationStatuses),
   verificationRejectedReason: z.string().nullable(),
   property: z.object({ id: z.string(), title: z.string(), status: z.enum(propertyStatuses), availableRoomCount: z.number(), ...houseServicesShape }),

@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/owner/status-badge";
 import { cardClassName, secondaryButtonClassName } from "@/components/owner/styles";
 import { sendApiRequest, toErrorMessage } from "@/lib/api";
 import { mediaSchema, type Media } from "@/lib/properties";
+import { formatDateTime } from "@/lib/admin";
 import { MAX_STORY_MEDIA, storyStatusLabels, type StoryStatus } from "@/lib/stories";
 
 const MB = 1024 * 1024;
@@ -20,11 +21,17 @@ export function RoomStoryEditor({
   initialMedia,
   status,
   rejectedReason,
+  expiresAt,
+  expired,
+  views,
 }: {
   roomId: string;
   initialMedia: Media[];
   status: StoryStatus;
   rejectedReason: string | null;
+  expiresAt: string | null;
+  expired: boolean;
+  views: { unique: number; total: number };
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [media, setMedia] = useState(initialMedia);
@@ -32,6 +39,7 @@ export function RoomStoryEditor({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
   const full = media.length >= MAX_STORY_MEDIA;
+  const approvedAndExpired = currentStatus === "APPROVED" && expired;
 
   function validate(file: File): string | undefined {
     if (imageTypes.includes(file.type)) return file.size > 10 * MB ? "A foto excede 10 MB." : undefined;
@@ -87,10 +95,23 @@ export function RoomStoryEditor({
             Até {MAX_STORY_MEDIA} fotos ou vídeos, vistos no formato stories na home enquanto o quarto estiver em destaque. Cada alteração passa por nova análise.
           </p>
         </div>
-        {media.length > 0 ? <StatusBadge tone={storyTones[currentStatus]}>{storyStatusLabels[currentStatus]}</StatusBadge> : null}
+        {media.length > 0 ? <StatusBadge tone={approvedAndExpired ? "neutral" : storyTones[currentStatus]}>{approvedAndExpired ? "Expirado" : storyStatusLabels[currentStatus]}</StatusBadge> : null}
       </div>
 
       {currentStatus === "REJECTED" && rejectedReason && media.length > 0 ? <p className="text-sm text-(--error)">Motivo da recusa: {rejectedReason}</p> : null}
+
+      {currentStatus === "APPROVED" && expiresAt && media.length > 0 ? (
+        <div className="flex flex-col gap-1 text-sm text-(--text-secondary)">
+          <p>
+            {expired
+              ? `Este story expirou em ${formatDateTime(expiresAt)}. Envie uma nova mídia ou aguarde a administração renovar a aprovação.`
+              : `Visível na home até ${formatDateTime(expiresAt)}.`}
+          </p>
+          <p className="font-semibold text-(--text-primary)">
+            {views.unique === 1 ? "1 visualização única" : `${views.unique} visualizações únicas`} · {views.total} no total
+          </p>
+        </div>
+      ) : null}
 
       <ul className="grid grid-cols-3 gap-3 sm:max-w-md">
         {media.map((item, index) => (
