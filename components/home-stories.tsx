@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { FaCrown } from "react-icons/fa6";
 import { LuStar } from "react-icons/lu";
 import { StoryViewer } from "@/components/story-viewer";
@@ -10,10 +10,65 @@ import type { Story } from "@/lib/stories";
 
 const actionFocus = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)";
 
+const VIEWED_STORAGE_KEY = "viewed-stories";
+
+const viewedListeners = new Set<() => void>();
+
+function subscribeViewed(listener: () => void) {
+  viewedListeners.add(listener);
+  window.addEventListener("storage", listener);
+  return () => {
+    viewedListeners.delete(listener);
+    window.removeEventListener("storage", listener);
+  };
+}
+
+function getViewedSnapshot() {
+  try {
+    return localStorage.getItem(VIEWED_STORAGE_KEY) ?? "[]";
+  } catch {
+    return "[]";
+  }
+}
+
+function parseViewed(raw: string): string[] {
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
 export function HomeStories({ stories }: { stories: Story[] }) {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const viewedRaw = useSyncExternalStore(subscribeViewed, getViewedSnapshot, () => "[]");
+  const viewed = useMemo(() => parseViewed(viewedRaw), [viewedRaw]);
+  const [viewer, setViewer] = useState<{ queue: Story[]; index: number } | null>(null);
+
+  const ordered = useMemo(() => [...stories.filter((story) => !viewed.includes(story.roomId)), ...stories.filter((story) => viewed.includes(story.roomId))], [stories, viewed]);
 
   if (stories.length === 0) return null;
+
+  function markViewed(roomId: string) {
+    if (viewed.includes(roomId)) return;
+    try {
+      localStorage.setItem(VIEWED_STORAGE_KEY, JSON.stringify([...viewed, roomId]));
+    } catch {
+      return;
+    }
+    viewedListeners.forEach((listener) => listener());
+  }
+
+  function open(queue: Story[], index: number) {
+    markViewed(queue[index].roomId);
+    setViewer({ queue, index });
+  }
+
+  function changeIndex(index: number | null) {
+    if (!viewer) return;
+    if (index === null) setViewer(null);
+    else open(viewer.queue, index);
+  }
 
   return (
     <section aria-labelledby="stories-titulo" className="mb-3 flex flex-col gap-2.5 short:max-sm:mb-2 short:max-sm:gap-1.5 md:mb-4">
@@ -27,19 +82,19 @@ export function HomeStories({ stories }: { stories: Story[] }) {
         </Link>
       </div>
 
-      <ul className="-mx-6 flex gap-4 overflow-x-auto px-6 py-1 [scrollbar-width:none] md:-mx-10 md:px-10 lg:-mx-12 lg:px-12 [&::-webkit-scrollbar]:hidden">
-        {stories.map((story, index) => {
+      <ul className="-mx-6 flex gap-4 overflow-x-auto px-6 py-2 [scrollbar-width:none] md:-mx-10 md:px-10 lg:-mx-12 lg:px-12 [&::-webkit-scrollbar]:hidden">
+        {ordered.map((story, index) => {
           const [first] = story.media;
           return (
             <li key={story.roomId} className="w-20 shrink-0">
               <button
                 type="button"
-                onClick={() => setActiveIndex(index)}
+                onClick={() => open(ordered, index)}
                 aria-label={`Abrir story de ${story.title}`}
                 className={`group flex w-full flex-col items-center gap-2 rounded-2xl ${actionFocus}`}
               >
                 <span className="relative">
-                  <span className="relative block size-18 overflow-hidden rounded-full bg-(--surface-raised) ring-2 ring-(--primary) ring-offset-2 ring-offset-(--background) transition-transform duration-200 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100">
+                  <span className={`relative block size-18 overflow-hidden rounded-full bg-(--surface-raised) ring-2 ${viewed.includes(story.roomId) ? "ring-(--border-strong)" : "ring-(--primary)"} ring-offset-2 ring-offset-(--background) transition-transform duration-200 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100`}>
                     {first.type === "IMAGE" ? (
                       <Image src={first.url} alt="" fill sizes="72px" className="object-cover" />
                     ) : (
@@ -57,7 +112,7 @@ export function HomeStories({ stories }: { stories: Story[] }) {
         })}
       </ul>
 
-      <StoryViewer stories={stories} index={activeIndex} onIndexChange={setActiveIndex} />
+      <StoryViewer stories={viewer?.queue ?? ordered} index={viewer?.index ?? null} onIndexChange={changeIndex} />
     </section>
   );
 }
