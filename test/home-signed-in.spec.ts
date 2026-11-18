@@ -17,12 +17,30 @@ const user = {
   roles: [],
 };
 
+const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGD4DwABBAEAX+XDSwAAAABJRU5ErkJggg==", "base64");
 let storyViewed = false;
+let withSecondStory = false;
 let storyMedia: { id: string; type: string; url: string }[] | null = null;
 
-const stories = () => [{ roomId: "story-1", viewed: storyViewed, propertyId: "p1", title: "Suíte Premium", priceCents: 35000, capacity: 2, acceptedAudiences: ["MAN", "WOMAN"], neighborhood: "Centro", city: "Curitiba", state: "PR", media: storyMedia ?? [{ id: "m1", type: "IMAGE", url: "http://localhost:3030/story.png" }, { id: "m2", type: "VIDEO", url: "http://localhost:3030/story.mp4" }] }];
+const defaultMedia = () => [{ id: "m1", type: "IMAGE", url: `${apiUrl}/story.png` }, { id: "m2", type: "VIDEO", url: `${apiUrl}/story.mp4` }];
 
-const twoImages = [{ id: "m1", type: "IMAGE", url: "http://localhost:3030/story.png" }, { id: "m2", type: "IMAGE", url: "http://localhost:3030/story-2.png" }];
+const storyOf = (roomId: string, title: string, media: { id: string; type: string; url: string }[]) => ({
+  roomId,
+  viewed: storyViewed,
+  propertyId: "p1",
+  title,
+  priceCents: 35000,
+  capacity: 2,
+  acceptedAudiences: ["MAN", "WOMAN"],
+  neighborhood: "Centro",
+  city: "Curitiba",
+  state: "PR",
+  media,
+});
+
+const stories = () => [storyOf("story-1", "Suíte Premium", storyMedia ?? defaultMedia()), ...(withSecondStory ? [storyOf("story-2", "Suíte Master", storyMedia ?? defaultMedia())] : [])];
+
+const twoImages = () => [{ id: "m1", type: "IMAGE", url: `${apiUrl}/story.png` }, { id: "m2", type: "IMAGE", url: `${apiUrl}/story-2.png` }];
 
 function rooms(prefix: string, featured: boolean) {
   return Array.from({ length: 6 }, (_, index) => ({
@@ -43,6 +61,7 @@ test.beforeAll(async () => {
     if (path === "/users/me") return response.end(JSON.stringify(user));
     if (path === "/rooms") return response.end(JSON.stringify({ items: rooms("Quarto", false), nextCursor: null, total: 6 }));
     if (path === "/rooms/featured") return response.end(JSON.stringify({ items: rooms("Suíte", true), nextCursor: null, total: 6 }));
+    if (path?.endsWith(".png")) return response.writeHead(200, { "Content-Type": "image/png" }).end(png);
     if (path === "/rooms/stories") return response.end(JSON.stringify({ items: stories() }));
     if (path === "/favorites/room-ids") return response.end(JSON.stringify({ roomIds: [] }));
     response.writeHead(404).end("{}");
@@ -54,9 +73,11 @@ test.afterAll(async () => {
   await new Promise<void>((resolve) => server.close(() => resolve()));
 });
 
-test.beforeEach(async ({ context }) => {
+test.beforeEach(async ({ context, page }) => {
+  await page.route("**/_next/image**", (route) => route.fulfill({ status: 200, contentType: "image/png", body: png }));
   storyViewed = false;
   storyMedia = null;
+  withSecondStory = false;
   await context.addCookies([{ name: "access_token", value: "test-session", url: "http://localhost:3001" }]);
 });
 
@@ -137,7 +158,7 @@ test("story abre mesmo quando o registro da visualização falha", async ({ page
 
 test.describe("temporizador do story", () => {
   async function openStory(page: Page) {
-    storyMedia = twoImages;
+    storyMedia = twoImages();
     await page.clock.install();
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/");
@@ -190,6 +211,61 @@ test.describe("temporizador do story", () => {
     await setHidden(false);
     await page.clock.runFor(5200);
     await expect.poll(() => barValue(bars, 0)).toBe(100);
+  });
+});
+
+test.describe("gestos, pré-carregamento e falha de mídia do story", () => {
+  async function openStory(page: Page, title = "Suíte Premium") {
+    await page.clock.install();
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/");
+    await page.getByRole("button", { name: `Abrir story de ${title}` }).click();
+    const viewer = page.getByRole("dialog", { name: `Story de ${title}` });
+    await expect(viewer).toBeVisible();
+    return viewer;
+  }
+
+  const swipe = async (page: Page, from: [number, number], to: [number, number]) => {
+    await page.mouse.move(...from);
+    await page.mouse.down();
+    await page.mouse.move(...to, { steps: 5 });
+    await page.mouse.up();
+  };
+
+  test("deslize horizontal troca de story e deslize para baixo fecha", async ({ page }) => {
+    withSecondStory = true;
+    storyMedia = twoImages();
+    await openStory(page);
+
+    await swipe(page, [300, 400], [100, 400]);
+    await expect(page.getByRole("dialog", { name: "Story de Suíte Master" })).toBeVisible();
+
+    await swipe(page, [100, 400], [300, 400]);
+    await expect(page.getByRole("dialog", { name: "Story de Suíte Premium" })).toBeVisible();
+
+    await swipe(page, [200, 300], [200, 520]);
+    await expect(page.getByRole("dialog")).toBeHidden();
+  });
+
+  test("pré-carrega a próxima mídia enquanto exibe a atual", async ({ page }) => {
+    storyMedia = twoImages();
+    const preloaded = page.waitForRequest((request) => decodeURIComponent(request.url()).includes("story-2.png"));
+
+    await openStory(page);
+    await page.clock.pauseAt(new Date(Date.now() + 1000));
+
+    await preloaded;
+  });
+
+  test("falha de mídia mostra aviso e avança depois de um instante", async ({ page }) => {
+    const viewer = await openStory(page);
+    await viewer.getByRole("button", { name: "Próxima mídia" }).click();
+
+    await expect(viewer.getByRole("status")).toHaveText("Não foi possível carregar esta mídia.");
+    await expect(viewer).toBeVisible();
+
+    await page.clock.runFor(2500);
+    await expect(viewer).toBeHidden();
   });
 });
 

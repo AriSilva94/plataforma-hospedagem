@@ -8,7 +8,12 @@ import { formatCents, formatLocation, genderIdentities, genderIdentityLabels } f
 import type { Story } from "@/lib/stories";
 
 const IMAGE_DURATION_MS = 5000;
+const SLIDE_SIZES = "(min-width: 448px) 448px, 100vw";
 const HOLD_TO_PAUSE_MS = 250;
+const SWIPE_MIN_PX = 50;
+const SWIPE_DOWN_MIN_PX = 80;
+const TAP_MAX_MOVE_PX = 10;
+const MEDIA_ERROR_ADVANCE_MS = 2000;
 
 const barClassName =
   "h-1 flex-1 appearance-none overflow-hidden rounded-full bg-(--white)/30 [&::-moz-progress-bar]:bg-(--white) [&::-webkit-progress-bar]:bg-(--white)/30 [&::-webkit-progress-value]:bg-(--white)";
@@ -79,8 +84,11 @@ function StorySlides({
   const [manuallyPaused, setManuallyPaused] = useState(false);
   const [holding, setHolding] = useState(false);
   const [tabHidden, setTabHidden] = useState(false);
-  const holdStartedAt = useRef<number | null>(null);
+  const [mediaFailed, setMediaFailed] = useState(false);
+  const gesture = useRef<{ x: number; y: number; startedAt: number } | null>(null);
+  const suppressTap = useRef(false);
   const media = story.media[mediaIndex];
+  const upcoming = story.media[mediaIndex + 1];
   const paused = manuallyPaused || holding || tabHidden;
 
   useEffect(() => {
@@ -92,6 +100,7 @@ function StorySlides({
   const goTo = useCallback((target: number) => {
     setProgress(0);
     setManuallyPaused(false);
+    setMediaFailed(false);
     setMediaIndex(target);
   }, []);
 
@@ -105,25 +114,52 @@ function StorySlides({
     else onPreviousStory();
   }, [goTo, mediaIndex, onPreviousStory]);
 
+  useEffect(() => {
+    if (!mediaFailed || paused) return;
+    const timer = setTimeout(next, MEDIA_ERROR_ADVANCE_MS);
+    return () => clearTimeout(timer);
+  }, [mediaFailed, paused, next]);
+
   function startHold(event: PointerEvent<HTMLElement>) {
     if (!(event.target as Element).closest("[data-tap-zone]")) return;
-    holdStartedAt.current = performance.now();
+    gesture.current = { x: event.clientX, y: event.clientY, startedAt: performance.now() };
+    suppressTap.current = false;
     setHolding(true);
   }
 
-  function endHold() {
+  function endHold(event: PointerEvent<HTMLElement>) {
     setHolding(false);
+    const started = gesture.current;
+    gesture.current = null;
+    if (!started) return;
+    const dx = event.clientX - started.x;
+    const dy = event.clientY - started.y;
+    const horizontal = Math.abs(dx) >= Math.abs(dy);
+    const swipedSideways = horizontal && Math.abs(dx) >= SWIPE_MIN_PX;
+    const swipedDown = !horizontal && dy >= SWIPE_DOWN_MIN_PX;
+    const heldLong = performance.now() - started.startedAt >= HOLD_TO_PAUSE_MS;
+    const moved = Math.hypot(dx, dy) > TAP_MAX_MOVE_PX;
+    suppressTap.current = swipedSideways || swipedDown || heldLong || moved;
+    if (swipedSideways) {
+      if (dx < 0) onNextStory();
+      else onPreviousStory();
+    } else if (swipedDown) {
+      onClose();
+    }
   }
 
   function cancelHold() {
-    holdStartedAt.current = null;
+    gesture.current = null;
+    suppressTap.current = false;
     setHolding(false);
   }
 
   function tap(action: () => void) {
-    const heldFor = holdStartedAt.current === null ? 0 : performance.now() - holdStartedAt.current;
-    holdStartedAt.current = null;
-    if (heldFor < HOLD_TO_PAUSE_MS) action();
+    if (suppressTap.current) {
+      suppressTap.current = false;
+      return;
+    }
+    action();
   }
 
   return (
@@ -139,10 +175,12 @@ function StorySlides({
       onPointerLeave={cancelHold}
     >
       {media.type === "IMAGE" ? (
-        <ImageSlide key={media.id} url={media.url} alt={story.title} paused={paused} onProgress={setProgress} onDone={next} />
+        <ImageSlide key={media.id} url={media.url} alt={story.title} paused={paused || mediaFailed} onProgress={setProgress} onDone={next} onError={() => setMediaFailed(true)} />
       ) : (
-        <VideoSlide key={media.id} url={media.url} label={story.title} paused={paused} onProgress={setProgress} onDone={next} />
+        <VideoSlide key={media.id} url={media.url} label={story.title} paused={paused} onProgress={setProgress} onDone={next} onError={() => setMediaFailed(true)} />
       )}
+
+      {upcoming ? <MediaPreload media={upcoming} /> : null}
 
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-linear-to-b from-(--black)/70 to-transparent" />
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-linear-to-t from-(--black)/80 to-transparent" />
@@ -180,6 +218,12 @@ function StorySlides({
       <button type="button" data-tap-zone aria-label="Mídia anterior" onClick={() => tap(previous)} className={`${tapZoneClassName} left-0 w-1/3`} />
       <button type="button" data-tap-zone aria-label="Próxima mídia" onClick={() => tap(next)} className={`${tapZoneClassName} right-0 w-2/3`} />
 
+      {mediaFailed ? (
+        <p role="status" className="pointer-events-none absolute inset-x-4 top-1/2 z-10 -translate-y-1/2 rounded-2xl bg-(--black)/70 px-4 py-3 text-center text-sm font-semibold">
+          Não foi possível carregar esta mídia.
+        </p>
+      ) : null}
+
       <div className="pointer-events-none absolute inset-x-4 bottom-22 z-10 flex flex-col gap-2">
         <p className="flex items-center gap-1.5 text-sm font-semibold">
           <LuMapPin aria-hidden="true" className="shrink-0" size={16} />
@@ -209,9 +253,9 @@ function StorySlides({
   );
 }
 
-type SlideProps = { onProgress: (value: number) => void; onDone: () => void };
+type SlideProps = { onProgress: (value: number) => void; onDone: () => void; onError: () => void };
 
-function ImageSlide({ url, alt, paused, onProgress, onDone }: SlideProps & { url: string; alt: string; paused: boolean }) {
+function ImageSlide({ url, alt, paused, onProgress, onDone, onError }: SlideProps & { url: string; alt: string; paused: boolean }) {
   const elapsedMs = useRef(0);
 
   useEffect(() => {
@@ -230,10 +274,10 @@ function ImageSlide({ url, alt, paused, onProgress, onDone }: SlideProps & { url
     return () => cancelAnimationFrame(frame);
   }, [paused, onProgress, onDone]);
 
-  return <Image src={url} alt={alt} fill priority sizes="(min-width: 448px) 448px, 100vw" className="object-cover" />;
+  return <Image src={url} alt={alt} fill priority sizes={SLIDE_SIZES} onError={onError} className="object-cover" />;
 }
 
-function VideoSlide({ url, label, paused, onProgress, onDone }: SlideProps & { url: string; label: string; paused: boolean }) {
+function VideoSlide({ url, label, paused, onProgress, onDone, onError }: SlideProps & { url: string; label: string; paused: boolean }) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -256,8 +300,15 @@ function VideoSlide({ url, label, paused, onProgress, onDone }: SlideProps & { u
         if (duration > 0) onProgress((currentTime / duration) * 100);
       }}
       onEnded={onDone}
-      onError={onDone}
+      onError={onError}
       className="size-full object-cover"
     />
   );
+}
+
+function MediaPreload({ media }: { media: Story["media"][number] }) {
+  if (media.type === "IMAGE") {
+    return <Image src={media.url} alt="" fill loading="eager" sizes={SLIDE_SIZES} aria-hidden="true" className="hidden" />;
+  }
+  return <video src={media.url} preload="auto" muted aria-hidden="true" className="hidden" />;
 }
