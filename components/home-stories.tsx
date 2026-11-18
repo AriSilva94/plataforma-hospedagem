@@ -24,8 +24,7 @@ export function HomeStories({ stories }: { stories: Story[] }) {
   if (stories.length === 0) return null;
 
   function markViewed(story: Story) {
-    if (isViewed(story)) return;
-    setOpenedRoomIds((current) => [...current, story.roomId]);
+    if (!isViewed(story)) setOpenedRoomIds((current) => [...current, story.roomId]);
     sendApiRequest(`/rooms/${story.roomId}/story/views`, { method: "POST" }).catch(() => undefined);
   }
 

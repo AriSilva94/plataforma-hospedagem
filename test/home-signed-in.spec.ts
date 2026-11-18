@@ -138,6 +138,24 @@ test("story registra a visualização no backend e passa a constar como visto", 
   expect(views).toEqual(["/rooms/story-1/story/views"]);
 });
 
+test("story já visto registra nova abertura a cada vez que é aberto", async ({ page }) => {
+  storyViewed = true;
+  const views: string[] = [];
+  await page.route("**/rooms/*/story/views", (route) => {
+    views.push(route.request().url());
+    return route.fulfill({ status: 204 });
+  });
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto("/");
+
+  const trigger = page.getByRole("button", { name: "Abrir story de Suíte Premium" });
+  await trigger.click();
+  await page.getByRole("button", { name: "Fechar story" }).click();
+  await trigger.click();
+
+  await expect.poll(() => views.length).toBe(2);
+});
+
 test("story já visto vem marcado pela API", async ({ page }) => {
   storyViewed = true;
   await page.setViewportSize({ width: 375, height: 812 });
@@ -194,6 +212,21 @@ test.describe("temporizador do story", () => {
 
     await page.clock.runFor(5200);
     await expect.poll(() => barValue(bars, 0)).toBe(100);
+  });
+
+  test("soltar depois de segurar com toque não navega", async ({ page }) => {
+    const { viewer, bars } = await openStory(page);
+    const zone = viewer.getByRole("button", { name: "Próxima mídia" });
+    const pointer = { pointerType: "touch", isPrimary: true, button: 0, clientX: 200, clientY: 400 };
+
+    await zone.dispatchEvent("pointerdown", pointer);
+    await page.clock.runFor(400);
+    await zone.dispatchEvent("pointerup", pointer);
+    await zone.dispatchEvent("pointerout", { ...pointer, relatedTarget: null });
+    await zone.dispatchEvent("click");
+
+    expect(await barValue(bars, 1)).toBe(0);
+    expect(await barValue(bars, 0)).toBeLessThan(100);
   });
 
   test("aba oculta pausa o avanço e voltar retoma", async ({ page }) => {

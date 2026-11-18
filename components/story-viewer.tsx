@@ -149,6 +149,7 @@ function StorySlides({
   }
 
   function cancelHold() {
+    if (!gesture.current) return;
     gesture.current = null;
     suppressTap.current = false;
     setHolding(false);
