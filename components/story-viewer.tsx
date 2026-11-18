@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { LuChevronRight, LuMapPin, LuTag, LuUsers, LuX } from "react-icons/lu";
+import { LuChevronRight, LuMapPin, LuPause, LuPlay, LuTag, LuUsers, LuX } from "react-icons/lu";
 import { formatCents, formatLocation, genderIdentities, genderIdentityLabels } from "@/lib/properties";
 import type { Story } from "@/lib/stories";
 
@@ -14,6 +14,9 @@ const barClassName =
   "h-1 flex-1 appearance-none overflow-hidden rounded-full bg-(--white)/30 [&::-moz-progress-bar]:bg-(--white) [&::-webkit-progress-bar]:bg-(--white)/30 [&::-webkit-progress-value]:bg-(--white)";
 
 const chipClassName = "inline-flex items-center gap-1.5 rounded-full bg-(--white)/15 px-2.5 py-1 text-xs font-semibold backdrop-blur-sm";
+
+const iconButtonClassName =
+  "relative z-10 flex size-11 shrink-0 items-center justify-center rounded-full text-(--white) transition-colors hover:bg-(--white)/15 focus-visible:outline-2 focus-visible:outline-(--focus-ring)";
 
 const tapZoneClassName = "absolute inset-y-24 focus-visible:outline-2 focus-visible:outline-(--focus-ring)";
 
@@ -73,10 +76,12 @@ function StorySlides({
 }) {
   const [mediaIndex, setMediaIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [paused, setPaused] = useState(false);
   const media = story.media[mediaIndex];
 
   const goTo = useCallback((target: number) => {
     setProgress(0);
+    setPaused(false);
     setMediaIndex(target);
   }, []);
 
@@ -101,7 +106,7 @@ function StorySlides({
       {media.type === "IMAGE" ? (
         <ImageSlide key={media.id} url={media.url} alt={story.title} onProgress={setProgress} onDone={next} />
       ) : (
-        <VideoSlide key={media.id} url={media.url} label={story.title} onProgress={setProgress} onDone={next} />
+        <VideoSlide key={media.id} url={media.url} label={story.title} paused={paused} onProgress={setProgress} onDone={next} />
       )}
 
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-linear-to-b from-(--black)/70 to-transparent" />
@@ -114,13 +119,23 @@ function StorySlides({
           ))}
         </div>
         <div className="flex items-center justify-between gap-3">
-          <p className="truncate text-sm font-bold">{story.title}</p>
+          <p className="min-w-0 flex-1 truncate text-sm font-bold">{story.title}</p>
+          {media.type === "VIDEO" ? (
+            <button
+              type="button"
+              aria-label={paused ? "Retomar vídeo" : "Pausar vídeo"}
+              onClick={() => setPaused((current) => !current)}
+              className={iconButtonClassName}
+            >
+              {paused ? <LuPlay aria-hidden="true" size={22} /> : <LuPause aria-hidden="true" size={22} />}
+            </button>
+          ) : null}
           <button
             type="button"
             autoFocus
             aria-label="Fechar story"
             onClick={onClose}
-            className="relative z-10 flex size-11 shrink-0 items-center justify-center rounded-full text-(--white) transition-colors hover:bg-(--white)/15 focus-visible:outline-2 focus-visible:outline-(--focus-ring)"
+            className={iconButtonClassName}
           >
             <LuX aria-hidden="true" size={22} />
           </button>
@@ -175,9 +190,19 @@ function ImageSlide({ url, alt, onProgress, onDone }: SlideProps & { url: string
   return <Image src={url} alt={alt} fill priority sizes="(min-width: 448px) 448px, 100vw" className="object-cover" />;
 }
 
-function VideoSlide({ url, label, onProgress, onDone }: SlideProps & { url: string; label: string }) {
+function VideoSlide({ url, label, paused, onProgress, onDone }: SlideProps & { url: string; label: string; paused: boolean }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (paused) video.pause();
+    else void video.play().catch(() => undefined);
+  }, [paused]);
+
   return (
     <video
+      ref={videoRef}
       src={url}
       autoPlay
       playsInline
