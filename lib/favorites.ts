@@ -1,5 +1,5 @@
 import { z } from "@/lib/zod";
-import { propertyTypes } from "@/lib/properties";
+import { coverTypeSchema, propertyTypes } from "@/lib/properties";
 
 export const favoriteRoomIdsSchema = z.object({ roomIds: z.array(z.string()) });
 
@@ -10,6 +10,7 @@ export const favoriteListSchema = z.object({
       title: z.string(),
       priceCents: z.number(),
       coverUrl: z.string().nullable(),
+      coverType: coverTypeSchema,
       available: z.boolean(),
       favoritedAt: z.string(),
       property: z.object({

@@ -6,6 +6,8 @@ export const roomStatuses = ["AVAILABLE", "UNAVAILABLE", "INACTIVE"] as const;
 export const roomVerificationStatuses = ["PENDING", "VERIFIED", "REJECTED"] as const;
 export const storyStatuses = ["PENDING", "APPROVED", "REJECTED"] as const;
 export const bathroomTypes = ["PRIVATE", "SHARED"] as const;
+export const cleaningFrequencies = ["DAILY", "SEVERAL_TIMES_WEEK", "WEEKLY", "BIWEEKLY", "MONTHLY", "ON_DEMAND"] as const;
+export const smokingPolicies = ["NOT_ALLOWED", "OUTDOOR_ONLY", "ALLOWED"] as const;
 export const genderIdentities = ["MAN", "WOMAN", "TRANS_WOMAN", "TRANS_MAN"] as const;
 export const sharedAreaTypes = ["LIVING_ROOM", "KITCHEN", "SHARED_BATHROOM", "LAUNDRY", "OUTDOOR_AREA", "GARAGE", "OTHER"] as const;
 export const propertyFeatures = ["WIFI", "ELEVATOR", "DOORMAN", "GATED_ACCESS", "SECURITY_CAMERAS", "ACCESSIBILITY", "PETS_ALLOWED", "SMOKING_ALLOWED", "CLEANING_SERVICE", "UTILITIES_INCLUDED"] as const;
@@ -66,6 +68,8 @@ export type RoomStatus = (typeof roomStatuses)[number];
 export type RoomVerificationStatus = (typeof roomVerificationStatuses)[number];
 export type BathroomType = (typeof bathroomTypes)[number];
 export type GenderIdentity = (typeof genderIdentities)[number];
+export type CleaningFrequency = (typeof cleaningFrequencies)[number];
+export type SmokingPolicy = (typeof smokingPolicies)[number];
 export type SharedAreaType = (typeof sharedAreaTypes)[number];
 export type PublishRequirement = (typeof publishRequirements)[number];
 export type CompletenessCriterion = (typeof completenessCriteria)[number];
@@ -104,6 +108,27 @@ export const bathroomTypeLabels: Record<BathroomType, string> = {
   PRIVATE: "Privativo",
   SHARED: "Compartilhado",
 };
+
+export const cleaningFrequencyLabels: Record<CleaningFrequency, string> = {
+  DAILY: "Todos os dias",
+  SEVERAL_TIMES_WEEK: "2 a 3 vezes por semana",
+  WEEKLY: "1 vez por semana",
+  BIWEEKLY: "A cada 15 dias",
+  MONTHLY: "1 vez por mês",
+  ON_DEMAND: "Sob demanda",
+};
+
+export const smokingPolicyLabels: Record<SmokingPolicy, string> = {
+  NOT_ALLOWED: "Não é permitido fumar",
+  OUTDOOR_ONLY: "Permitido só em área externa",
+  ALLOWED: "Permitido fumar",
+};
+
+export function cleaningSummary(hasCleaner: boolean | null, frequency: CleaningFrequency | null): string | null {
+  if (hasCleaner === null) return null;
+  if (!hasCleaner) return "Sem faxineira";
+  return frequency ? `Faxineira · ${cleaningFrequencyLabels[frequency].toLowerCase()}` : "Com faxineira";
+}
 
 export const genderIdentityLabels: Record<GenderIdentity, string> = {
   MAN: "Homem",
@@ -164,9 +189,19 @@ export const roomAmenityLabels: Record<(typeof roomAmenities)[number], string> =
   TOWELS: "Toalhas",
 };
 
+export const houseServicesShape = {
+  hasCleaner: z.boolean().nullable().default(null),
+  cleaningFrequency: z.enum(cleaningFrequencies).nullable().default(null),
+  smokingPolicy: z.enum(smokingPolicies).nullable().default(null),
+};
+
+export const mediaKinds = ["IMAGE", "VIDEO"] as const;
+export type MediaKind = (typeof mediaKinds)[number];
+export const coverTypeSchema = z.enum(mediaKinds).nullable().default(null);
+
 export const mediaSchema = z.object({
   id: z.string(),
-  type: z.enum(["IMAGE", "VIDEO"]),
+  type: z.enum(mediaKinds),
   url: z.string(),
   mimeType: z.string(),
   sizeBytes: z.number(),
@@ -189,6 +224,7 @@ export const propertySummarySchema = z.object({
   city: z.string().nullable(),
   state: z.string().nullable(),
   coverUrl: z.string().nullable(),
+  coverType: coverTypeSchema,
   roomCount: z.number(),
   availableRoomCount: z.number(),
   minAvailablePriceCents: z.number().nullable(),
@@ -214,6 +250,7 @@ export const roomSummarySchema = z.object({
   completenessScore: z.number(),
   completenessMissing: z.array(z.enum(completenessCriteria)),
   coverUrl: z.string().nullable(),
+  coverType: coverTypeSchema,
   verificationStatus: z.enum(roomVerificationStatuses),
   verificationRejectedReason: z.string().nullable(),
 });
@@ -226,6 +263,7 @@ export const propertyDetailSchema = z.object({
   description: z.string().nullable(),
   houseRules: z.string().nullable(),
   generalInfo: z.string().nullable(),
+  ...houseServicesShape,
   features: z.array(z.string()),
   missingRequirements: z.array(z.enum(publishRequirements)),
   postalCode: z.string().nullable(),
@@ -259,6 +297,7 @@ export const roomDetailSchema = z.object({
   acceptedAudiences: z.array(z.enum(genderIdentities)),
   amenities: z.array(z.string()),
   additionalInfo: z.string().nullable(),
+  ...houseServicesShape,
   completenessScore: z.number(),
   completenessMissing: z.array(z.enum(completenessCriteria)),
   media: z.array(mediaSchema),
@@ -267,7 +306,7 @@ export const roomDetailSchema = z.object({
   storyRejectedReason: z.string().nullable(),
   verificationStatus: z.enum(roomVerificationStatuses),
   verificationRejectedReason: z.string().nullable(),
-  property: z.object({ id: z.string(), title: z.string(), status: z.enum(propertyStatuses), availableRoomCount: z.number() }),
+  property: z.object({ id: z.string(), title: z.string(), status: z.enum(propertyStatuses), availableRoomCount: z.number(), ...houseServicesShape }),
 });
 
 export const publicRoomCardSchema = z.object({
@@ -277,6 +316,7 @@ export const publicRoomCardSchema = z.object({
   featured: z.boolean(),
   verified: z.boolean(),
   coverUrl: z.string().nullable(),
+  coverType: coverTypeSchema,
   property: z.object({
     id: z.string(),
     title: z.string(),
@@ -302,6 +342,7 @@ export const publicPropertyDetailSchema = z.object({
   description: z.string().nullable(),
   houseRules: z.string().nullable(),
   generalInfo: z.string().nullable(),
+  ...houseServicesShape,
   features: z.array(z.string()),
   neighborhood: z.string().nullable(),
   city: z.string().nullable(),
@@ -327,6 +368,7 @@ export const publicPropertyDetailSchema = z.object({
       acceptedAudiences: z.array(z.enum(genderIdentities)),
       amenities: z.array(z.string()),
       additionalInfo: z.string().nullable(),
+      ...houseServicesShape,
       verified: z.boolean(),
       media: z.array(mediaSchema),
     }),

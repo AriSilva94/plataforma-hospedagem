@@ -86,12 +86,12 @@ export function HomeStories({ stories }: { stories: Story[] }) {
         {ordered.map((story, index) => {
           const [first] = story.media;
           return (
-            <li key={story.roomId} className="w-20 shrink-0">
+            <li key={story.roomId} className="w-24 shrink-0">
               <button
                 type="button"
                 onClick={() => open(ordered, index)}
                 aria-label={`Abrir story de ${story.title}`}
-                className={`group flex w-full flex-col items-center gap-2 rounded-2xl ${actionFocus}`}
+                className={`group flex w-full flex-col items-center gap-3 rounded-2xl ${actionFocus}`}
               >
                 <span className="relative">
                   <span className={`relative block size-18 overflow-hidden rounded-full bg-(--surface-raised) ring-2 ${viewed.includes(story.roomId) ? "ring-(--border-strong)" : "ring-(--primary)"} ring-offset-2 ring-offset-(--background) transition-transform duration-200 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100`}>
@@ -105,7 +105,14 @@ export function HomeStories({ stories }: { stories: Story[] }) {
                     <FaCrown size={13} />
                   </span>
                 </span>
-                <span className="line-clamp-2 w-full text-center text-xs leading-tight font-semibold text-(--text-primary)">{story.title}</span>
+                <span className="flex w-full flex-col items-center gap-1">
+                  <span className="w-full truncate text-center text-[13px] leading-tight font-extrabold text-(--text-primary)">{story.title}</span>
+                  <span className="flex w-full justify-center text-xs leading-tight font-bold text-(--primary-text)">
+                    <span className="truncate">{story.city}</span>
+                    {story.city && story.state ? <span className="shrink-0 whitespace-pre"> · </span> : null}
+                    <span className="shrink-0">{story.state}</span>
+                  </span>
+                </span>
               </button>
             </li>
           );

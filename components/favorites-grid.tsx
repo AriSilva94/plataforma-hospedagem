@@ -33,7 +33,7 @@ export function FavoritesGrid({ items, loginReturnPath = "/favoritos" }: { items
         {items.map((item) => (
           <li key={item.roomId}>
             <RoomCard
-              room={{ id: item.roomId, title: item.title, priceCents: item.priceCents, coverUrl: item.coverUrl, featured: false, verified: false, property: item.property }}
+              room={{ id: item.roomId, title: item.title, priceCents: item.priceCents, coverUrl: item.coverUrl, coverType: item.coverType, featured: false, verified: false, property: item.property }}
               unavailable={!item.available}
               action={
                 <FavoriteButton
