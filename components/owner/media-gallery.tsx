@@ -4,12 +4,12 @@ import Image from "next/image";
 import { memo, useEffect, useLayoutEffect, useRef, useState, type DragEvent, type KeyboardEvent, type PointerEvent } from "react";
 import { flushSync } from "react-dom";
 import { z } from "@/lib/zod";
-import { LuCheck, LuGripVertical, LuImagePlus, LuLoaderCircle, LuPlay, LuStar, LuTrash2 } from "react-icons/lu";
+import { LuCheck, LuGripVertical, LuImagePlus, LuImages, LuVideo, LuLoaderCircle, LuPlay, LuStar, LuTrash2 } from "react-icons/lu";
 import { FormFeedback } from "@/components/form-feedback";
 import { ConfirmDialog } from "@/components/owner/confirm-dialog";
 import { secondaryButtonClassName } from "@/components/owner/styles";
 import { sendApiRequest, toErrorMessage } from "@/lib/api";
-import { mediaSchema, type Media } from "@/lib/properties";
+import { mediaSchema, type Media, type MediaKind } from "@/lib/properties";
 
 const MB = 1024 * 1024;
 const imageTypes = ["image/jpeg", "image/png", "image/webp"];
@@ -58,6 +58,12 @@ function moveItem<T>(items: T[], from: number, to: number): T[] {
 
 function sameOrder(a: Media[], b: Media[]): boolean {
   return a.length === b.length && a.every((item, index) => item.id === b[index].id);
+}
+
+function mergeOrder(all: Media[], reordered: Media[]): Media[] {
+  const ids = new Set(reordered.map((item) => item.id));
+  let next = 0;
+  return all.map((item) => (ids.has(item.id) ? reordered[next++] : item));
 }
 
 function shiftedIndex(index: number, from: number, to: number): number {
@@ -136,7 +142,7 @@ const MediaTile = memo(function MediaTile({
         ) : null}
       </div>
       <div className="flex items-center justify-between gap-1.5 p-1.5">
-        {item.type === "IMAGE" && !isCover ? (
+        {!isCover ? (
           <button
             type="button"
             aria-label={`Tornar capa: ${label}`}
@@ -148,7 +154,7 @@ const MediaTile = memo(function MediaTile({
             Tornar capa
           </button>
         ) : (
-          <span className="px-2 text-xs text-(--text-secondary)">{isCover ? "Foto de capa" : "Vídeo"}</span>
+          <span className="px-2 text-xs text-(--text-secondary)">{item.type === "IMAGE" ? "Foto de capa" : "Vídeo de capa"}</span>
         )}
         <button
           type="button"
@@ -195,15 +201,19 @@ export function MediaGallery({
   const [orderStatus, setOrderStatus] = useState<"saving" | "saved">();
   const [announcement, setAnnouncement] = useState("");
   const [filesOver, setFilesOver] = useState(false);
-  const accept = [...imageTypes, ...(allowVideo ? videoTypes : [])].join(",");
-  const coverId = media.find((item) => item.type === "IMAGE")?.id;
+  const [kind, setKind] = useState<MediaKind>("IMAGE");
+  const accept = (kind === "IMAGE" ? imageTypes : videoTypes).join(",");
+  const coverId = media[0]?.id;
+  const visible = media.filter((item) => item.type === kind);
+  const videoCount = media.length - media.filter((item) => item.type === "IMAGE").length;
+  const photoCount = media.length - videoCount;
   const disabled = busy || Boolean(progress) || orderStatus === "saving";
-  const canReorder = media.length > 1;
+  const canReorder = visible.length > 1;
   const draggedItem = media.find((item) => item.id === draggingId);
-  const stateRef = useRef({ media, disabled, grabbedId });
+  const stateRef = useRef({ media: visible, all: media, disabled, grabbedId });
 
   useLayoutEffect(() => {
-    stateRef.current = { media, disabled, grabbedId };
+    stateRef.current = { media: visible, all: media, disabled, grabbedId };
   });
 
   useLayoutEffect(() => {
@@ -276,15 +286,16 @@ export function MediaGallery({
 
       if (moved) {
         const next = moveItem(session.previous, session.fromIndex, session.overIndex);
+        const allBefore = stateRef.current.all;
         session.nodes.forEach((node) => {
           node.classList.remove(...SHIFT_CLASSES);
           node.style.transform = "";
         });
         flushSync(() => {
           setDraggingId(undefined);
-          setMedia(next);
+          setMedia((all) => mergeOrder(all, next));
         });
-        void persistOrder(next, session.previous);
+        void persistOrder(mergeOrder(allBefore, next), allBefore);
         return;
       }
 
@@ -336,7 +347,7 @@ export function MediaGallery({
         if (sessionRef.current?.pointerId === event.pointerId) finishDrag(commit);
       },
       reorderKey(event, id) {
-        const { media: current, disabled: locked, grabbedId: grabbed } = stateRef.current;
+        const { media: current, all, disabled: locked, grabbedId: grabbed } = stateRef.current;
         if (locked || sessionRef.current) return;
         const index = current.findIndex((item) => item.id === id);
         const confirmKey = event.key === " " || event.key === "Enter";
@@ -344,7 +355,7 @@ export function MediaGallery({
         if (grabbed !== id) {
           if (!confirmKey || grabbed) return;
           event.preventDefault();
-          keyboardSnapshotRef.current = current;
+          keyboardSnapshotRef.current = all;
           setOrderStatus(undefined);
           setGrabbedId(id);
           setAnnouncement(
@@ -358,15 +369,16 @@ export function MediaGallery({
           event.preventDefault();
           const destination = index + step;
           if (destination < 0 || destination >= current.length) return;
-          setMedia(moveItem(current, index, destination));
+          const moved = moveItem(current, index, destination);
+          setMedia((currentAll) => mergeOrder(currentAll, moved));
           setAnnouncement(`Posição ${destination + 1} de ${current.length}.`);
           return;
         }
         if (confirmKey) {
           event.preventDefault();
           setGrabbedId(undefined);
-          if (sameOrder(keyboardSnapshotRef.current, current)) setAnnouncement("Posição mantida.");
-          else void persistOrder(current, keyboardSnapshotRef.current);
+          if (sameOrder(keyboardSnapshotRef.current, all)) setAnnouncement("Posição mantida.");
+          else void persistOrder(all, keyboardSnapshotRef.current);
           return;
         }
         if (event.key === "Escape") {
@@ -377,13 +389,13 @@ export function MediaGallery({
         }
       },
       releaseKeyboard(id) {
-        const { media: current, grabbedId: grabbed } = stateRef.current;
+        const { all, grabbedId: grabbed } = stateRef.current;
         if (grabbed !== id) return;
         setGrabbedId(undefined);
-        if (!sameOrder(keyboardSnapshotRef.current, current)) void persistOrder(current, keyboardSnapshotRef.current);
+        if (!sameOrder(keyboardSnapshotRef.current, all)) void persistOrder(all, keyboardSnapshotRef.current);
       },
       makeCover(id) {
-        const current = stateRef.current.media;
+        const current = stateRef.current.all;
         const target = current.find((item) => item.id === id);
         if (target) void persistOrder([target, ...current.filter((item) => item.id !== id)], current);
       },
@@ -398,13 +410,13 @@ export function MediaGallery({
   });
 
   function validate(file: File): string | undefined {
-    if (imageTypes.includes(file.type)) {
+    if (kind === "IMAGE" && imageTypes.includes(file.type)) {
       return file.size > 10 * MB ? `${file.name}: a foto excede 10 MB.` : undefined;
     }
-    if (allowVideo && videoTypes.includes(file.type)) {
+    if (kind === "VIDEO" && videoTypes.includes(file.type)) {
       return file.size > 100 * MB ? `${file.name}: o vídeo excede 100 MB.` : undefined;
     }
-    return `${file.name}: formato não suportado.`;
+    return `${file.name}: formato não suportado nesta aba.`;
   }
 
   async function upload(files: File[]) {
@@ -481,6 +493,32 @@ export function MediaGallery({
 
   return (
     <section aria-label="Galeria" className="flex flex-col gap-5 py-6">
+      {allowVideo ? (
+        <div role="tablist" aria-label="Tipo de mídia" className="flex w-full gap-1 rounded-[1.625rem] border border-(--border) bg-(--surface) p-1 sm:w-fit">
+          {(
+            [
+              { id: "IMAGE", label: `Fotos ${photoCount}/${maxImages}`, icon: LuImages },
+              { id: "VIDEO", label: `Vídeos ${videoCount}/${maxVideos}`, icon: LuVideo },
+            ] as const
+          ).map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={kind === tab.id}
+              disabled={disabled}
+              onClick={() => setKind(tab.id)}
+              className={`inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full px-4 text-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) disabled:opacity-60 sm:flex-none ${
+                kind === tab.id ? "bg-(--primary) text-(--on-primary)" : "text-(--text-secondary) hover:bg-(--primary-soft) hover:text-(--text-primary)"
+              }`}
+            >
+              <tab.icon aria-hidden="true" size={16} />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
       <div
         onDragEnter={handleFilesOver}
         onDragOver={handleFilesOver}
@@ -491,16 +529,15 @@ export function MediaGallery({
         }`}
       >
         <div>
-          <h2 className="font-bold text-(--text-primary)">{allowVideo ? "Fotos e vídeos" : "Fotos"}</h2>
+          <h2 className="font-bold text-(--text-primary)">{kind === "IMAGE" ? "Fotos" : "Vídeos"}</h2>
           <p className="mt-1 text-sm leading-relaxed text-(--text-secondary)">
             <span className="hidden sm:inline">Arraste arquivos para cá ou use o botão. </span>
-            Fotos JPEG, PNG ou WebP até 10 MB (máx. {maxImages})
-            {allowVideo ? `; vídeos MP4, MOV ou WebM até 100 MB (máx. ${maxVideos})` : ""}.
+            {kind === "IMAGE" ? `JPEG, PNG ou WebP até 10 MB (máx. ${maxImages}).` : `MP4, MOV ou WebM até 100 MB (máx. ${maxVideos}).`}
           </p>
         </div>
         <label className={`${secondaryButtonClassName} shrink-0 cursor-pointer has-disabled:cursor-not-allowed has-disabled:opacity-60`}>
           <LuImagePlus aria-hidden="true" size={17} />
-          {progress ? `Enviando ${progress.done}/${progress.total}...` : "Adicionar arquivos"}
+          {progress ? `Enviando ${progress.done}/${progress.total}...` : kind === "IMAGE" ? "Adicionar fotos" : "Adicionar vídeos"}
           <input
             ref={inputRef}
             type="file"
@@ -520,19 +557,19 @@ export function MediaGallery({
         {message ? <FormFeedback tone="success">{message}</FormFeedback> : null}
       </div>
 
-      {media.length === 0 ? (
-        <p className="text-sm text-(--text-secondary)">Nenhum arquivo enviado ainda.</p>
+      {visible.length === 0 ? (
+        <p className="text-sm text-(--text-secondary)">{kind === "IMAGE" ? "Nenhuma foto enviada ainda." : "Nenhum vídeo enviado ainda."}</p>
       ) : (
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-[13px] text-(--text-secondary)">
             {canReorder ? (
               <p id={REORDER_INSTRUCTIONS_ID} className="flex items-center gap-1.5">
                 <LuGripVertical aria-hidden="true" size={14} className="shrink-0" />
-                Arraste pelo ícone para reordenar. A primeira foto é a capa.
+                Arraste pelo ícone para reordenar. O primeiro item é a capa, seja foto ou vídeo.
                 <span className="sr-only">No teclado, foque o ícone, pressione Espaço, mova com as setas e confirme com Enter.</span>
               </p>
             ) : (
-              <p>A primeira foto é a capa.</p>
+              <p>O primeiro item é a capa, seja foto ou vídeo.</p>
             )}
             {orderStatus === "saving" ? (
               <p className="flex items-center gap-1.5">
@@ -548,7 +585,7 @@ export function MediaGallery({
           </div>
 
           <ol ref={listRef} className="relative grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {media.map((item, index) => (
+            {visible.map((item, index) => (
               <MediaTile
                 key={item.id}
                 item={item}

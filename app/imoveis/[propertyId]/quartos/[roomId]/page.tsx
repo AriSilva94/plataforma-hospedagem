@@ -6,7 +6,9 @@ import {
   LuArrowLeft,
   LuBath,
   LuCalendarDays,
+  LuCigarette,
   LuFlag,
+  LuSparkles,
   LuTag,
   LuUsers,
 } from "react-icons/lu";
@@ -33,6 +35,7 @@ import { roomAvailabilitySchema } from "@/lib/availability";
 import { getCurrentUser } from "@/lib/current-user";
 import {
   bathroomTypeLabels,
+  cleaningSummary,
   formatCents,
   formatLocation,
   genderIdentityLabels,
@@ -41,6 +44,7 @@ import {
   publicPropertyDetailSchema,
   roomAmenityLabels,
   sharedAreaTypeLabels,
+  smokingPolicyLabels,
 } from "@/lib/properties";
 import { getFavoriteRoomIds } from "@/lib/room-listings";
 import { getApiData } from "@/lib/server-api";
@@ -134,16 +138,14 @@ export default async function PublicRoomPage({
   }
 
   const favoriteRoomIds = new Set(await getFavoriteRoomIds(Boolean(user)));
-  const roomPhotos = room.media
-    .filter((item) => item.type === "IMAGE")
-    .map((item, index) => ({
-      id: item.id,
-      url: item.url,
-      alt:
-        index === 0
-          ? `Foto principal de ${room.title}`
-          : `Foto ${index + 1} de ${room.title}`,
-    }));
+  const roomPhotos = room.media.map((item, index) => ({
+    id: item.id,
+    url: item.url,
+    type: item.type,
+    alt: `${item.type === "VIDEO" ? "Vídeo" : "Foto"} ${index === 0 ? "principal" : index + 1} de ${room.title}`,
+  }));
+
+  const cleaning = cleaningSummary(room.hasCleaner, room.cleaningFrequency);
   const hasPropertyContext =
     Boolean(property.description) ||
     property.features.length > 0 ||
@@ -208,6 +210,8 @@ export default async function PublicRoomPage({
                     label="Banheiro"
                     value={bathroomTypeLabels[room.bathroomType]}
                   />
+                  {cleaning ? <StatBox icon={LuSparkles} label="Faxina" value={cleaning} /> : null}
+                  {room.smokingPolicy ? <StatBox icon={LuCigarette} label="Fumantes" value={smokingPolicyLabels[room.smokingPolicy]} /> : null}
                 </div>
 
                 {room.description ? (

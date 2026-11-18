@@ -11,9 +11,13 @@ import { ChoiceGroup, optionsFrom } from "@/components/owner/choice-group";
 import { FieldError } from "@/components/field-error";
 import { PropertyTypeTag } from "@/components/property-type-tag";
 import { CharacterCount, FieldHint } from "@/components/owner/field-hint";
+import { HouseServicesFields } from "@/components/owner/house-services-fields";
 import { OptionalDetails } from "@/components/owner/optional-details";
 import { fieldClassName, labelClassName, primaryButtonClassName, secondaryButtonClassName } from "@/components/owner/styles";
 import {
+  houseServicesDefaults,
+  houseServicesError,
+  houseServicesPayload,
   propertyGeneralSchema,
   propertyGuidedGeneralSchema,
   type PropertyGeneralInput,
@@ -60,6 +64,7 @@ export function PropertyGeneralForm({ property, guided }: { property?: PropertyD
       houseRules: property?.houseRules ?? "",
       generalInfo: property?.generalInfo ?? "",
       features: property?.features ?? [],
+      ...houseServicesDefaults(property),
     },
     mode: "onBlur",
   });
@@ -67,15 +72,21 @@ export function PropertyGeneralForm({ property, guided }: { property?: PropertyD
   const editing = Boolean(property) && !guided;
   const published = Boolean(property) && property?.status !== "DRAFT";
   const description = useWatch({ control, name: "description" });
+  const hasCleaner = useWatch({ control, name: "hasCleaner" });
   const detailsHaveErrors = Boolean(errors.houseRules || errors.generalInfo);
 
   async function save(values: PropertyGeneralValues) {
     setError(undefined);
     setMessage(undefined);
+    const servicesError = houseServicesError(values);
+    if (servicesError) {
+      setError(servicesError);
+      return;
+    }
     try {
       const saved = await sendApiRequest(property ? `/owner/properties/${property.id}` : "/owner/properties", {
         method: property ? "PATCH" : "POST",
-        body: JSON.stringify(values),
+        body: JSON.stringify({ ...values, ...houseServicesPayload(values) }),
       });
       if (property) {
         if (guided) {
@@ -166,6 +177,14 @@ export function PropertyGeneralForm({ property, guided }: { property?: PropertyD
         </div>
         <FieldError id="property-description-error" message={errors.description?.message} />
       </div>
+
+      <section aria-labelledby="property-services-heading" className="flex flex-col gap-3">
+        <h2 id="property-services-heading" className="text-lg font-bold text-(--text-primary)">
+          Faxina e fumantes
+        </h2>
+        <p className="max-w-prose text-sm leading-relaxed text-(--text-secondary)">Vale para todos os quartos. Cada quarto pode ter uma regra própria.</p>
+        <HouseServicesFields register={register} hasCleaner={hasCleaner} />
+      </section>
 
       <OptionalDetails
         title="Mais detalhes"

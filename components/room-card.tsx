@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { LuBadgeCheck, LuImage, LuMapPin, LuStar } from "react-icons/lu";
+import { CoverMedia } from "@/components/cover-media";
 import { PropertyTypeTag } from "@/components/property-type-tag";
 import { formatCents, formatLocation, type PublicRoomCard } from "@/lib/properties";
 
@@ -25,11 +25,10 @@ export function RoomCard({
     <>
       <div className={`relative bg-(--surface-raised) ${fill ? "min-h-32 flex-1" : "aspect-4/3"}`}>
         {room.coverUrl ? (
-          <Image
-            src={room.coverUrl}
-            alt=""
-            fill
-            className={`object-cover transition-transform duration-300 ${unavailable ? "opacity-50 grayscale" : "group-hover:scale-103"}`}
+          <CoverMedia
+            url={room.coverUrl}
+            type={room.coverType}
+            className={`transition-transform duration-300 ${unavailable ? "opacity-50 grayscale" : "group-hover:scale-103"}`}
             sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
           />
         ) : (

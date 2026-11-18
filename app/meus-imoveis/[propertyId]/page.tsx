@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { LuArrowRight, LuChevronDown, LuCircleAlert, LuCircleCheck, LuEye, LuExternalLink, LuImage, LuPencil, LuPlus } from "react-icons/lu";
+import { CoverMedia } from "@/components/cover-media";
 import { OwnerDataNotice } from "@/components/owner/owner-notice";
 import { OwnerPage } from "@/components/owner/owner-page";
 import { PropertyStatusBadge, roomVerificationTones } from "@/components/owner/property-status-badge";
@@ -18,6 +18,7 @@ import { completenessHint, isRoomCriterion } from "@/lib/completeness";
 import { firstPendingStep, requirementLabels, setupStepHref } from "@/lib/setup-steps";
 import {
   bathroomTypeLabels,
+  cleaningSummary,
   formatCents,
   formatLocation,
   genderIdentityLabels,
@@ -26,6 +27,7 @@ import {
   propertyTypeLabels,
   roomVerificationStatusLabels,
   sharedAreaTypeLabels,
+  smokingPolicyLabels,
   type PropertyDetail,
   type PropertyStatus,
   type PropertyType,
@@ -115,12 +117,11 @@ function RoomRow({
         >
           <span className={`absolute inset-0 ${room.status === "AVAILABLE" ? "" : "opacity-50 grayscale"}`}>
             {room.coverUrl ? (
-              <Image
-                src={room.coverUrl}
-                alt=""
-                fill
+              <CoverMedia
+                url={room.coverUrl}
+                type={room.coverType}
                 sizes="(min-width: 64rem) 240px, 100vw"
-                className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+                className="transition-transform duration-300 ease-out group-hover:scale-[1.03]"
               />
             ) : (
               <span className="flex size-full items-center justify-center text-(--text-secondary)">
@@ -226,7 +227,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
   const property = result.data;
   const editHref = (section: string) => `/meus-imoveis/${property.id}/editar?secao=${section}`;
   const images = property.media.filter((item) => item.type === "IMAGE");
-  const cover = images[0];
+  const cover = property.media[0];
   const videoCount = property.media.length - images.length;
   const address = privateAddress(property);
   const listedRooms = property.rooms.filter((room) => room.status !== "INACTIVE");
@@ -428,7 +429,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
           </div>
           {cover ? (
             <div className="relative mt-4 h-28 overflow-hidden rounded-xl bg-(--surface-raised)">
-              <Image src={cover.url} alt="Foto de capa do imóvel" fill sizes="320px" className="object-cover" />
+              <CoverMedia url={cover.url} type={cover.type} alt="Capa do imóvel" sizes="320px" />
             </div>
           ) : null}
           <div className="mt-3 divide-y divide-(--border)">
@@ -442,6 +443,11 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
             <PropertySection title="Sobre" editHref={editHref("geral")}>
               <p className="truncate">{property.description || "Sem descrição."}</p>
               <p>{property.features.length === 1 ? "1 comodidade" : `${property.features.length} comodidades`}</p>
+            </PropertySection>
+
+            <PropertySection title="Faxina e fumantes" editHref={editHref("geral")}>
+              <p>{cleaningSummary(property.hasCleaner, property.cleaningFrequency) ?? "Faxina não informada."}</p>
+              <p>{property.smokingPolicy ? smokingPolicyLabels[property.smokingPolicy] : "Fumantes não informado."}</p>
             </PropertySection>
 
             <PropertySection title="Localização" editHref={editHref("localizacao")}>

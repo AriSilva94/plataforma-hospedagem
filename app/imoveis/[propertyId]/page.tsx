@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { LuArrowDown, LuArrowLeft, LuBedDouble } from "react-icons/lu";
+import { LuArrowDown, LuArrowLeft, LuBedDouble, LuCigarette, LuSparkles } from "react-icons/lu";
 import { FavoriteButton } from "@/components/favorite-button";
 import { HostCard } from "@/components/host-card";
 import { IconList } from "@/components/icon-list";
@@ -11,7 +11,7 @@ import { RoomCard } from "@/components/room-card";
 import { SiteHeader } from "@/components/site-header";
 import { iconOf, propertyFeatureIcons, sharedAreaTypeIcons } from "@/lib/amenity-icons";
 import { getCurrentUser } from "@/lib/current-user";
-import { formatCents, formatLocation, labelOf, propertyFeatureLabels, publicPropertyDetailSchema, sharedAreaTypeLabels } from "@/lib/properties";
+import { cleaningSummary, formatCents, formatLocation, labelOf, propertyFeatureLabels, publicPropertyDetailSchema, sharedAreaTypeLabels, smokingPolicyLabels } from "@/lib/properties";
 import { getFavoriteRoomIds } from "@/lib/room-listings";
 import { getApiData } from "@/lib/server-api";
 
@@ -51,10 +51,13 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
 
   const property = result.data;
   const favoriteRoomIds = new Set(await getFavoriteRoomIds(Boolean(user)));
-  const photos = property.media
-    .filter((item) => item.type === "IMAGE")
-    .map((item, index) => ({ id: item.id, url: item.url, alt: index === 0 ? `Foto principal de ${property.title}` : `Foto ${index + 1} de ${property.title}` }));
-  const videos = property.media.filter((item) => item.type === "VIDEO");
+  const photos = property.media.map((item, index) => ({
+    id: item.id,
+    url: item.url,
+    type: item.type,
+    alt: `${item.type === "VIDEO" ? "Vídeo" : "Foto"} ${index === 0 ? "principal" : index + 1} de ${property.title}`,
+  }));
+  const cleaning = cleaningSummary(property.hasCleaner, property.cleaningFrequency);
   const lowestPrice = property.rooms.length > 0 ? Math.min(...property.rooms.map((room) => room.priceCents)) : undefined;
   const roomCount = property.rooms.length === 1 ? "1 quarto disponível" : `${property.rooms.length} quartos disponíveis`;
   const highlights = property.features.slice(0, 2).map((feature) => ({
@@ -103,7 +106,8 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
                             priceCents: room.priceCents,
                             featured: false,
                             verified: room.verified,
-                            coverUrl: room.media.find((item) => item.type === "IMAGE")?.url ?? null,
+                            coverUrl: room.media[0]?.url ?? null,
+                            coverType: room.media[0]?.type ?? null,
                             property: { id: property.id, title: property.title, type: property.type, neighborhood: property.neighborhood, city: property.city, state: property.state },
                           }}
                           action={
@@ -125,6 +129,25 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
                   </p>
                 )}
               </section>
+
+              {cleaning || property.smokingPolicy ? (
+                <Section title="Faxina e fumantes">
+                  <ul className="grid gap-3 sm:grid-cols-2">
+                    {cleaning ? (
+                      <li className="flex items-center gap-3 rounded-xl border border-(--border) bg-(--surface) p-4">
+                        <LuSparkles aria-hidden="true" size={18} className="shrink-0 text-(--primary-text)" />
+                        <span className="font-semibold text-(--text-primary)">{cleaning}</span>
+                      </li>
+                    ) : null}
+                    {property.smokingPolicy ? (
+                      <li className="flex items-center gap-3 rounded-xl border border-(--border) bg-(--surface) p-4">
+                        <LuCigarette aria-hidden="true" size={18} className="shrink-0 text-(--primary-text)" />
+                        <span className="font-semibold text-(--text-primary)">{smokingPolicyLabels[property.smokingPolicy]}</span>
+                      </li>
+                    ) : null}
+                  </ul>
+                </Section>
+              ) : null}
 
               {property.description || property.features.length > 0 ? (
                 <Section title="Sobre o local">
@@ -159,23 +182,6 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
                       );
                     })}
                   </ul>
-                </Section>
-              ) : null}
-
-              {videos.length > 0 ? (
-                <Section title="Vídeos">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {videos.map((video, index) => (
-                      <video
-                        key={video.id}
-                        src={`${video.url}#t=0.1`}
-                        controls
-                        preload="metadata"
-                        aria-label={`Vídeo ${index + 1} de ${property.title}`}
-                        className="aspect-video w-full rounded-xl bg-(--surface-raised)"
-                      />
-                    ))}
-                  </div>
                 </Section>
               ) : null}
 

@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { LuArrowLeft } from "react-icons/lu";
 import { FormActions, FormStatus } from "@/components/owner/form-actions";
 import { UnsavedChangesGuard } from "@/components/owner/unsaved-changes-guard";
@@ -12,6 +12,7 @@ import { ChoiceGroup, optionsFrom } from "@/components/owner/choice-group";
 import { ConfirmDialog } from "@/components/owner/confirm-dialog";
 import { FieldError } from "@/components/field-error";
 import { FieldHint } from "@/components/owner/field-hint";
+import { HouseServicesFields } from "@/components/owner/house-services-fields";
 import { OptionalDetails } from "@/components/owner/optional-details";
 import {
   dangerButtonClassName,
@@ -22,6 +23,9 @@ import {
 } from "@/components/owner/styles";
 import {
   centsToInput,
+  houseServicesDefaults,
+  houseServicesError,
+  houseServicesPayload,
   roomSchema,
   type RoomInput,
   type RoomValues,
@@ -69,7 +73,7 @@ export function RoomForm({ propertyId, room, createdHref, backHref }: { property
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [confirmingArchive, setConfirmingArchive] = useState(false);
   const [archiving, setArchiving] = useState(false);
-  const { register, handleSubmit, getValues, reset, formState } = useForm<RoomInput, unknown, RoomValues>({
+  const { register, handleSubmit, control, getValues, reset, formState } = useForm<RoomInput, unknown, RoomValues>({
     resolver: zodResolver(roomSchema),
     defaultValues: {
       title: room?.title ?? "",
@@ -80,16 +84,23 @@ export function RoomForm({ propertyId, room, createdHref, backHref }: { property
       acceptedAudiences: room?.acceptedAudiences ?? [],
       amenities: room?.amenities ?? [],
       additionalInfo: room?.additionalInfo ?? "",
+      ...houseServicesDefaults(room),
     },
     mode: "onBlur",
   });
   const { errors, isSubmitting, isDirty } = formState;
+  const hasCleaner = useWatch({ control, name: "hasCleaner" });
   const lastAvailableRoom = room?.property.status === "ACTIVE" && room.status === "AVAILABLE" && room.property.availableRoomCount === 1;
 
   async function save({ price, ...values }: RoomValues) {
     setError(undefined);
     setMessage(undefined);
-    const body = JSON.stringify({ ...values, priceCents: price });
+    const servicesError = houseServicesError(values);
+    if (servicesError) {
+      setError(servicesError);
+      return;
+    }
+    const body = JSON.stringify({ ...values, ...houseServicesPayload(values), priceCents: price });
     try {
       if (room) {
         await sendApiRequest(`/owner/rooms/${room.id}`, { method: "PATCH", body });
@@ -214,6 +225,10 @@ export function RoomForm({ propertyId, room, createdHref, backHref }: { property
           />
           <FieldError id="room-description-error" message={errors.description?.message} />
         </div>
+      </FormSection>
+
+      <FormSection id="room-services-heading" title="Faxina e fumantes" description="Deixe no padrão do imóvel ou defina uma regra própria para este quarto.">
+        <HouseServicesFields register={register} hasCleaner={hasCleaner} inherited={room?.property} />
       </FormSection>
 
       <OptionalDetails

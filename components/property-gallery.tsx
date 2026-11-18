@@ -35,15 +35,19 @@ function PhotoButton({
       aria-label={`Ampliar ${photo.alt}`}
       className={`group relative block overflow-hidden bg-(--surface-raised) focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--focus-ring) ${className}`}
     >
-      <Image
-        src={photo.url}
-        alt=""
-        fill
-        loading={eager ? "eager" : undefined}
-        fetchPriority={eager ? "high" : undefined}
-        sizes={sizes}
-        className="object-cover transition-transform duration-300 group-hover:scale-102"
-      />
+      {photo.type === "VIDEO" ? (
+        <video src={photo.url} autoPlay muted loop playsInline preload="auto" aria-hidden="true" className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-102" />
+      ) : (
+        <Image
+          src={photo.url}
+          alt=""
+          fill
+          loading={eager ? "eager" : undefined}
+          fetchPriority={eager ? "high" : undefined}
+          sizes={sizes}
+          className="object-cover transition-transform duration-300 group-hover:scale-102"
+        />
+      )}
     </button>
   );
 }
@@ -79,7 +83,7 @@ export function PropertyPhotoGrid({ title, photos }: { title: string; photos: Vi
           className="absolute right-3 bottom-3 inline-flex min-h-11 items-center gap-2 rounded-2xl bg-(--black)/70 px-4 text-sm font-semibold text-(--white) transition-colors hover:bg-(--black)/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
         >
           <LuImages aria-hidden="true" size={16} />
-          Ver as {photos.length} fotos
+          {photos.some((photo) => photo.type === "VIDEO") ? `Ver as ${photos.length} mídias` : `Ver as ${photos.length} fotos`}
         </button>
       ) : null}
       <PhotoViewer title={title} photos={photos} index={viewing} onIndexChange={setViewing} onClose={() => setViewing(null)} />
