@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { IconType } from "react-icons";
 import { BrandMark } from "@/components/brand-mark";
+import { InstallAppBanner } from "@/components/install-app-banner";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useFieldPopover } from "@/components/use-field-popover";
 import { logout } from "@/lib/api";
@@ -61,6 +62,7 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
   return (
     <>
       <header className="sticky top-0 z-20 border-b border-(--border) bg-(--background)/85 backdrop-blur-sm">
+        <InstallAppBanner />
         <div className="flex h-16 items-center px-4 md:hidden">
           {user ? (
             <>

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { cookies } from "next/headers";
 import { connection } from "next/server";
@@ -15,6 +15,15 @@ const jakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "DOMUS X | Hospedagens com segurança e discrição",
   description: "Encontre estadias e gerencie seus anúncios com segurança.",
+  applicationName: "DOMUS X",
+  appleWebApp: { capable: true, title: "DOMUS X", statusBarStyle: "default" },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f9f9fb" },
+    { media: "(prefers-color-scheme: dark)", color: "#161b24" },
+  ],
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
