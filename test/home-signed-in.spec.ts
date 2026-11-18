@@ -1,5 +1,5 @@
 import { createServer, type Server } from "node:http";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3030";
 let server: Server;
@@ -18,8 +18,11 @@ const user = {
 };
 
 let storyViewed = false;
+let storyMedia: { id: string; type: string; url: string }[] | null = null;
 
-const stories = () => [{ roomId: "story-1", viewed: storyViewed, propertyId: "p1", title: "Suíte Premium", priceCents: 35000, capacity: 2, acceptedAudiences: ["MAN", "WOMAN"], neighborhood: "Centro", city: "Curitiba", state: "PR", media: [{ id: "m1", type: "IMAGE", url: "http://localhost:3030/story.png" }, { id: "m2", type: "VIDEO", url: "http://localhost:3030/story.mp4" }] }];
+const stories = () => [{ roomId: "story-1", viewed: storyViewed, propertyId: "p1", title: "Suíte Premium", priceCents: 35000, capacity: 2, acceptedAudiences: ["MAN", "WOMAN"], neighborhood: "Centro", city: "Curitiba", state: "PR", media: storyMedia ?? [{ id: "m1", type: "IMAGE", url: "http://localhost:3030/story.png" }, { id: "m2", type: "VIDEO", url: "http://localhost:3030/story.mp4" }] }];
+
+const twoImages = [{ id: "m1", type: "IMAGE", url: "http://localhost:3030/story.png" }, { id: "m2", type: "IMAGE", url: "http://localhost:3030/story-2.png" }];
 
 function rooms(prefix: string, featured: boolean) {
   return Array.from({ length: 6 }, (_, index) => ({
@@ -53,6 +56,7 @@ test.afterAll(async () => {
 
 test.beforeEach(async ({ context }) => {
   storyViewed = false;
+  storyMedia = null;
   await context.addCookies([{ name: "access_token", value: "test-session", url: "http://localhost:3001" }]);
 });
 
@@ -129,6 +133,64 @@ test("story abre mesmo quando o registro da visualização falha", async ({ page
   await page.getByRole("button", { name: "Abrir story de Suíte Premium" }).click();
 
   await expect(page.getByRole("dialog", { name: "Story de Suíte Premium" })).toBeVisible();
+});
+
+test.describe("temporizador do story", () => {
+  async function openStory(page: Page) {
+    storyMedia = twoImages;
+    await page.clock.install();
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Abrir story de Suíte Premium" }).click();
+    const viewer = page.getByRole("dialog", { name: "Story de Suíte Premium" });
+    await expect(viewer).toBeVisible();
+    return { viewer, bars: viewer.locator("progress") };
+  }
+
+  const barValue = (bars: Locator, index: number) => bars.nth(index).evaluate((bar: HTMLProgressElement) => bar.value);
+
+  test("imagem avança sozinha depois de 5 segundos", async ({ page }) => {
+    const { bars } = await openStory(page);
+
+    await page.clock.runFor(5200);
+
+    await expect.poll(() => barValue(bars, 0)).toBe(100);
+  });
+
+  test("segurar o story pausa o avanço e soltar retoma sem navegar", async ({ page }) => {
+    const { viewer, bars } = await openStory(page);
+    const box = await viewer.getByRole("button", { name: "Próxima mídia" }).boundingBox();
+    if (!box) throw new Error("zona de toque ausente");
+
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.clock.runFor(6000);
+    expect(await barValue(bars, 0)).toBeLessThan(100);
+
+    await page.mouse.up();
+    expect(await barValue(bars, 0)).toBeLessThan(100);
+    expect(await barValue(bars, 1)).toBe(0);
+
+    await page.clock.runFor(5200);
+    await expect.poll(() => barValue(bars, 0)).toBe(100);
+  });
+
+  test("aba oculta pausa o avanço e voltar retoma", async ({ page }) => {
+    const { bars } = await openStory(page);
+    const setHidden = (hidden: boolean) =>
+      page.evaluate((value) => {
+        Object.defineProperty(document, "hidden", { value, configurable: true });
+        document.dispatchEvent(new Event("visibilitychange"));
+      }, hidden);
+
+    await setHidden(true);
+    await page.clock.runFor(6000);
+    expect(await barValue(bars, 0)).toBeLessThan(100);
+
+    await setHidden(false);
+    await page.clock.runFor(5200);
+    await expect.poll(() => barValue(bars, 0)).toBe(100);
+  });
 });
 
 test("home logada não gera rolagem horizontal no mobile", async ({ page }) => {

@@ -2,13 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import { LuChevronRight, LuMapPin, LuPause, LuPlay, LuTag, LuUsers, LuX } from "react-icons/lu";
 import { formatCents, formatLocation, genderIdentities, genderIdentityLabels } from "@/lib/properties";
 import type { Story } from "@/lib/stories";
 
 const IMAGE_DURATION_MS = 5000;
-const PROGRESS_TICK_MS = 100;
+const HOLD_TO_PAUSE_MS = 250;
 
 const barClassName =
   "h-1 flex-1 appearance-none overflow-hidden rounded-full bg-(--white)/30 [&::-moz-progress-bar]:bg-(--white) [&::-webkit-progress-bar]:bg-(--white)/30 [&::-webkit-progress-value]:bg-(--white)";
@@ -18,7 +18,7 @@ const chipClassName = "inline-flex items-center gap-1.5 rounded-full bg-(--white
 const iconButtonClassName =
   "relative z-10 flex size-11 shrink-0 items-center justify-center rounded-full text-(--white) transition-colors hover:bg-(--white)/15 focus-visible:outline-2 focus-visible:outline-(--focus-ring)";
 
-const tapZoneClassName = "absolute inset-y-24 focus-visible:outline-2 focus-visible:outline-(--focus-ring)";
+const tapZoneClassName = "absolute inset-y-24 touch-none select-none focus-visible:outline-2 focus-visible:outline-(--focus-ring)";
 
 export function StoryViewer({
   stories,
@@ -76,12 +76,22 @@ function StorySlides({
 }) {
   const [mediaIndex, setMediaIndex] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [manuallyPaused, setManuallyPaused] = useState(false);
+  const [holding, setHolding] = useState(false);
+  const [tabHidden, setTabHidden] = useState(false);
+  const holdStartedAt = useRef<number | null>(null);
   const media = story.media[mediaIndex];
+  const paused = manuallyPaused || holding || tabHidden;
+
+  useEffect(() => {
+    const syncVisibility = () => setTabHidden(document.hidden);
+    document.addEventListener("visibilitychange", syncVisibility);
+    return () => document.removeEventListener("visibilitychange", syncVisibility);
+  }, []);
 
   const goTo = useCallback((target: number) => {
     setProgress(0);
-    setPaused(false);
+    setManuallyPaused(false);
     setMediaIndex(target);
   }, []);
 
@@ -95,6 +105,27 @@ function StorySlides({
     else onPreviousStory();
   }, [goTo, mediaIndex, onPreviousStory]);
 
+  function startHold(event: PointerEvent<HTMLElement>) {
+    if (!(event.target as Element).closest("[data-tap-zone]")) return;
+    holdStartedAt.current = performance.now();
+    setHolding(true);
+  }
+
+  function endHold() {
+    setHolding(false);
+  }
+
+  function cancelHold() {
+    holdStartedAt.current = null;
+    setHolding(false);
+  }
+
+  function tap(action: () => void) {
+    const heldFor = holdStartedAt.current === null ? 0 : performance.now() - holdStartedAt.current;
+    holdStartedAt.current = null;
+    if (heldFor < HOLD_TO_PAUSE_MS) action();
+  }
+
   return (
     <div
       className="relative mx-auto flex h-full max-w-md flex-col bg-(--black)"
@@ -102,9 +133,13 @@ function StorySlides({
         if (event.key === "ArrowLeft") previous();
         if (event.key === "ArrowRight") next();
       }}
+      onPointerDown={startHold}
+      onPointerUp={endHold}
+      onPointerCancel={cancelHold}
+      onPointerLeave={cancelHold}
     >
       {media.type === "IMAGE" ? (
-        <ImageSlide key={media.id} url={media.url} alt={story.title} onProgress={setProgress} onDone={next} />
+        <ImageSlide key={media.id} url={media.url} alt={story.title} paused={paused} onProgress={setProgress} onDone={next} />
       ) : (
         <VideoSlide key={media.id} url={media.url} label={story.title} paused={paused} onProgress={setProgress} onDone={next} />
       )}
@@ -123,11 +158,11 @@ function StorySlides({
           {media.type === "VIDEO" ? (
             <button
               type="button"
-              aria-label={paused ? "Retomar vídeo" : "Pausar vídeo"}
-              onClick={() => setPaused((current) => !current)}
+              aria-label={manuallyPaused ? "Retomar vídeo" : "Pausar vídeo"}
+              onClick={() => setManuallyPaused((current) => !current)}
               className={iconButtonClassName}
             >
-              {paused ? <LuPlay aria-hidden="true" size={22} /> : <LuPause aria-hidden="true" size={22} />}
+              {manuallyPaused ? <LuPlay aria-hidden="true" size={22} /> : <LuPause aria-hidden="true" size={22} />}
             </button>
           ) : null}
           <button
@@ -142,8 +177,8 @@ function StorySlides({
         </div>
       </div>
 
-      <button type="button" aria-label="Mídia anterior" onClick={previous} className={`${tapZoneClassName} left-0 w-1/3`} />
-      <button type="button" aria-label="Próxima mídia" onClick={next} className={`${tapZoneClassName} right-0 w-2/3`} />
+      <button type="button" data-tap-zone aria-label="Mídia anterior" onClick={() => tap(previous)} className={`${tapZoneClassName} left-0 w-1/3`} />
+      <button type="button" data-tap-zone aria-label="Próxima mídia" onClick={() => tap(next)} className={`${tapZoneClassName} right-0 w-2/3`} />
 
       <div className="pointer-events-none absolute inset-x-4 bottom-22 z-10 flex flex-col gap-2">
         <p className="flex items-center gap-1.5 text-sm font-semibold">
@@ -176,16 +211,24 @@ function StorySlides({
 
 type SlideProps = { onProgress: (value: number) => void; onDone: () => void };
 
-function ImageSlide({ url, alt, onProgress, onDone }: SlideProps & { url: string; alt: string }) {
+function ImageSlide({ url, alt, paused, onProgress, onDone }: SlideProps & { url: string; alt: string; paused: boolean }) {
+  const elapsedMs = useRef(0);
+
   useEffect(() => {
-    const startedAt = performance.now();
-    const timer = setInterval(() => {
-      const value = Math.min(100, ((performance.now() - startedAt) / IMAGE_DURATION_MS) * 100);
+    if (paused) return;
+    let lastFrameAt = performance.now();
+    let frame = 0;
+    const tick = (now: number) => {
+      elapsedMs.current += now - lastFrameAt;
+      lastFrameAt = now;
+      const value = Math.min(100, (elapsedMs.current / IMAGE_DURATION_MS) * 100);
       onProgress(value);
       if (value >= 100) onDone();
-    }, PROGRESS_TICK_MS);
-    return () => clearInterval(timer);
-  }, [onProgress, onDone]);
+      else frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [paused, onProgress, onDone]);
 
   return <Image src={url} alt={alt} fill priority sizes="(min-width: 448px) 448px, 100vw" className="object-cover" />;
 }
