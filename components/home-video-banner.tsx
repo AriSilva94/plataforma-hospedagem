@@ -37,11 +37,11 @@ export function HomeVideoBanner() {
           <Image src={posterSrc} alt="" fill priority sizes="(min-width: 1440px) 1340px, 100vw" className="-z-10 object-cover object-[center_70%]" />
           <div aria-hidden="true" className="absolute inset-0 -z-10 bg-linear-to-t from-(--black)/85 via-(--black)/50 to-(--black)/15 md:bg-linear-to-r md:from-(--black)/85 md:from-0% md:via-(--black)/60 md:via-40% md:to-transparent md:to-80%" />
 
-          <div className="absolute inset-0 flex max-w-2xl md:right-auto flex-col justify-end gap-3 p-5 md:gap-4 md:p-10 lg:justify-center xl:p-14">
+          <div className="relative flex max-w-2xl flex-col justify-end gap-3 p-5 pt-20 md:absolute md:inset-0 md:right-auto md:gap-4 md:p-10 lg:justify-center xl:p-14">
             <h1 id="hero-titulo" className="text-balance text-[1.625rem] font-extrabold leading-[1.08] tracking-[-0.03em] text-(--white) sm:text-4xl xl:text-5xl">
               Encontre o quarto livre sem precisar perguntar.
             </h1>
-            <p className="hidden max-w-lg text-pretty sm:block text-sm leading-relaxed text-(--white)/85 md:text-base">
+            <p className="max-w-lg text-pretty text-sm leading-relaxed text-(--white)/85 md:text-base">
               Quartos e suítes reserváveis de forma independente. Veja o que está disponível, reserve, pague e renove a diária em um só lugar.
             </p>
             {state === "error" ? (

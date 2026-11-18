@@ -99,13 +99,13 @@ function HomeHero({ total }: { total: number }) {
     >
       <Image src="/rooms/room2.png" alt="" fill priority sizes="(min-width: 1440px) 1340px, 100vw" className="-z-10 object-cover object-[center_62%]" />
       <div aria-hidden="true" className="absolute inset-0 -z-10 bg-linear-to-r from-(--black)/85 via-(--black)/60 to-(--black)/15" />
-      <p className="w-fit rounded-full bg-(--primary-soft) px-3 py-1 text-xs font-bold text-(--primary-text) short:max-sm:hidden">
+      <p className="w-fit rounded-full bg-(--primary-soft) px-3 py-1 text-xs font-bold text-(--primary-text)">
         {total > 1 ? `${total} quartos disponíveis agora.` : "Reserva independente por quarto."}
       </p>
       <h1 id="hero-titulo" className="max-w-xl text-balance text-[1.625rem] leading-[1.08] font-extrabold tracking-[-0.03em] text-(--white) short:max-sm:text-xl sm:text-3xl xl:text-4xl">
         Encontre o quarto livre sem precisar perguntar.
       </h1>
-      <p className="max-w-lg text-pretty text-sm leading-relaxed text-(--white)/85 short:max-sm:hidden md:text-base">
+      <p className="max-w-lg text-pretty text-sm leading-relaxed text-(--white)/85 short:max-sm:text-xs md:text-base">
         A DOMUS X reúne espaços com quartos e suítes prontos para reserva. Veja o que está disponível, agende e renove em um só lugar.
       </p>
     </section>
