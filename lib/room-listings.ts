@@ -3,6 +3,7 @@ import { favoriteRoomIdsSchema } from "@/lib/favorites";
 import { citySuggestionsSchema, type CityLocation } from "@/lib/home-search";
 import { publicRoomPageSchema, roomListingPageSize } from "@/lib/properties";
 import { getApiData } from "@/lib/server-api";
+import { storyListSchema } from "@/lib/stories";
 
 function cityKey(city: string) {
   return city.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
@@ -20,6 +21,11 @@ export async function getFavoriteRoomIds(signedIn: boolean): Promise<string[]> {
   if (!signedIn) return [];
   const favorites = await getApiData("/favorites/room-ids", favoriteRoomIdsSchema);
   return favorites.status === "ok" ? favorites.data.roomIds : [];
+}
+
+export async function getStories() {
+  const result = await getApiData("/rooms/stories", storyListSchema);
+  return result.status === "ok" ? result.data.items : [];
 }
 
 export async function getRoomListings(signedIn: boolean, filter = "") {
