@@ -27,6 +27,7 @@ export const storySchema = z.object({
   neighborhood: z.string().nullable(),
   city: z.string().nullable(),
   state: z.string().nullable(),
+  viewed: z.boolean(),
   media: z.array(storyMediaSchema).min(1),
 });
 
