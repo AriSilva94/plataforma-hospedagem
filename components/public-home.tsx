@@ -77,7 +77,7 @@ export function PublicHome({
   ];
 
   return (
-    <div className="flex flex-1 flex-col screenfit:h-dvh screenfit:flex-none">
+    <div className="flex flex-1 flex-col screenfit:min-h-dvh">
       <SiteHeader user={user} />
 
       <main className="mx-auto flex min-h-0 w-full max-w-360 flex-1 flex-col gap-3 px-6 py-3 short:max-sm:gap-2 short:max-sm:py-2 md:gap-6 md:px-10 md:py-6 short:md:gap-4 short:md:py-4 lg:px-12">
