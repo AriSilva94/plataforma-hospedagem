@@ -41,7 +41,7 @@ export function OwnerPropertiesGrid({ properties }: { properties: PropertySummar
               href={`/meus-imoveis/${property.id}`}
               className="group flex h-full flex-col overflow-hidden rounded-2xl border border-(--border) bg-(--surface) transition-colors hover:border-(--primary-border) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
             >
-              <CoverImage url={property.coverUrl} alt="" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" />
+              <CoverImage url={property.coverUrl} type={property.coverType} alt="" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" />
               <div className="flex flex-1 flex-col gap-3 p-5">
                 <div className="flex items-start justify-between gap-3">
                   <h2 className="min-w-0 wrap-break-word text-lg font-bold text-(--primary-text)">{property.title}</h2>

@@ -17,6 +17,8 @@ const user = {
   roles: [],
 };
 
+const stories = [{ roomId: "story-1", propertyId: "p1", title: "Suíte Premium", priceCents: 35000, capacity: 2, acceptedAudiences: ["MAN", "WOMAN"], neighborhood: "Centro", city: "Curitiba", state: "PR", media: [{ id: "m1", type: "IMAGE", url: "http://localhost:3030/story.png" }, { id: "m2", type: "VIDEO", url: "http://localhost:3030/story.mp4" }] }];
+
 function rooms(prefix: string, featured: boolean) {
   return Array.from({ length: 6 }, (_, index) => ({
     id: `${prefix}-${index}`,
@@ -36,6 +38,7 @@ test.beforeAll(async () => {
     if (path === "/users/me") return response.end(JSON.stringify(user));
     if (path === "/rooms") return response.end(JSON.stringify({ items: rooms("Quarto", false), nextCursor: null, total: 6 }));
     if (path === "/rooms/featured") return response.end(JSON.stringify({ items: rooms("Suíte", true), nextCursor: null, total: 6 }));
+    if (path === "/rooms/stories") return response.end(JSON.stringify({ items: stories }));
     if (path === "/favorites/room-ids") return response.end(JSON.stringify({ roomIds: [] }));
     response.writeHead(404).end("{}");
   });
@@ -56,13 +59,10 @@ test("home logada troca de painel pelas abas sem rolar a página no desktop", as
 
   const fits = () => page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight);
 
-  await expect(page.getByRole("tab", { name: "Em destaque" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("tab", { name: "Em destaque" })).toHaveCount(0);
+  await expect(page.getByRole("tab", { name: "Disponíveis" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("heading", { name: "Locais em destaque" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Suíte 1" })).toBeVisible();
-  expect(await fits()).toBe(true);
-
-  await page.getByRole("tab", { name: "Disponíveis" }).click();
-  await expect(page.getByRole("heading", { name: "Quarto 1", exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Suíte 1" })).toBeHidden();
   expect(await fits()).toBe(true);
 
   await page.getByRole("tab", { name: "Disponíveis" }).press("ArrowRight");
@@ -75,10 +75,28 @@ test("home logada troca de painel pelas abas sem rolar a página no desktop", as
   expect(await fits()).toBe(true);
 });
 
+test("story abre em tela cheia, avança entre mídias e fecha", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto("/");
+
+  await page.getByRole("button", { name: "Abrir story de Suíte Premium" }).click();
+  const viewer = page.getByRole("dialog", { name: "Story de Suíte Premium" });
+  await expect(viewer).toBeVisible();
+  await expect(viewer.getByText("Centro, Curitiba · PR")).toBeVisible();
+  await expect(viewer.getByRole("link", { name: "Ver quarto" })).toHaveAttribute("href", "/imoveis/p1/quartos/story-1");
+
+  await viewer.getByRole("button", { name: "Próxima mídia" }).click();
+  await expect(viewer.locator("video")).toBeVisible();
+
+  await viewer.getByRole("button", { name: "Fechar story" }).click();
+  await expect(viewer).toBeHidden();
+});
+
 test("home logada não gera rolagem horizontal no mobile", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/");
 
-  await expect(page.getByRole("tab", { name: "Em destaque" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Disponíveis" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Abrir story de Suíte Premium" })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });

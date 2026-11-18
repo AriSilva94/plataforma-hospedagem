@@ -2,6 +2,10 @@ import { z } from "@/lib/zod";
 import {
   bathroomTypes,
   brazilianStates,
+  cleaningFrequencies,
+  smokingPolicies,
+  type CleaningFrequency,
+  type SmokingPolicy,
   genderIdentities,
   propertyTypes,
   sharedAreaTypes,
@@ -9,6 +13,40 @@ import {
 
 const optionalText = (max: number) =>
   z.string().trim().max(max, { error: `Use no máximo ${max} caracteres.` });
+
+const houseServicesFields = {
+  hasCleaner: z.enum(["", "yes", "no"]),
+  cleaningFrequency: z.enum(["", ...cleaningFrequencies]),
+  smokingPolicy: z.enum(["", ...smokingPolicies]),
+};
+
+export type HouseServicesInput = {
+  hasCleaner: "" | "yes" | "no";
+  cleaningFrequency: "" | CleaningFrequency;
+  smokingPolicy: "" | SmokingPolicy;
+};
+
+type HouseServicesSource = { hasCleaner: boolean | null; cleaningFrequency: CleaningFrequency | null; smokingPolicy: SmokingPolicy | null };
+
+export function houseServicesDefaults(source?: HouseServicesSource): HouseServicesInput {
+  return {
+    hasCleaner: source?.hasCleaner == null ? "" : source.hasCleaner ? "yes" : "no",
+    cleaningFrequency: source?.cleaningFrequency ?? "",
+    smokingPolicy: source?.smokingPolicy ?? "",
+  };
+}
+
+export function houseServicesPayload({ hasCleaner, cleaningFrequency, smokingPolicy }: HouseServicesInput) {
+  return {
+    hasCleaner: hasCleaner === "" ? null : hasCleaner === "yes",
+    cleaningFrequency: hasCleaner === "yes" && cleaningFrequency !== "" ? cleaningFrequency : null,
+    smokingPolicy: smokingPolicy === "" ? null : smokingPolicy,
+  };
+}
+
+export function houseServicesError({ hasCleaner, cleaningFrequency }: HouseServicesInput): string | undefined {
+  return hasCleaner === "yes" && cleaningFrequency === "" ? "Informe a frequência da faxina." : undefined;
+}
 
 export const propertyGeneralSchema = z.object({
   title: z
@@ -21,6 +59,7 @@ export const propertyGeneralSchema = z.object({
   houseRules: optionalText(3000),
   generalInfo: optionalText(3000),
   features: z.array(z.string()),
+  ...houseServicesFields,
 });
 
 export const propertyLocationSchema = z.object({
@@ -107,6 +146,7 @@ export const roomSchema = z.object({
   acceptedAudiences: z.array(z.enum(genderIdentities)).min(1, { error: "Selecione ao menos um público aceito." }),
   amenities: z.array(z.string()),
   additionalInfo: optionalText(2000),
+  ...houseServicesFields,
 });
 
 export type PropertyGeneralInput = z.input<typeof propertyGeneralSchema>;

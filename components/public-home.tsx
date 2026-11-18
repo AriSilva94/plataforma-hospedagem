@@ -3,10 +3,12 @@ import Link from "next/link";
 import type { IconType } from "react-icons";
 import { LuBedDouble, LuBell, LuCalendarCheck, LuCircleCheck, LuHistory, LuHouse, LuListChecks, LuMapPin, LuStar } from "react-icons/lu";
 import { FeaturedRooms } from "@/components/featured-rooms";
+import { HomeStories } from "@/components/home-stories";
 import { HomeTabs, type HomeTab } from "@/components/home-tabs";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import type { PublicRoomCard, PublicRoomPage } from "@/lib/properties";
+import type { Story } from "@/lib/stories";
 
 const assurances: { icon: IconType; label: string }[] = [
   { icon: LuMapPin, label: "Localização aproximada" },
@@ -36,63 +38,51 @@ export function PublicHome({
   user,
   listing,
   featuredListing,
+  stories,
   favoriteRoomIds,
 }: {
   user: { name: string; roles: string[] };
   listing: PublicRoomPage | null;
   featuredListing: PublicRoomPage | null;
+  stories: Story[];
   favoriteRoomIds: string[];
 }) {
   const total = (listing?.total ?? 0) + (featuredListing?.total ?? 0);
   const featuredRooms = featuredListing?.items ?? [];
 
+  const availableRooms = [...featuredRooms, ...(listing?.items ?? [])];
+
   const tabs: HomeTab[] = [
-    ...(featuredRooms.length > 0
-      ? [
-          {
-            id: "destaques",
-            label: "Em destaque",
-            icon: <LuStar aria-hidden="true" size={16} />,
-            panel: <RoomsPanel summary="Anúncios em evidência na DOMUS X." rooms={featuredRooms} favoriteRoomIds={favoriteRoomIds} />,
-          },
-        ]
-      : []),
     {
       id: "disponiveis",
       label: "Disponíveis",
       icon: <LuBedDouble aria-hidden="true" size={16} />,
       panel: (
         <RoomsPanel
+          stories={stories}
           summary={
             !listing
               ? "Não foi possível carregar os quartos agora. Tente novamente em alguns instantes."
-              : listing.items.length === 0
+              : availableRooms.length === 0
                 ? "Nenhum quarto disponível no momento."
                 : "Quartos prontos para reserva."
           }
-          rooms={listing?.items ?? []}
+          rooms={availableRooms}
           favoriteRoomIds={favoriteRoomIds}
         />
       ),
     },
     { id: "como-funciona", label: "Como funciona", icon: <LuListChecks aria-hidden="true" size={16} />, panel: <JourneyPanel /> },
-    { id: "anunciar", label: "Anunciar", icon: <LuHouse aria-hidden="true" size={16} />, panel: <OwnerPanel /> },
+    { id: "anunciar", label: "Anunciar", icon: <LuHouse aria-hidden="true" size={16} />, panel: <OwnerPanel />, desktopOnly: true },
   ];
 
   return (
-    <div className="flex flex-1 flex-col screenfit:h-dvh screenfit:flex-none">
+    <div className="flex flex-1 flex-col screenfit:min-h-dvh">
       <SiteHeader user={user} />
 
       <main className="mx-auto flex min-h-0 w-full max-w-360 flex-1 flex-col gap-3 px-6 py-3 short:max-sm:gap-2 short:max-sm:py-2 md:gap-6 md:px-10 md:py-6 short:md:gap-4 short:md:py-4 lg:px-12">
         <HomeTabs tabs={tabs}>
-          <div>
-            <h1 className="text-balance text-[1.375rem] short:max-sm:text-xl font-extrabold leading-tight tracking-[-0.02em] text-(--text-primary) sm:text-2xl md:text-3xl">
-              Encontre o quarto livre sem precisar perguntar.
-            </h1>
-            <p className="mt-1 text-sm text-(--text-secondary) short:max-sm:hidden">
-              {total > 1 ? `${total} quartos disponíveis agora.` : "Reserva independente por quarto."}
-            </p>
-          </div>
+          <HomeHero total={total} />
         </HomeTabs>
       </main>
 
@@ -101,9 +91,31 @@ export function PublicHome({
   );
 }
 
-function RoomsPanel({ summary, rooms, favoriteRoomIds }: { summary: string; rooms: PublicRoomCard[]; favoriteRoomIds: string[] }) {
+function HomeHero({ total }: { total: number }) {
+  return (
+    <section
+      aria-labelledby="hero-titulo"
+      className="relative isolate flex min-h-40 flex-col justify-center gap-2 overflow-hidden rounded-[1.75rem] bg-(--black) p-5 ring-1 ring-(--border) short:max-sm:min-h-0 short:max-sm:p-4 md:min-h-44 md:gap-3 md:p-8 lg:flex-1"
+    >
+      <Image src="/rooms/room2.png" alt="" fill priority sizes="(min-width: 1440px) 1340px, 100vw" className="-z-10 object-cover object-[center_62%]" />
+      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-linear-to-r from-(--black)/85 via-(--black)/60 to-(--black)/15" />
+      <p className="w-fit rounded-full bg-(--primary-soft) px-3 py-1 text-xs font-bold text-(--primary-text) short:max-sm:hidden">
+        {total > 1 ? `${total} quartos disponíveis agora.` : "Reserva independente por quarto."}
+      </p>
+      <h1 id="hero-titulo" className="max-w-xl text-balance text-[1.625rem] leading-[1.08] font-extrabold tracking-[-0.03em] text-(--white) short:max-sm:text-xl sm:text-3xl xl:text-4xl">
+        Encontre o quarto livre sem precisar perguntar.
+      </h1>
+      <p className="max-w-lg text-pretty text-sm leading-relaxed text-(--white)/85 short:max-sm:hidden md:text-base">
+        A DOMUS X reúne espaços com quartos e suítes prontos para reserva. Veja o que está disponível, agende e renove em um só lugar.
+      </p>
+    </section>
+  );
+}
+
+function RoomsPanel({ stories, summary, rooms, favoriteRoomIds }: { stories: Story[]; summary: string; rooms: PublicRoomCard[]; favoriteRoomIds: string[] }) {
   return (
     <>
+      <HomeStories stories={stories} />
       <div className="flex items-baseline justify-between gap-4">
         <p className="text-sm text-(--text-secondary)">{summary}</p>
         <Link href="/anuncios" className={`shrink-0 text-sm font-bold text-(--primary-text) underline underline-offset-2 ${actionFocus}`}>

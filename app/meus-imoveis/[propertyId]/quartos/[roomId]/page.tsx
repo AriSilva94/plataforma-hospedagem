@@ -1,10 +1,11 @@
-import { LuBedDouble, LuCalendarDays, LuImages } from "react-icons/lu";
+import { LuBedDouble, LuCalendarDays, LuCrown, LuImages } from "react-icons/lu";
 import { AvailabilityEditor } from "@/components/owner/availability-editor";
 import { MediaGallery } from "@/components/owner/media-gallery";
 import { OwnerDataNotice } from "@/components/owner/owner-notice";
 import { OwnerPage } from "@/components/owner/owner-page";
 import { RoomCompletenessHints, RoomCompletenessSummary } from "@/components/owner/room-completeness";
 import { RoomForm } from "@/components/owner/room-form";
+import { RoomStoryEditor } from "@/components/owner/room-story-editor";
 import { RoomStatusStrip } from "@/components/owner/room-status-strip";
 import { SectionTabs } from "@/components/owner/section-tabs";
 import { roomAvailabilitySchema } from "@/lib/availability";
@@ -15,6 +16,7 @@ import { bathroomTypeLabels, formatCents, roomDetailSchema } from "@/lib/propert
 const sections = [
   { id: "dados", label: "Dados e preço", icon: LuBedDouble },
   { id: "fotos", label: "Fotos", icon: LuImages },
+  { id: "story", label: "Story", icon: LuCrown },
   { id: "disponibilidade", label: "Disponibilidade", icon: LuCalendarDays },
 ] as const;
 
@@ -69,8 +71,9 @@ export default async function EditRoomPage({ params, searchParams }: PageProps<"
       />
       {section === "dados" ? <RoomForm propertyId={propertyId} room={room} /> : null}
       {section === "fotos" ? (
-        <MediaGallery basePath={`/owner/rooms/${room.id}`} initialMedia={room.media} allowVideo={false} maxImages={20} />
+        <MediaGallery basePath={`/owner/rooms/${room.id}`} initialMedia={room.media} allowVideo maxImages={20} maxVideos={3} />
       ) : null}
+      {section === "story" ? <RoomStoryEditor roomId={room.id} initialMedia={room.storyMedia} status={room.storyStatus} rejectedReason={room.storyRejectedReason} /> : null}
       {availability?.status === "ok" ? <AvailabilityEditor roomId={room.id} initial={availability.data} /> : null}
       {availability && availability.status !== "ok" ? (
         <OwnerDataNotice status={availability.status} retryHref={`/meus-imoveis/${propertyId}/quartos/${roomId}?secao=${section}`} />

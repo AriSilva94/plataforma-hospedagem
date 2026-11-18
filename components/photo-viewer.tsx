@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { LuChevronLeft, LuChevronRight, LuX } from "react-icons/lu";
 
-export type ViewerPhoto = { id: string; url: string; alt: string };
+export type ViewerPhoto = { id: string; url: string; alt: string; type?: "IMAGE" | "VIDEO" };
 
 const SWIPE_THRESHOLD = 50;
 
@@ -84,13 +84,17 @@ export function PhotoViewer({
               if (Math.abs(distance) > SWIPE_THRESHOLD) go(distance < 0 ? 1 : -1);
             }}
           >
-            <Image key={photo.id} src={photo.url} alt={photo.alt} fill sizes="100vw" className="object-contain" />
+            {photo.type === "VIDEO" ? (
+              <video key={photo.id} src={photo.url} controls autoPlay muted loop playsInline aria-label={photo.alt} className="size-full object-contain" />
+            ) : (
+              <Image key={photo.id} src={photo.url} alt={photo.alt} fill sizes="100vw" className="object-contain" />
+            )}
             {photos.length > 1 ? (
               <>
-                <button type="button" aria-label="Foto anterior" onClick={() => go(-1)} className={`${navButtonClassName} left-3 sm:left-6`}>
+                <button type="button" aria-label="Anterior" onClick={() => go(-1)} className={`${navButtonClassName} left-3 sm:left-6`}>
                   <LuChevronLeft aria-hidden="true" size={24} />
                 </button>
-                <button type="button" aria-label="Próxima foto" onClick={() => go(1)} className={`${navButtonClassName} right-3 sm:right-6`}>
+                <button type="button" aria-label="Próxima" onClick={() => go(1)} className={`${navButtonClassName} right-3 sm:right-6`}>
                   <LuChevronRight aria-hidden="true" size={24} />
                 </button>
               </>
