@@ -358,7 +358,12 @@ export const publicPropertyDetailSchema = z.object({
     }),
   ),
   media: z.array(mediaSchema),
-  host: z.object({ id: z.string(), name: z.string() }),
+  host: z.object({ id: z.string(), name: z.string(), avatarUrl: z.string().nullable(), since: z.string() }),
+  availability: z.object({
+    today: z.string(),
+    windowEnd: z.string(),
+    period: z.object({ checkIn: z.string(), checkOut: z.string() }).nullable(),
+  }),
   rooms: z.array(
     z.object({
       id: z.string(),
@@ -372,6 +377,7 @@ export const publicPropertyDetailSchema = z.object({
       additionalInfo: z.string().nullable(),
       ...houseServicesShape,
       verified: z.boolean(),
+      availabilityStatus: z.enum(["AVAILABLE", "BLOCKED"]),
       media: z.array(mediaSchema),
     }),
   ),

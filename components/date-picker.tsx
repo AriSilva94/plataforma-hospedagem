@@ -78,6 +78,9 @@ export function DatePicker({
   invalid = false,
   describedBy,
   startView = "years",
+  placeholder = "DD/MM/AAAA",
+  compact = false,
+  align = "start",
   ref,
 }: {
   id: string;
@@ -92,6 +95,9 @@ export function DatePicker({
   invalid?: boolean;
   describedBy?: string;
   startView?: View;
+  placeholder?: string;
+  compact?: boolean;
+  align?: "start" | "end";
   ref?: Ref<HTMLInputElement>;
 }) {
   const { anchorRef, panelRef, isOpen, open, close, rootProps, panelProps } = useFieldPopover<HTMLButtonElement>();
@@ -211,7 +217,7 @@ export function DatePicker({
           type="text"
           inputMode="numeric"
           autoComplete="off"
-          placeholder="DD/MM/AAAA"
+          placeholder={placeholder}
           maxLength={10}
           disabled={disabled}
           value={toDisplay(value)}
@@ -226,15 +232,19 @@ export function DatePicker({
             }
             onChange(next);
           }}
-          onClick={() => {
-            if (!isOpen) openCalendar();
-          }}
+          onClick={() => (isOpen ? close() : openCalendar())}
           onBlur={onBlur}
-          className="min-w-0 flex-1 rounded-r-xl bg-transparent py-3 pr-4 pl-0.5 text-(--text-primary) tabular-nums caret-(--primary) outline-hidden placeholder:text-(--text-secondary) disabled:cursor-not-allowed disabled:text-(--text-secondary)"
+          className={`min-w-0 flex-1 rounded-r-xl bg-transparent pr-4 pl-0.5 text-(--text-primary) tabular-nums caret-(--primary) outline-hidden placeholder:text-(--text-secondary) disabled:cursor-not-allowed disabled:text-(--text-secondary) ${compact ? "py-2.5 text-sm" : "py-3"}`}
         />
       </div>
 
-      <div {...panelProps} role="dialog" aria-label={dialogLabel} className="field-popover w-full p-3 sm:w-80">
+      <div
+        {...panelProps}
+        data-align={align}
+        role="dialog"
+        aria-label={dialogLabel}
+        className={`field-popover p-3 ${compact ? "w-80 max-w-[calc(100vw-2rem)]" : "w-full sm:w-80"}`}
+      >
         <div className="flex items-center gap-1">
           <button
             type="button"
