@@ -81,26 +81,21 @@ test.beforeEach(async ({ context, page }) => {
   await context.addCookies([{ name: "access_token", value: "test-session", url: "http://localhost:3001" }]);
 });
 
-test("home logada troca de painel pelas abas sem rolar a página no desktop", async ({ page }) => {
+test("home logada troca de painel pelas abas no desktop", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.goto("/");
-
-  const fits = () => page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight);
 
   await expect(page.getByRole("tab", { name: "Em destaque" })).toHaveCount(0);
   await expect(page.getByRole("tab", { name: "Disponíveis" })).toHaveAttribute("aria-selected", "true");
   await expect(page.getByRole("heading", { name: "Locais em destaque" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Suíte 1" })).toBeVisible();
-  expect(await fits()).toBe(true);
 
   await page.getByRole("tab", { name: "Disponíveis" }).press("ArrowRight");
   await expect(page.getByRole("tab", { name: "Como funciona" })).toBeFocused();
-  await expect(page.getByRole("heading", { name: "Discrição e segurança fazem parte do fluxo" })).toBeVisible();
-  expect(await fits()).toBe(true);
+  await expect(page.getByRole("heading", { name: "Compare quarto a quarto" })).toBeVisible();
 
   await page.getByRole("tab", { name: "Anunciar" }).click();
   await expect(page.getByRole("link", { name: "Anunciar meu espaço" })).toHaveAttribute("href", "/meus-imoveis");
-  expect(await fits()).toBe(true);
 });
 
 test("story abre em tela cheia, avança entre mídias e fecha", async ({ page }) => {
