@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useId, useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 import { LuCheck, LuChevronUp, LuPencil, LuTrash2 } from "react-icons/lu";
 import { Combobox } from "@/components/combobox";
 import { ConfirmDialog } from "@/components/owner/confirm-dialog";
@@ -9,7 +9,7 @@ import { RoomForm, roomFormValues } from "@/components/owner/room-form";
 import { dangerButtonClassName, labelClassName, secondaryButtonClassName } from "@/components/owner/styles";
 import { sendApiRequest, toErrorMessage } from "@/lib/api";
 import type { RoomInput } from "@/lib/owner-forms";
-import { bedsSummary, formatCents, type RoomDetail } from "@/lib/properties";
+import { bedsSummary, countPhotos, formatCents, type RoomDetail } from "@/lib/properties";
 
 function photoCountLabel(count: number) {
   if (count === 0) return "Nenhuma ainda";
@@ -42,13 +42,27 @@ export function RoomSetupCard({
   const [confirmingRemove, setConfirmingRemove] = useState(false);
   const [removing, setRemoving] = useState(false);
   const [error, setError] = useState<string>();
-  const reportDirty = useCallback((dirty: boolean) => onDirtyChange(cardKey, dirty), [onDirtyChange, cardKey]);
+  const [formDirty, setFormDirty] = useState(false);
+  const [pendingCopyId, setPendingCopyId] = useState<string>();
+  const valuesRef = useRef<(() => RoomInput) | null>(null);
+  const reportDirty = useCallback(
+    (dirty: boolean) => {
+      setFormDirty(dirty);
+      onDirtyChange(cardKey, dirty || (!room && Boolean(copiedFrom)));
+    },
+    [onDirtyChange, cardKey, room, copiedFrom],
+  );
 
-  function copyFrom(sourceId: string) {
+  function applyCopy(sourceId: string) {
     const source = savedRooms.find((item) => item.id === sourceId);
     if (!source) return;
     setCopiedFrom(source.id);
-    setInitialValues({ ...roomFormValues(source), title: "" });
+    setInitialValues({ ...roomFormValues(source), title: valuesRef.current?.().title ?? "" });
+  }
+
+  function copyFrom(sourceId: string) {
+    if (formDirty || copiedFrom) setPendingCopyId(sourceId);
+    else applyCopy(sourceId);
   }
 
   async function remove() {
@@ -131,7 +145,7 @@ export function RoomSetupCard({
           </div>
           <div>
             <dt className="text-(--text-secondary)">Fotos</dt>
-            <dd className="font-semibold text-(--text-primary)">{photoCountLabel(room.media.length)}</dd>
+            <dd className="font-semibold text-(--text-primary)">{photoCountLabel(countPhotos(room.media))}</dd>
           </div>
         </dl>
       ) : null}
@@ -167,6 +181,7 @@ export function RoomSetupCard({
           initialValues={initialValues}
           onSaved={(saved) => onSaved(cardKey, saved)}
           onDirtyChange={reportDirty}
+          valuesRef={valuesRef}
         />
         {room ? (
           <div className="border-t border-(--border) pt-6">
@@ -183,6 +198,18 @@ export function RoomSetupCard({
         ) : null}
       </div>
 
+      <ConfirmDialog
+        open={Boolean(pendingCopyId)}
+        title="Substituir os dados deste quarto?"
+        description="Os campos já preenchidos neste quarto serão trocados pelos do quarto escolhido. O nome é mantido."
+        confirmLabel="Copiar dados"
+        tone="primary"
+        onConfirm={() => {
+          if (pendingCopyId) applyCopy(pendingCopyId);
+          setPendingCopyId(undefined);
+        }}
+        onCancel={() => setPendingCopyId(undefined)}
+      />
       <ConfirmDialog
         open={confirmingRemove}
         title="Excluir este quarto?"

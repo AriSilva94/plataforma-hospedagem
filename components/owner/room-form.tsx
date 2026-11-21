@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState, type ReactNode } from "react";
+import { useEffect, useId, useState, type ReactNode, type RefObject } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -91,6 +91,7 @@ export function RoomForm({
   initialValues,
   onSaved,
   onDirtyChange,
+  valuesRef,
 }: {
   propertyId: string;
   room?: RoomDetail;
@@ -100,6 +101,7 @@ export function RoomForm({
   initialValues?: Partial<RoomInput>;
   onSaved?: (room: RoomDetail) => void;
   onDirtyChange?: (dirty: boolean) => void;
+  valuesRef?: RefObject<(() => RoomInput) | null>;
 }) {
   const uid = useId();
   const router = useRouter();
@@ -115,6 +117,9 @@ export function RoomForm({
     mode: "onBlur",
   });
   const { errors, isSubmitting, isDirty } = formState;
+  useEffect(() => {
+    if (valuesRef) valuesRef.current = getValues;
+  }, [valuesRef, getValues]);
   useEffect(() => {
     onDirtyChange?.(isDirty);
   }, [isDirty, onDirtyChange]);
