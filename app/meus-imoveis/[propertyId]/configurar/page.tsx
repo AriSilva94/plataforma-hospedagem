@@ -11,7 +11,7 @@ import { RoomsSetup } from "@/components/owner/rooms-setup";
 import { SetupSteps } from "@/components/owner/setup-steps";
 import { primaryButtonClassName, secondaryButtonClassName } from "@/components/owner/styles";
 import { getApiData } from "@/lib/server-api";
-import { bedsSummary, formatCents, propertyDetailSchema, roomDetailSchema } from "@/lib/properties";
+import { bedsSummary, countPhotos, formatCents, propertyDetailSchema, roomDetailSchema } from "@/lib/properties";
 import { firstPendingStep, parseRoomCount, parseSetupStep, setupStepHref, setupSteps, type SetupStepId } from "@/lib/setup-steps";
 
 const stepCopy: Record<SetupStepId, { title: string; description: string }> = {
@@ -107,24 +107,27 @@ export default async function SetupPropertyPage({ params, searchParams }: PagePr
             </div>
             {rooms.length > 0 ? (
               <ul className="divide-y divide-(--border) rounded-2xl border border-(--border) bg-(--surface)">
-                {rooms.map((room) => (
-                  <li key={room.id} className="flex items-start gap-3 p-4">
-                    <LuBedDouble aria-hidden="true" size={20} className="mt-0.5 shrink-0 text-(--text-secondary)" />
-                    <div className="flex min-w-0 flex-1 flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                      <div className="min-w-0">
-                        <p className="wrap-break-word font-bold text-(--text-primary)">{room.title}</p>
-                        <p className="text-sm text-(--text-secondary)">
-                          {[room.beds.length > 0 ? bedsSummary(room.beds) : null, room.media.length === 0 ? "sem fotos" : room.media.length === 1 ? "1 foto" : `${room.media.length} fotos`]
-                            .filter(Boolean)
-                            .join(" · ")}
-                        </p>
+                {rooms.map((room) => {
+                  const photoCount = countPhotos(room.media);
+                  return (
+                    <li key={room.id} className="flex items-start gap-3 p-4">
+                      <LuBedDouble aria-hidden="true" size={20} className="mt-0.5 shrink-0 text-(--text-secondary)" />
+                      <div className="flex min-w-0 flex-1 flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                        <div className="min-w-0">
+                          <p className="wrap-break-word font-bold text-(--text-primary)">{room.title}</p>
+                          <p className="text-sm text-(--text-secondary)">
+                            {[room.beds.length > 0 ? bedsSummary(room.beds) : null, photoCount === 0 ? "sem fotos" : photoCount === 1 ? "1 foto" : `${photoCount} fotos`]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </p>
+                        </div>
+                        <span className="shrink-0 text-sm font-semibold text-(--text-primary) tabular-nums">
+                          {formatCents(room.priceCents)} <span className="font-normal text-(--text-secondary)">/ diária</span>
+                        </span>
                       </div>
-                      <span className="shrink-0 text-sm font-semibold text-(--text-primary) tabular-nums">
-                        {formatCents(room.priceCents)} <span className="font-normal text-(--text-secondary)">/ diária</span>
-                      </span>
-                    </div>
-                  </li>
-                ))}
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <p className="rounded-2xl border border-dashed border-(--border-strong) p-4 text-sm text-(--text-secondary)">
@@ -136,12 +139,19 @@ export default async function SetupPropertyPage({ params, searchParams }: PagePr
           <p className="text-sm leading-relaxed text-(--text-secondary)">
             Opcional: cadastre as{" "}
             <Link
-              href={`/meus-imoveis/${property.id}/editar?secao=areas`}
+              href={setupStepHref(property.id, "imovel", roomCount)}
               className="font-semibold text-(--primary-text) underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-(--focus-ring)"
             >
               áreas compartilhadas
             </Link>{" "}
-            e as fotos de cada quarto antes de publicar. Você pode publicar agora e editar depois.
+            e as{" "}
+            <Link
+              href={setupStepHref(property.id, "quartos", roomCount)}
+              className="font-semibold text-(--primary-text) underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-(--focus-ring)"
+            >
+              fotos de cada quarto
+            </Link>{" "}
+            antes de publicar. Você pode publicar agora e editar depois.
           </p>
           <PropertyStatusActions propertyId={property.id} status={property.status} canPublish={property.missingRequirements.length === 0} inline />
         </div>
