@@ -213,6 +213,12 @@ test.beforeEach(async ({ context }) => {
   ]);
 });
 
+async function fillRequiredAddress(page: Page) {
+  await page.getByRole("textbox", { name: "CEP" }).pressSequentially("01310100");
+  await expect(page.getByRole("textbox", { name: "Rua / avenida" })).toHaveValue("Avenida Paulista");
+  await page.getByRole("textbox", { name: "Número" }).fill("1000");
+}
+
 async function openProfileTab(page: Page) {
   await page.goto("/perfil");
   await page.getByRole("button", { name: "Perfil", exact: true }).click();
@@ -650,6 +656,7 @@ test("cadastra imóvel escolhendo o tipo no seletor com busca", async ({ page })
 
   await page.getByRole("button", { name: /^Tipo do imóvel/ }).click();
   await page.getByRole("option", { name: "Casa" }).click();
+  await fillRequiredAddress(page);
   await page.getByRole("button", { name: /^Salvar/ }).click();
 
   await expect.poll(() => ownerRequests.length).toBe(1);
@@ -663,6 +670,7 @@ test("cadastra motel como tipo do imóvel", async ({ page }) => {
   await page.getByRole("textbox", { name: /^Descrição do imóvel/ }).fill("Suítes com hidromassagem.");
   await page.getByRole("button", { name: /^Tipo do imóvel/ }).click();
   await page.getByRole("option", { name: "Motel" }).click();
+  await fillRequiredAddress(page);
   await page.getByRole("button", { name: /^Salvar/ }).click();
 
   await expect.poll(() => ownerRequests.length).toBe(1);
@@ -679,6 +687,7 @@ test("cadastra apartamento buscando o tipo do imóvel", async ({ page }) => {
   await expect(page.getByRole("option")).toHaveText(["Apartamento"]);
   await page.keyboard.press("Enter");
   await expect(page.getByRole("button", { name: /^Tipo do imóvel/ })).toHaveAccessibleName("Tipo do imóvel Apartamento");
+  await fillRequiredAddress(page);
   await page.getByRole("button", { name: /^Salvar/ }).click();
 
   await expect.poll(() => ownerRequests.length).toBe(1);
