@@ -19,7 +19,6 @@ import {
   houseServicesError,
   houseServicesPayload,
   propertyGeneralSchema,
-  propertyGuidedGeneralSchema,
   type PropertyGeneralInput,
   type PropertyGeneralValues,
 } from "@/lib/owner-forms";
@@ -31,7 +30,6 @@ import {
   propertyTypes,
   type PropertyDetail,
 } from "@/lib/properties";
-import { setupStepHref } from "@/lib/setup-steps";
 
 export function detailsSummary(property?: PropertyDetail): string {
   if (!property) return "Regras da casa, informações úteis e características.";
@@ -195,20 +193,18 @@ export function PropertyDetailsFields() {
   );
 }
 
-export function PropertyGeneralForm({ property, guided }: { property?: PropertyDetail; guided?: { nextHref: string } }) {
+export function PropertyGeneralForm({ property }: { property: PropertyDetail }) {
   const router = useRouter();
-  const isGuided = !property || Boolean(guided);
   const [error, setError] = useState<string>();
   const [message, setMessage] = useState<string>();
   const form = useForm<PropertyGeneralInput, unknown, PropertyGeneralValues>({
-    resolver: zodResolver(isGuided ? propertyGuidedGeneralSchema : propertyGeneralSchema),
+    resolver: zodResolver(propertyGeneralSchema),
     defaultValues: generalDefaults(property),
     mode: "onBlur",
   });
   const { register, handleSubmit, control, getValues, reset, formState } = form;
   const { errors, isSubmitting, isDirty } = formState;
-  const editing = Boolean(property) && !guided;
-  const published = Boolean(property) && property?.status !== "DRAFT";
+  const published = property.status !== "DRAFT";
   const hasCleaner = useWatch({ control, name: "hasCleaner" });
   const detailsHaveErrors = Boolean(errors.houseRules || errors.generalInfo);
 
@@ -221,22 +217,13 @@ export function PropertyGeneralForm({ property, guided }: { property?: PropertyD
       return;
     }
     try {
-      const saved = await sendApiRequest(property ? `/owner/properties/${property.id}` : "/owner/properties", {
-        method: property ? "PATCH" : "POST",
+      await sendApiRequest(`/owner/properties/${property.id}`, {
+        method: "PATCH",
         body: JSON.stringify({ ...values, ...houseServicesPayload(values) }),
       });
-      if (property) {
-        if (guided) {
-          router.push(guided.nextHref);
-          return;
-        }
-        setMessage("Informações salvas.");
-        reset(getValues());
-        router.refresh();
-        return;
-      }
-      const id = typeof saved === "object" && saved !== null && "id" in saved ? String(saved.id) : undefined;
-      router.push(id ? setupStepHref(id, "fotos") : "/meus-imoveis");
+      setMessage("Informações salvas.");
+      reset(getValues());
+      router.refresh();
     } catch (requestError) {
       setError(toErrorMessage(requestError));
     }
@@ -265,17 +252,16 @@ export function PropertyGeneralForm({ property, guided }: { property?: PropertyD
         </OptionalDetails>
 
         <FormActions>
-          <button type="submit" disabled={isSubmitting || (editing && !isDirty)} className={primaryButtonClassName}>
-            {isSubmitting ? "Salvando..." : isGuided ? "Salvar e continuar" : "Salvar informações"}
+          <button type="submit" disabled={isSubmitting || !isDirty} className={primaryButtonClassName}>
+            {isSubmitting ? "Salvando..." : "Salvar informações"}
           </button>
-          {editing && isDirty ? (
+          {isDirty ? (
             <button type="button" disabled={isSubmitting} onClick={() => reset()} className={secondaryButtonClassName}>
               Descartar
             </button>
           ) : null}
-          <FormStatus error={error} saved={message} dirty={editing && isDirty} />
+          <FormStatus error={error} saved={message} dirty={isDirty} />
         </FormActions>
-        {!property ? <p className="text-[13px] text-(--text-secondary)">Você poderá editar tudo depois. O imóvel só aparece para hóspedes quando for publicado.</p> : null}
         <UnsavedChangesGuard dirty={isDirty && !isSubmitting} />
       </form>
     </FormProvider>
