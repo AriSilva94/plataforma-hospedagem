@@ -29,7 +29,7 @@ export function SetupSteps({
             <>
               <span
                 aria-hidden="true"
-                className={`block h-1.5 rounded-full ${done ? "bg-(--success)" : active ? "bg-(--primary)" : "bg-(--border-strong)"}`}
+                className={`block h-1.5 rounded-full ${active ? "bg-(--primary)" : done ? "bg-(--success)" : "bg-(--border-strong)"}`}
               />
               <span
                 className={`mt-2 hidden items-center gap-1.5 text-xs font-semibold sm:flex ${active ? "text-(--text-primary)" : "text-(--text-secondary)"}`}
@@ -37,9 +37,9 @@ export function SetupSteps({
                 {done ? <LuCheck aria-hidden="true" size={13} className="shrink-0 text-(--success)" /> : null}
                 {step.label}
               </span>
-              {done ? <span className="sr-only">Concluído</span> : null}
             </>
           );
+          const label = done ? `${step.label} (concluído)` : step.label;
 
           return (
             <li key={step.id}>
@@ -47,13 +47,13 @@ export function SetupSteps({
                 <Link
                   href={setupStepHref(propertyId, step.id, roomCount)}
                   aria-current={active ? "step" : undefined}
-                  aria-label={step.label}
+                  aria-label={label}
                   className="block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--focus-ring)"
                 >
                   {content}
                 </Link>
               ) : (
-                <div aria-current={active ? "step" : undefined} aria-label={step.label}>
+                <div aria-current={active ? "step" : undefined} aria-label={label}>
                   {content}
                 </div>
               )}

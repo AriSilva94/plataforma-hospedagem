@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { LuBedDouble, LuHouse } from "react-icons/lu";
 import { FieldError } from "@/components/field-error";
 import { FieldHint } from "@/components/owner/field-hint";
 import { FormActions, FormStatus } from "@/components/owner/form-actions";
@@ -13,7 +14,7 @@ import { PropertyAddressFields, locationDefaults } from "@/components/owner/prop
 import { PropertyBasicFields, PropertyDetailsFields, detailsSummary, generalDefaults } from "@/components/owner/property-general-form";
 import { SharedAreasFields, sharedAreasDefaults } from "@/components/owner/shared-areas-fields";
 import { UnsavedChangesGuard } from "@/components/owner/unsaved-changes-guard";
-import { fieldClassName, labelClassName, primaryButtonClassName } from "@/components/owner/styles";
+import { cardClassName, fieldClassName, labelClassName, primaryButtonClassName } from "@/components/owner/styles";
 import { sendApiRequest, toErrorMessage } from "@/lib/api";
 import {
   houseServicesError,
@@ -79,7 +80,13 @@ export function PropertySetupForm({ property, roomCount }: { property?: Property
     <FormProvider {...form}>
       <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col gap-6 py-6">
         <section aria-labelledby="setup-basic-heading" className="flex flex-col gap-5">
-          <h2 id="setup-basic-heading" className={sectionHeadingClassName}>Informações básicas</h2>
+          <div className="flex items-start gap-3">
+            <LuHouse aria-hidden="true" size={20} className="mt-0.5 shrink-0 text-(--primary-text)" />
+            <div>
+              <h2 id="setup-basic-heading" className={sectionHeadingClassName}>Informações básicas</h2>
+              <p className="mt-1 text-sm leading-relaxed text-(--text-secondary)">Aparecem no anúncio e valem para todos os quartos.</p>
+            </div>
+          </div>
           <PropertyBasicFields published={false} />
         </section>
 
@@ -105,9 +112,15 @@ export function PropertySetupForm({ property, roomCount }: { property?: Property
           <SharedAreasFields />
         </OptionalDetails>
 
-        <section aria-labelledby="setup-room-count-heading" className="flex flex-col gap-2">
-          <h2 id="setup-room-count-heading" className={sectionHeadingClassName}>Quantos quartos você vai cadastrar agora?</h2>
-          <div className="max-w-40">
+        <section aria-labelledby="setup-room-count-heading" className={`${cardClassName} mt-2 flex flex-col gap-2`}>
+          <div className="flex items-start gap-3">
+            <LuBedDouble aria-hidden="true" size={20} className="mt-0.5 shrink-0 text-(--primary-text)" />
+            <div>
+              <h2 id="setup-room-count-heading" className={sectionHeadingClassName}>Quantos quartos você vai cadastrar agora?</h2>
+              <p className="mt-1 text-sm leading-relaxed text-(--text-secondary)">Cada quarto terá preço, camas e fotos próprios.</p>
+            </div>
+          </div>
+          <div className="mt-2 max-w-40 sm:ml-8">
             <label htmlFor="property-room-count" className={labelClassName}>Quartos</label>
             <input
               id="property-room-count"
@@ -122,17 +135,19 @@ export function PropertySetupForm({ property, roomCount }: { property?: Property
               className={fieldClassName}
             />
           </div>
-          <FieldHint id="property-room-count-hint">No passo Quartos você cadastra cada quarto. Dá para adicionar mais depois.</FieldHint>
-          <FieldError id="property-room-count-error" message={errors.roomCount?.message} />
+          <div className="sm:ml-8">
+            <FieldHint id="property-room-count-hint">No passo Quartos você cadastra cada quarto. Dá para adicionar mais depois.</FieldHint>
+            <FieldError id="property-room-count-error" message={errors.roomCount?.message} />
+          </div>
         </section>
 
+        {!property ? <p className="text-[13px] text-(--text-secondary)">Você poderá editar tudo depois. O imóvel só aparece para hóspedes quando for publicado.</p> : null}
         <FormActions>
           <button type="submit" disabled={isSubmitting} className={primaryButtonClassName}>
             {isSubmitting ? "Salvando..." : "Salvar e continuar"}
           </button>
           <FormStatus error={error} />
         </FormActions>
-        {!property ? <p className="text-[13px] text-(--text-secondary)">Você poderá editar tudo depois. O imóvel só aparece para hóspedes quando for publicado.</p> : null}
         <UnsavedChangesGuard dirty={isDirty && !isSubmitting} />
       </form>
     </FormProvider>

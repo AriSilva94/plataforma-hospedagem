@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LuPlus } from "react-icons/lu";
+import { LuArrowLeft, LuPlus } from "react-icons/lu";
 import { ConfirmDialog } from "@/components/owner/confirm-dialog";
 import { RoomSetupCard } from "@/components/owner/room-setup-card";
 import { UnsavedChangesGuard } from "@/components/owner/unsaved-changes-guard";
@@ -20,11 +21,13 @@ export function RoomsSetup({
   rooms,
   emptyCount,
   reviewHref,
+  backHref,
 }: {
   propertyId: string;
   rooms: RoomDetail[];
   emptyCount: number;
   reviewHref: string;
+  backHref: string;
 }) {
   const router = useRouter();
   const [cards, setCards] = useState<Card[]>(() => [
@@ -62,7 +65,12 @@ export function RoomsSetup({
   }
 
   return (
-    <div className="flex flex-col gap-6 py-8">
+    <div className="flex flex-col gap-4 py-8">
+      {cards.length > 0 ? (
+        <p role="status" className="text-sm font-semibold text-(--text-secondary)">
+          {`${savedRooms.length} de ${cards.length} ${cards.length === 1 ? "quarto salvo" : "quartos salvos"}`}
+        </p>
+      ) : null}
       <ol className="flex flex-col gap-4">
         {cards.map((card, index) => (
           <RoomSetupCard
@@ -79,11 +87,26 @@ export function RoomsSetup({
         ))}
       </ol>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <button type="button" onClick={() => setCards((current) => [...current, emptyCard()])} className={secondaryButtonClassName}>
-          <LuPlus aria-hidden="true" size={17} />
-          Adicionar quarto
-        </button>
+      {cards.length === 0 ? (
+        <p className="text-sm leading-relaxed text-(--text-secondary)">
+          Nenhum quarto no cadastro. Adicione um quarto para informar preço, camas e fotos.
+        </p>
+      ) : null}
+
+      <button
+        type="button"
+        onClick={() => setCards((current) => [...current, emptyCard()])}
+        className="flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-dashed border-(--border-strong) text-sm font-semibold text-(--primary-text) transition-colors hover:border-(--primary-border) hover:bg-(--primary-soft) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
+      >
+        <LuPlus aria-hidden="true" size={17} />
+        Adicionar quarto
+      </button>
+
+      <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-(--border) pt-6">
+        <Link href={backHref} className={secondaryButtonClassName}>
+          <LuArrowLeft aria-hidden="true" size={16} />
+          Voltar
+        </Link>
         <button type="button" disabled={savedRooms.length === 0} onClick={continueToReview} className={primaryButtonClassName}>
           Continuar para revisão
         </button>

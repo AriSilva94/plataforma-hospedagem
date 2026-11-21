@@ -1,17 +1,18 @@
 "use client";
 
 import { useCallback, useId, useState } from "react";
-import { LuChevronUp, LuPencil, LuTrash2 } from "react-icons/lu";
+import { LuCheck, LuChevronUp, LuPencil, LuTrash2 } from "react-icons/lu";
 import { Combobox } from "@/components/combobox";
 import { ConfirmDialog } from "@/components/owner/confirm-dialog";
 import { MediaGallery } from "@/components/owner/media-gallery";
 import { RoomForm, roomFormValues } from "@/components/owner/room-form";
-import { cardClassName, dangerButtonClassName, labelClassName, secondaryButtonClassName } from "@/components/owner/styles";
+import { dangerButtonClassName, labelClassName, secondaryButtonClassName } from "@/components/owner/styles";
 import { sendApiRequest, toErrorMessage } from "@/lib/api";
 import type { RoomInput } from "@/lib/owner-forms";
 import { bedsSummary, formatCents, type RoomDetail } from "@/lib/properties";
 
 function photoCountLabel(count: number) {
+  if (count === 0) return "Nenhuma ainda";
   return count === 1 ? "1 foto" : `${count} fotos`;
 }
 
@@ -65,13 +66,22 @@ export function RoomSetupCard({
   }
 
   return (
-    <li aria-labelledby={`${uid}-heading`} className={cardClassName}>
+    <li aria-labelledby={`${uid}-heading`} className="rounded-2xl border border-(--border) bg-(--surface) p-4 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-xs font-bold tracking-wide text-(--text-secondary) uppercase">{`Quarto ${index + 1}`}</p>
-          <h2 id={`${uid}-heading`} className="mt-1 wrap-break-word text-lg font-bold text-(--text-primary)">
-            {room ? room.title : "Novo quarto"}
-          </h2>
+        <div className="flex min-w-0 items-start gap-3">
+          <span
+            aria-hidden="true"
+            className={`grid size-8 shrink-0 place-items-center rounded-full text-sm font-bold tabular-nums ${room ? "bg-(--success-soft) text-(--success)" : "bg-(--surface-raised) text-(--text-secondary)"}`}
+          >
+            {room ? <LuCheck size={16} /> : index + 1}
+          </span>
+          <div className="min-w-0">
+            <h2 id={`${uid}-heading`} className="wrap-break-word text-lg font-bold text-(--text-primary)">
+              <span className="sr-only">{`Quarto ${index + 1}: `}</span>
+              {room ? room.title : "Novo quarto"}
+            </h2>
+            <p className="text-sm text-(--text-secondary)">{room ? "Salvo" : "Ainda não salvo"}</p>
+          </div>
         </div>
         <div className="flex flex-wrap gap-2">
           {room ? (
@@ -106,10 +116,10 @@ export function RoomSetupCard({
       ) : null}
 
       {room && !expanded ? (
-        <dl className="mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+        <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-(--border) pt-4 text-sm sm:grid-cols-4 sm:pl-11">
           <div>
             <dt className="text-(--text-secondary)">Diária</dt>
-            <dd className="font-semibold text-(--text-primary)">{formatCents(room.priceCents)} / diária</dd>
+            <dd className="font-semibold text-(--text-primary) tabular-nums">{formatCents(room.priceCents)}</dd>
           </div>
           <div>
             <dt className="text-(--text-secondary)">Capacidade</dt>
@@ -127,11 +137,11 @@ export function RoomSetupCard({
       ) : null}
 
       {!room && savedRooms.length > 0 ? (
-        <div className="mt-4 max-w-sm">
+        <div className="mt-4 rounded-xl bg-(--surface-raised) p-4 sm:ml-11">
           <span id={`${uid}-copy-label`} className={labelClassName}>
             Copiar dados de…
           </span>
-          <div className="mt-1.5">
+          <div className="mt-1.5 max-w-sm">
             <Combobox
               id={`${uid}-copy`}
               labelId={`${uid}-copy-label`}

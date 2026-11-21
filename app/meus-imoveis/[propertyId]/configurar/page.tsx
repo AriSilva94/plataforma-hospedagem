@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { LuArrowLeft } from "react-icons/lu";
+import { LuArrowLeft, LuBedDouble } from "react-icons/lu";
 import { MediaGallery } from "@/components/owner/media-gallery";
 import { OwnerDataNotice } from "@/components/owner/owner-notice";
 import { OwnerPage } from "@/components/owner/owner-page";
@@ -87,33 +87,49 @@ export default async function SetupPropertyPage({ params, searchParams }: PagePr
           rooms={rooms}
           emptyCount={emptyCount}
           reviewHref={setupStepHref(property.id, "revisao", roomCount)}
+          backHref={setupStepHref(property.id, "fotos", roomCount)}
         />
       ) : null}
 
       {step === "revisao" ? (
         <div className="flex flex-col gap-6 py-8">
           <section aria-labelledby="review-rooms-heading" className="flex flex-col gap-3">
-            <h2 id="review-rooms-heading" className="text-lg font-bold text-(--text-primary)">
-              Quartos
-            </h2>
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+              <h2 id="review-rooms-heading" className="text-lg font-bold text-(--text-primary)">
+                {rooms.length > 0 ? `Quartos (${rooms.length})` : "Quartos"}
+              </h2>
+              <Link
+                href={setupStepHref(property.id, "quartos", roomCount)}
+                className="text-sm font-semibold text-(--primary-text) underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-(--focus-ring)"
+              >
+                {rooms.length > 0 ? "Editar quartos" : "Cadastrar quartos"}
+              </Link>
+            </div>
             {rooms.length > 0 ? (
-              <ul className="flex flex-col gap-3">
+              <ul className="divide-y divide-(--border) rounded-2xl border border-(--border) bg-(--surface)">
                 {rooms.map((room) => (
-                  <li key={room.id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-2xl border border-(--border) bg-(--surface) p-4">
-                    <div className="min-w-0">
-                      <p className="wrap-break-word font-bold text-(--text-primary)">{room.title}</p>
-                      <p className="text-sm text-(--text-secondary)">
-                        {[room.beds.length > 0 ? bedsSummary(room.beds) : null, room.media.length === 1 ? "1 foto" : `${room.media.length} fotos`]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </p>
+                  <li key={room.id} className="flex items-start gap-3 p-4">
+                    <LuBedDouble aria-hidden="true" size={20} className="mt-0.5 shrink-0 text-(--text-secondary)" />
+                    <div className="flex min-w-0 flex-1 flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                      <div className="min-w-0">
+                        <p className="wrap-break-word font-bold text-(--text-primary)">{room.title}</p>
+                        <p className="text-sm text-(--text-secondary)">
+                          {[room.beds.length > 0 ? bedsSummary(room.beds) : null, room.media.length === 0 ? "sem fotos" : room.media.length === 1 ? "1 foto" : `${room.media.length} fotos`]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </p>
+                      </div>
+                      <span className="shrink-0 text-sm font-semibold text-(--text-primary) tabular-nums">
+                        {formatCents(room.priceCents)} <span className="font-normal text-(--text-secondary)">/ diária</span>
+                      </span>
                     </div>
-                    <span className="shrink-0 text-sm font-semibold text-(--text-secondary)">{formatCents(room.priceCents)} / diária</span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-(--text-secondary)">Nenhum quarto salvo ainda.</p>
+              <p className="rounded-2xl border border-dashed border-(--border-strong) p-4 text-sm text-(--text-secondary)">
+                Nenhum quarto salvo ainda. Cadastre ao menos um quarto para publicar.
+              </p>
             )}
           </section>
           <PublishChecklist propertyId={property.id} missing={property.missingRequirements} />
@@ -131,7 +147,7 @@ export default async function SetupPropertyPage({ params, searchParams }: PagePr
         </div>
       ) : null}
 
-      {step === "imovel" ? null : (
+      {step === "imovel" || step === "quartos" ? null : (
         <div className="flex flex-wrap items-center gap-3 border-t border-(--border) pt-6 pb-4">
           {previousHref ? (
             <Link href={previousHref} className={secondaryButtonClassName}>
