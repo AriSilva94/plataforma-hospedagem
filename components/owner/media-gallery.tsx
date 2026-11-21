@@ -1,14 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { memo, useEffect, useLayoutEffect, useRef, useState, type DragEvent, type KeyboardEvent, type PointerEvent } from "react";
+import { memo, useEffect, useId, useLayoutEffect, useRef, useState, type DragEvent, type KeyboardEvent, type PointerEvent } from "react";
 import { flushSync } from "react-dom";
 import { z } from "@/lib/zod";
 import { LuCheck, LuGripVertical, LuImagePlus, LuImages, LuVideo, LuLoaderCircle, LuPlay, LuStar, LuTrash2 } from "react-icons/lu";
 import { FormFeedback } from "@/components/form-feedback";
 import { ConfirmDialog } from "@/components/owner/confirm-dialog";
 import { secondaryButtonClassName } from "@/components/owner/styles";
-import { sendApiRequest, toErrorMessage } from "@/lib/api";
+import { ApiRequestError, sendApiRequest, toErrorMessage } from "@/lib/api";
 import { mediaSchema, type Media, type MediaKind } from "@/lib/properties";
 
 const MB = 1024 * 1024;
@@ -19,7 +19,6 @@ const AUTO_SCROLL_EDGE = 72;
 const AUTO_SCROLL_STEP = 14;
 const SHIFT_DURATION_MS = 200;
 const SHIFT_CLASSES = ["transition-transform", "duration-200", "ease-out"];
-const REORDER_INSTRUCTIONS_ID = "media-reorder-instructions";
 
 type DragSession = {
   id: string;
@@ -85,6 +84,7 @@ const MediaTile = memo(function MediaTile({
   grabbed,
   disabled,
   canReorder,
+  instructionsId,
   actions,
 }: {
   item: Media;
@@ -94,6 +94,7 @@ const MediaTile = memo(function MediaTile({
   grabbed: boolean;
   disabled: boolean;
   canReorder: boolean;
+  instructionsId: string;
   actions: TileActions;
 }) {
   const label = mediaLabel(item, index);
@@ -124,7 +125,7 @@ const MediaTile = memo(function MediaTile({
           <button
             type="button"
             aria-label={`Reordenar ${label}`}
-            aria-describedby={REORDER_INSTRUCTIONS_ID}
+            aria-describedby={instructionsId}
             aria-pressed={grabbed}
             disabled={disabled}
             onPointerDown={(event) => actions.startDrag(event, item.id)}
@@ -171,18 +172,21 @@ const MediaTile = memo(function MediaTile({
 });
 
 export function MediaGallery({
+  label,
   basePath,
   initialMedia,
   allowVideo,
   maxImages,
   maxVideos = 0,
 }: {
+  label: string;
   basePath: string;
   initialMedia: Media[];
   allowVideo: boolean;
   maxImages: number;
   maxVideos?: number;
 }) {
+  const reorderInstructionsId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLOListElement>(null);
   const ghostRef = useRef<HTMLDivElement>(null);
@@ -440,6 +444,10 @@ export function MediaGallery({
           setMedia((current) => [...current, created]);
           uploaded += 1;
         } catch (error) {
+          if (error instanceof ApiRequestError && error.status === 429) {
+            failures.push(`${error.message} ${files.length - index} arquivo(s) não enviados.`);
+            break;
+          }
           failures.push(`${file.name}: ${toErrorMessage(error)}`);
         }
       }
@@ -492,7 +500,7 @@ export function MediaGallery({
   const removingTitle = removing?.type === "VIDEO" ? "Remover este vídeo?" : "Remover esta foto?";
 
   return (
-    <section aria-label="Galeria" className="flex flex-col gap-5 py-6">
+    <section aria-label={label} className="flex flex-col gap-5 py-6">
       {allowVideo ? (
         <div role="tablist" aria-label="Tipo de mídia" className="flex w-full gap-1 rounded-[1.625rem] border border-(--border) bg-(--surface) p-1 sm:w-fit">
           {(
@@ -529,7 +537,7 @@ export function MediaGallery({
         }`}
       >
         <div>
-          <h2 className="font-bold text-(--text-primary)">{kind === "IMAGE" ? "Fotos" : "Vídeos"}</h2>
+          <h2 className="font-bold text-(--text-primary)">{kind === "IMAGE" ? label : "Vídeos"}</h2>
           <p className="mt-1 text-sm leading-relaxed text-(--text-secondary)">
             <span className="hidden sm:inline">Arraste arquivos para cá ou use o botão. </span>
             {kind === "IMAGE" ? `JPEG, PNG ou WebP até 10 MB (máx. ${maxImages}).` : `MP4, MOV ou WebM até 100 MB (máx. ${maxVideos}).`}
@@ -563,7 +571,7 @@ export function MediaGallery({
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-[13px] text-(--text-secondary)">
             {canReorder ? (
-              <p id={REORDER_INSTRUCTIONS_ID} className="flex items-center gap-1.5">
+              <p id={reorderInstructionsId} className="flex items-center gap-1.5">
                 <LuGripVertical aria-hidden="true" size={14} className="shrink-0" />
                 Arraste pelo ícone para reordenar. O primeiro item é a capa, seja foto ou vídeo.
                 <span className="sr-only">No teclado, foque o ícone, pressione Espaço, mova com as setas e confirme com Enter.</span>
@@ -595,6 +603,7 @@ export function MediaGallery({
                 grabbed={item.id === grabbedId}
                 disabled={disabled}
                 canReorder={canReorder}
+                instructionsId={reorderInstructionsId}
                 actions={actions}
               />
             ))}

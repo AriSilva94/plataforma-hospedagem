@@ -72,7 +72,7 @@ export default async function EditRoomPage({ params, searchParams }: PageProps<"
       />
       {section === "dados" ? <RoomForm propertyId={propertyId} room={room} /> : null}
       {section === "fotos" ? (
-        <MediaGallery basePath={`/owner/rooms/${room.id}`} initialMedia={room.media} allowVideo maxImages={20} maxVideos={3} />
+        <MediaGallery label={`Fotos de ${room.title}`} basePath={`/owner/rooms/${room.id}`} initialMedia={room.media} allowVideo maxImages={20} maxVideos={3} />
       ) : null}
       {section === "story" ? <RoomStoryEditor roomId={room.id} initialMedia={room.storyMedia} status={room.storyStatus} rejectedReason={room.storyRejectedReason} expiresAt={room.storyExpiresAt} expired={isStoryExpired(room.storyExpiresAt)} views={room.storyViews} /> : null}
       {availability?.status === "ok" ? <AvailabilityEditor roomId={room.id} initial={availability.data} /> : null}

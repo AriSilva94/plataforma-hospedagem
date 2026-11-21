@@ -8,6 +8,15 @@ const sessionAuthPaths = [
 
 export type ApiError = { message: string };
 
+export class ApiRequestError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+  }
+}
+
 export async function apiFetch(
   path: string,
   init: RequestInit = {},
@@ -49,7 +58,7 @@ export async function sendApiRequest(path: string, init: RequestInit): Promise<u
   } catch {
     throw new Error("Não foi possível conectar ao servidor. Tente novamente.");
   }
-  if (!response.ok) throw new Error(await getErrorMessage(response));
+  if (!response.ok) throw new ApiRequestError(await getErrorMessage(response), response.status);
   return response.status === 204 ? null : response.json().catch(() => null);
 }
 
