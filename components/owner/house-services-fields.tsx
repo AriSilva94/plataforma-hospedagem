@@ -9,10 +9,12 @@ const cleanerOptions = [
 ];
 
 export function HouseServicesFields<T extends FieldValues & HouseServicesInput>({
+  id = "house-services",
   register,
   hasCleaner,
   inherited,
 }: {
+  id?: string;
   register: UseFormRegister<T>;
   hasCleaner: HouseServicesInput["hasCleaner"];
   inherited?: { hasCleaner: boolean | null; cleaningFrequency: CleaningFrequency | null; smokingPolicy: SmokingPolicy | null };
@@ -24,7 +26,7 @@ export function HouseServicesFields<T extends FieldValues & HouseServicesInput>(
   return (
     <div className="flex flex-col gap-4">
       <ChoiceGroup
-        id="house-services-cleaner"
+        id={`${id}-cleaner`}
         legend="Faxineira"
         type="radio"
         options={inherited ? [inheritOption(inheritedCleaning), ...cleanerOptions] : cleanerOptions}
@@ -32,7 +34,7 @@ export function HouseServicesFields<T extends FieldValues & HouseServicesInput>(
       />
       {hasCleaner === "yes" ? (
         <ChoiceGroup
-          id="house-services-frequency"
+          id={`${id}-frequency`}
           legend="Frequência da faxina"
           type="radio"
           options={optionsFrom(cleaningFrequencyLabels)}
@@ -40,7 +42,7 @@ export function HouseServicesFields<T extends FieldValues & HouseServicesInput>(
         />
       ) : null}
       <ChoiceGroup
-        id="house-services-smoking"
+        id={`${id}-smoking`}
         legend="Fumantes"
         type="radio"
         options={inherited ? [inheritOption(inheritedSmoking), ...optionsFrom(smokingPolicyLabels)] : optionsFrom(smokingPolicyLabels)}
