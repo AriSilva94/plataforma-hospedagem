@@ -313,7 +313,7 @@ export const roomDetailSchema = z.object({
   bathroomType: z.enum(bathroomTypes),
   acceptedAudiences: z.array(z.enum(genderIdentities)),
   amenities: z.array(z.string()),
-  beds: z.array(bedSchema),
+  beds: z.array(bedSchema).default([]),
   additionalInfo: z.string().nullable(),
   ...houseServicesShape,
   completenessScore: z.number(),
@@ -392,7 +392,7 @@ export const publicPropertyDetailSchema = z.object({
       bathroomType: z.enum(bathroomTypes),
       acceptedAudiences: z.array(z.enum(genderIdentities)),
       amenities: z.array(z.string()),
-      beds: z.array(bedSchema),
+      beds: z.array(bedSchema).default([]),
       additionalInfo: z.string().nullable(),
       ...houseServicesShape,
       verified: z.boolean(),
@@ -429,4 +429,8 @@ export function formatLocation({ neighborhood, city, state }: Pick<PropertySumma
 
 export function labelOf(labels: Partial<Record<string, string>>, key: string): string {
   return labels[key] ?? key;
+}
+
+export function countPhotos(media: Array<{ type: (typeof mediaKinds)[number] }>): number {
+  return media.filter((item) => item.type === "IMAGE").length;
 }
