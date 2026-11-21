@@ -36,6 +36,7 @@ import { getCurrentUser } from "@/lib/current-user";
 import { initialsOf } from "@/lib/initials";
 import {
   bathroomTypeLabels,
+  bedsSummary,
   cleaningSummary,
   formatCents,
   formatLocation,
@@ -183,6 +184,7 @@ export default async function PublicRoomPage({ params, searchParams }: PageProps
   const highlights = [
     { icon: LuUsers, label: room.capacity === 1 ? "1 hóspede" : `Até ${room.capacity} hóspedes` },
     { icon: LuBath, label: `Banheiro ${bathroomTypeLabels[room.bathroomType].toLowerCase()}` },
+    ...(room.beds.length > 0 ? [{ icon: LuBedDouble, label: bedsSummary(room.beds) }] : []),
     ...room.amenities.slice(0, 4).map((amenity) => ({ icon: iconOf(roomAmenityIcons, amenity), label: labelOf(roomAmenityLabels, amenity) })),
   ];
   const details = [

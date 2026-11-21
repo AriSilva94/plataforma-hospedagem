@@ -11,7 +11,7 @@ export const smokingPolicies = ["NOT_ALLOWED", "OUTDOOR_ONLY", "ALLOWED"] as con
 export const genderIdentities = ["MAN", "WOMAN", "TRANS_WOMAN", "TRANS_MAN"] as const;
 export const sharedAreaTypes = ["LIVING_ROOM", "KITCHEN", "SHARED_BATHROOM", "LAUNDRY", "OUTDOOR_AREA", "GARAGE", "OTHER"] as const;
 export const propertyFeatures = ["WIFI", "ELEVATOR", "DOORMAN", "GATED_ACCESS", "SECURITY_CAMERAS", "ACCESSIBILITY", "PETS_ALLOWED", "SMOKING_ALLOWED", "CLEANING_SERVICE", "UTILITIES_INCLUDED"] as const;
-export const roomAmenities = ["AIR_CONDITIONING", "FAN", "DOUBLE_BED", "SINGLE_BED", "WARDROBE", "DESK", "TV", "MINIBAR", "WINDOW", "BALCONY", "BLACKOUT_CURTAINS", "DOOR_LOCK", "BED_LINEN", "TOWELS"] as const;
+export const roomAmenities = ["AIR_CONDITIONING", "FAN", "WARDROBE", "DESK", "TV", "MINIBAR", "WINDOW", "BALCONY", "BLACKOUT_CURTAINS", "DOOR_LOCK", "BED_LINEN", "TOWELS"] as const;
 export const publishRequirements = ["DESCRIPTION", "ADDRESS", "PHOTO", "ROOM"] as const;
 export const completenessCriteria = [
   "ROOM_DESCRIPTION",
@@ -167,7 +167,7 @@ export const propertyFeatureGroups: { id: string; legend: string; features: (typ
 ];
 
 export const roomAmenityGroups: { id: string; legend: string; amenities: (typeof roomAmenities)[number][] }[] = [
-  { id: "beds", legend: "Camas e enxoval", amenities: ["DOUBLE_BED", "SINGLE_BED", "BED_LINEN", "TOWELS"] },
+  { id: "linen", legend: "Enxoval", amenities: ["BED_LINEN", "TOWELS"] },
   { id: "climate", legend: "Conforto do ambiente", amenities: ["AIR_CONDITIONING", "FAN", "WINDOW", "BALCONY", "BLACKOUT_CURTAINS"] },
   { id: "furniture", legend: "Móveis e equipamentos", amenities: ["WARDROBE", "DESK", "TV", "MINIBAR", "DOOR_LOCK"] },
 ];
@@ -175,8 +175,6 @@ export const roomAmenityGroups: { id: string; legend: string; amenities: (typeof
 export const roomAmenityLabels: Record<(typeof roomAmenities)[number], string> = {
   AIR_CONDITIONING: "Ar-condicionado",
   FAN: "Ventilador",
-  DOUBLE_BED: "Cama de casal",
-  SINGLE_BED: "Cama de solteiro",
   WARDROBE: "Guarda-roupa",
   DESK: "Mesa de trabalho",
   TV: "TV",
@@ -188,6 +186,25 @@ export const roomAmenityLabels: Record<(typeof roomAmenities)[number], string> =
   BED_LINEN: "Roupa de cama",
   TOWELS: "Toalhas",
 };
+
+export const bedTypes = ["SINGLE", "DOUBLE", "QUEEN", "KING", "BUNK", "SOFA_BED"] as const;
+export type BedType = (typeof bedTypes)[number];
+
+export const bedTypeLabels: Record<BedType, string> = {
+  SINGLE: "Solteiro",
+  DOUBLE: "Casal",
+  QUEEN: "Queen",
+  KING: "King",
+  BUNK: "Beliche",
+  SOFA_BED: "Sofá-cama",
+};
+
+export const bedSchema = z.object({ type: z.enum(bedTypes), quantity: z.number() });
+export type RoomBed = z.infer<typeof bedSchema>;
+
+export function bedsSummary(beds: RoomBed[]): string {
+  return beds.map(({ type, quantity }) => `${quantity} ${bedTypeLabels[type].toLowerCase()}`).join(" · ");
+}
 
 export const houseServicesShape = {
   hasCleaner: z.boolean().nullable().default(null),
@@ -296,6 +313,7 @@ export const roomDetailSchema = z.object({
   bathroomType: z.enum(bathroomTypes),
   acceptedAudiences: z.array(z.enum(genderIdentities)),
   amenities: z.array(z.string()),
+  beds: z.array(bedSchema),
   additionalInfo: z.string().nullable(),
   ...houseServicesShape,
   completenessScore: z.number(),
@@ -374,6 +392,7 @@ export const publicPropertyDetailSchema = z.object({
       bathroomType: z.enum(bathroomTypes),
       acceptedAudiences: z.array(z.enum(genderIdentities)),
       amenities: z.array(z.string()),
+      beds: z.array(bedSchema),
       additionalInfo: z.string().nullable(),
       ...houseServicesShape,
       verified: z.boolean(),

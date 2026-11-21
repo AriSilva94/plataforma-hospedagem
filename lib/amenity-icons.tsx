@@ -4,8 +4,6 @@ import {
   LuAppWindow,
   LuArchive,
   LuBath,
-  LuBedDouble,
-  LuBedSingle,
   LuBlinds,
   LuCamera,
   LuChefHat,
@@ -42,8 +40,6 @@ export function iconOf(icons: Partial<Record<string, IconType>>, key: string): I
 export const roomAmenityIcons: Record<(typeof roomAmenities)[number], IconType> = {
   AIR_CONDITIONING: LuAirVent,
   FAN: LuWind,
-  DOUBLE_BED: LuBedDouble,
-  SINGLE_BED: LuBedSingle,
   WARDROBE: LuArchive,
   DESK: LuLampDesk,
   TV: LuTv,
