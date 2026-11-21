@@ -1,5 +1,5 @@
 import { OwnerPage } from "@/components/owner/owner-page";
-import { PropertyGeneralForm } from "@/components/owner/property-general-form";
+import { PropertySetupForm } from "@/components/owner/property-setup-form";
 import { SetupSteps } from "@/components/owner/setup-steps";
 import { PageNotice } from "@/components/page-notice";
 import { getCurrentUser } from "@/lib/current-user";
@@ -22,11 +22,11 @@ export default async function NewPropertyPage() {
   return (
     <OwnerPage
       title="Novo imóvel"
-      description="Comece pelo básico. Em seguida você informa o endereço, adiciona fotos e cadastra o primeiro quarto."
+      description="Conte sobre o imóvel e informe o endereço. Em seguida você adiciona fotos e cadastra os quartos."
       back={{ href: "/meus-imoveis", label: "Meus imóveis" }}
     >
-      <SetupSteps current="basico" missing={[]} />
-      <PropertyGeneralForm />
+      <SetupSteps current="imovel" missing={[]} />
+      <PropertySetupForm />
     </OwnerPage>
   );
 }

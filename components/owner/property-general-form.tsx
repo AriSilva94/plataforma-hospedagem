@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { Controller, FormProvider, useForm, useFormContext, useWatch } from "react-hook-form";
 import { Combobox, type ComboboxOption } from "@/components/combobox";
 import { FormActions, FormStatus } from "@/components/owner/form-actions";
 import { UnsavedChangesGuard } from "@/components/owner/unsaved-changes-guard";
@@ -33,7 +33,7 @@ import {
 } from "@/lib/properties";
 import { setupStepHref } from "@/lib/setup-steps";
 
-function detailsSummary(property?: PropertyDetail): string {
+export function detailsSummary(property?: PropertyDetail): string {
   if (!property) return "Regras da casa, informações úteis e características.";
   const parts = [
     property.houseRules ? "regras da casa" : null,
@@ -43,6 +43,18 @@ function detailsSummary(property?: PropertyDetail): string {
   return parts.length > 0 ? `Preenchido: ${parts.join(", ")}.` : "Regras da casa, informações úteis e características.";
 }
 
+export function generalDefaults(property?: PropertyDetail) {
+  return {
+    title: property?.title ?? "",
+    type: property?.type,
+    description: property?.description ?? "",
+    houseRules: property?.houseRules ?? "",
+    generalInfo: property?.generalInfo ?? "",
+    features: property?.features ?? [],
+    ...houseServicesDefaults(property),
+  };
+}
+
 const propertyTypeOptions = optionsFrom(propertyTypeLabels);
 
 function renderPropertyTypeOption(option: ComboboxOption) {
@@ -50,63 +62,13 @@ function renderPropertyTypeOption(option: ComboboxOption) {
   return type ? <PropertyTypeTag type={type} /> : option.label;
 }
 
-export function PropertyGeneralForm({ property, guided }: { property?: PropertyDetail; guided?: { nextHref: string } }) {
-  const router = useRouter();
-  const isGuided = !property || Boolean(guided);
-  const [error, setError] = useState<string>();
-  const [message, setMessage] = useState<string>();
-  const { register, handleSubmit, control, getValues, reset, formState } = useForm<PropertyGeneralInput, unknown, PropertyGeneralValues>({
-    resolver: zodResolver(isGuided ? propertyGuidedGeneralSchema : propertyGeneralSchema),
-    defaultValues: {
-      title: property?.title ?? "",
-      type: property?.type,
-      description: property?.description ?? "",
-      houseRules: property?.houseRules ?? "",
-      generalInfo: property?.generalInfo ?? "",
-      features: property?.features ?? [],
-      ...houseServicesDefaults(property),
-    },
-    mode: "onBlur",
-  });
-  const { errors, isSubmitting, isDirty } = formState;
-  const editing = Boolean(property) && !guided;
-  const published = Boolean(property) && property?.status !== "DRAFT";
+export function PropertyBasicFields({ published }: { published: boolean }) {
+  const { register, control, formState } = useFormContext<PropertyGeneralInput>();
+  const { errors } = formState;
   const description = useWatch({ control, name: "description" });
-  const hasCleaner = useWatch({ control, name: "hasCleaner" });
-  const detailsHaveErrors = Boolean(errors.houseRules || errors.generalInfo);
-
-  async function save(values: PropertyGeneralValues) {
-    setError(undefined);
-    setMessage(undefined);
-    const servicesError = houseServicesError(values);
-    if (servicesError) {
-      setError(servicesError);
-      return;
-    }
-    try {
-      const saved = await sendApiRequest(property ? `/owner/properties/${property.id}` : "/owner/properties", {
-        method: property ? "PATCH" : "POST",
-        body: JSON.stringify({ ...values, ...houseServicesPayload(values) }),
-      });
-      if (property) {
-        if (guided) {
-          router.push(guided.nextHref);
-          return;
-        }
-        setMessage("Informações salvas.");
-        reset(getValues());
-        router.refresh();
-        return;
-      }
-      const id = typeof saved === "object" && saved !== null && "id" in saved ? String(saved.id) : undefined;
-      router.push(id ? setupStepHref(id, "endereco") : "/meus-imoveis");
-    } catch (requestError) {
-      setError(toErrorMessage(requestError));
-    }
-  }
 
   return (
-    <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col gap-5 py-6">
+    <>
       <div className="grid gap-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div>
           <label htmlFor="property-title" className={labelClassName}>Título do anúncio</label>
@@ -177,78 +139,145 @@ export function PropertyGeneralForm({ property, guided }: { property?: PropertyD
         </div>
         <FieldError id="property-description-error" message={errors.description?.message} />
       </div>
+    </>
+  );
+}
 
-      <section aria-labelledby="property-services-heading" className="flex flex-col gap-3">
-        <h2 id="property-services-heading" className="text-lg font-bold text-(--text-primary)">
-          Faxina e fumantes
-        </h2>
-        <p className="max-w-prose text-sm leading-relaxed text-(--text-secondary)">Vale para todos os quartos. Cada quarto pode ter uma regra própria.</p>
-        <HouseServicesFields register={register} hasCleaner={hasCleaner} />
-      </section>
+export function PropertyDetailsFields() {
+  const { register, formState } = useFormContext<PropertyGeneralInput>();
+  const { errors } = formState;
 
-      <OptionalDetails
-        title="Mais detalhes"
-        tag="recomendado"
-        description={detailsSummary(property)}
-        forceOpen={detailsHaveErrors}
-      >
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <label htmlFor="property-rules" className={labelClassName}>Regras da casa</label>
-            <textarea
-              id="property-rules"
-              rows={3}
-              {...register("houseRules")}
-              placeholder="Ex.: silêncio após 22h, visitas com aviso prévio."
-              aria-invalid={errors.houseRules ? "true" : undefined}
-              aria-describedby={errors.houseRules ? "property-rules-error" : undefined}
-              className={fieldClassName}
-            />
-            <FieldError id="property-rules-error" message={errors.houseRules?.message} />
-          </div>
-          <div>
-            <label htmlFor="property-info" className={labelClassName}>Informações úteis ao hóspede</label>
-            <textarea
-              id="property-info"
-              rows={3}
-              {...register("generalInfo")}
-              placeholder="Ex.: check-in a partir das 14h, ponto de ônibus a 5 min."
-              aria-invalid={errors.generalInfo ? "true" : undefined}
-              aria-describedby={errors.generalInfo ? "property-info-error" : undefined}
-              className={fieldClassName}
-            />
-            <FieldError id="property-info-error" message={errors.generalInfo?.message} />
-          </div>
+  return (
+    <>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div>
+          <label htmlFor="property-rules" className={labelClassName}>Regras da casa</label>
+          <textarea
+            id="property-rules"
+            rows={3}
+            {...register("houseRules")}
+            placeholder="Ex.: silêncio após 22h, visitas com aviso prévio."
+            aria-invalid={errors.houseRules ? "true" : undefined}
+            aria-describedby={errors.houseRules ? "property-rules-error" : undefined}
+            className={fieldClassName}
+          />
+          <FieldError id="property-rules-error" message={errors.houseRules?.message} />
         </div>
-
-        <div className="flex flex-col gap-4">
-          <p className="text-[13px] leading-relaxed text-(--text-secondary)">Marque o que o imóvel oferece. Os hóspedes veem isso no anúncio.</p>
-          {propertyFeatureGroups.map((group) => (
-            <ChoiceGroup
-              key={group.id}
-              id={`property-features-${group.id}`}
-              legend={group.legend}
-              type="checkbox"
-              options={group.features.map((feature) => ({ value: feature, label: propertyFeatureLabels[feature] }))}
-              registration={register("features")}
-            />
-          ))}
+        <div>
+          <label htmlFor="property-info" className={labelClassName}>Informações úteis ao hóspede</label>
+          <textarea
+            id="property-info"
+            rows={3}
+            {...register("generalInfo")}
+            placeholder="Ex.: check-in a partir das 14h, ponto de ônibus a 5 min."
+            aria-invalid={errors.generalInfo ? "true" : undefined}
+            aria-describedby={errors.generalInfo ? "property-info-error" : undefined}
+            className={fieldClassName}
+          />
+          <FieldError id="property-info-error" message={errors.generalInfo?.message} />
         </div>
-      </OptionalDetails>
+      </div>
 
-      <FormActions>
-        <button type="submit" disabled={isSubmitting || (editing && !isDirty)} className={primaryButtonClassName}>
-          {isSubmitting ? "Salvando..." : isGuided ? "Salvar e continuar" : "Salvar informações"}
-        </button>
-        {editing && isDirty ? (
-          <button type="button" disabled={isSubmitting} onClick={() => reset()} className={secondaryButtonClassName}>
-            Descartar
+      <div className="flex flex-col gap-4">
+        <p className="text-[13px] leading-relaxed text-(--text-secondary)">Marque o que o imóvel oferece. Os hóspedes veem isso no anúncio.</p>
+        {propertyFeatureGroups.map((group) => (
+          <ChoiceGroup
+            key={group.id}
+            id={`property-features-${group.id}`}
+            legend={group.legend}
+            type="checkbox"
+            options={group.features.map((feature) => ({ value: feature, label: propertyFeatureLabels[feature] }))}
+            registration={register("features")}
+          />
+        ))}
+      </div>
+    </>
+  );
+}
+
+export function PropertyGeneralForm({ property, guided }: { property?: PropertyDetail; guided?: { nextHref: string } }) {
+  const router = useRouter();
+  const isGuided = !property || Boolean(guided);
+  const [error, setError] = useState<string>();
+  const [message, setMessage] = useState<string>();
+  const form = useForm<PropertyGeneralInput, unknown, PropertyGeneralValues>({
+    resolver: zodResolver(isGuided ? propertyGuidedGeneralSchema : propertyGeneralSchema),
+    defaultValues: generalDefaults(property),
+    mode: "onBlur",
+  });
+  const { register, handleSubmit, control, getValues, reset, formState } = form;
+  const { errors, isSubmitting, isDirty } = formState;
+  const editing = Boolean(property) && !guided;
+  const published = Boolean(property) && property?.status !== "DRAFT";
+  const hasCleaner = useWatch({ control, name: "hasCleaner" });
+  const detailsHaveErrors = Boolean(errors.houseRules || errors.generalInfo);
+
+  async function save(values: PropertyGeneralValues) {
+    setError(undefined);
+    setMessage(undefined);
+    const servicesError = houseServicesError(values);
+    if (servicesError) {
+      setError(servicesError);
+      return;
+    }
+    try {
+      const saved = await sendApiRequest(property ? `/owner/properties/${property.id}` : "/owner/properties", {
+        method: property ? "PATCH" : "POST",
+        body: JSON.stringify({ ...values, ...houseServicesPayload(values) }),
+      });
+      if (property) {
+        if (guided) {
+          router.push(guided.nextHref);
+          return;
+        }
+        setMessage("Informações salvas.");
+        reset(getValues());
+        router.refresh();
+        return;
+      }
+      const id = typeof saved === "object" && saved !== null && "id" in saved ? String(saved.id) : undefined;
+      router.push(id ? setupStepHref(id, "fotos") : "/meus-imoveis");
+    } catch (requestError) {
+      setError(toErrorMessage(requestError));
+    }
+  }
+
+  return (
+    <FormProvider {...form}>
+      <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col gap-5 py-6">
+        <PropertyBasicFields published={published} />
+
+        <section aria-labelledby="property-services-heading" className="flex flex-col gap-3">
+          <h2 id="property-services-heading" className="text-lg font-bold text-(--text-primary)">
+            Faxina e fumantes
+          </h2>
+          <p className="max-w-prose text-sm leading-relaxed text-(--text-secondary)">Vale para todos os quartos. Cada quarto pode ter uma regra própria.</p>
+          <HouseServicesFields register={register} hasCleaner={hasCleaner} />
+        </section>
+
+        <OptionalDetails
+          title="Mais detalhes"
+          tag="recomendado"
+          description={detailsSummary(property)}
+          forceOpen={detailsHaveErrors}
+        >
+          <PropertyDetailsFields />
+        </OptionalDetails>
+
+        <FormActions>
+          <button type="submit" disabled={isSubmitting || (editing && !isDirty)} className={primaryButtonClassName}>
+            {isSubmitting ? "Salvando..." : isGuided ? "Salvar e continuar" : "Salvar informações"}
           </button>
-        ) : null}
-        <FormStatus error={error} saved={message} dirty={editing && isDirty} />
-      </FormActions>
-      {!property ? <p className="text-[13px] text-(--text-secondary)">Você poderá editar tudo depois. O imóvel só aparece para hóspedes quando for publicado.</p> : null}
-      <UnsavedChangesGuard dirty={isDirty && !isSubmitting} />
-    </form>
+          {editing && isDirty ? (
+            <button type="button" disabled={isSubmitting} onClick={() => reset()} className={secondaryButtonClassName}>
+              Descartar
+            </button>
+          ) : null}
+          <FormStatus error={error} saved={message} dirty={editing && isDirty} />
+        </FormActions>
+        {!property ? <p className="text-[13px] text-(--text-secondary)">Você poderá editar tudo depois. O imóvel só aparece para hóspedes quando for publicado.</p> : null}
+        <UnsavedChangesGuard dirty={isDirty && !isSubmitting} />
+      </form>
+    </FormProvider>
   );
 }

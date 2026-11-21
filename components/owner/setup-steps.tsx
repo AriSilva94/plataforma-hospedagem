@@ -1,16 +1,18 @@
 import Link from "next/link";
 import { LuCheck } from "react-icons/lu";
 import type { PublishRequirement } from "@/lib/properties";
-import { setupStepHref, setupSteps, type SetupStepId } from "@/lib/setup-steps";
+import { isStepComplete, setupStepHref, setupSteps, type SetupStepId } from "@/lib/setup-steps";
 
 export function SetupSteps({
   current,
   propertyId,
   missing,
+  roomCount,
 }: {
   current: SetupStepId;
   propertyId?: string;
   missing: PublishRequirement[];
+  roomCount?: number;
 }) {
   const currentIndex = setupSteps.findIndex((step) => step.id === current);
 
@@ -19,10 +21,10 @@ export function SetupSteps({
       <p className="text-sm font-semibold text-(--primary-text)">
         Passo {currentIndex + 1} de {setupSteps.length} · {setupSteps[currentIndex].label}
       </p>
-      <ol className="mt-3 grid grid-cols-5 gap-2">
+      <ol className="mt-3 grid grid-cols-4 gap-2">
         {setupSteps.map((step) => {
           const active = step.id === current;
-          const done = propertyId !== undefined && step.requirement !== undefined && !missing.includes(step.requirement);
+          const done = propertyId !== undefined && isStepComplete(step, missing);
           const content = (
             <>
               <span
@@ -43,7 +45,7 @@ export function SetupSteps({
             <li key={step.id}>
               {propertyId ? (
                 <Link
-                  href={setupStepHref(propertyId, step.id)}
+                  href={setupStepHref(propertyId, step.id, roomCount)}
                   aria-current={active ? "step" : undefined}
                   aria-label={step.label}
                   className="block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--focus-ring)"

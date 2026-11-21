@@ -4,8 +4,7 @@ import { LuArrowLeft, LuPlus } from "react-icons/lu";
 import { MediaGallery } from "@/components/owner/media-gallery";
 import { OwnerDataNotice } from "@/components/owner/owner-notice";
 import { OwnerPage } from "@/components/owner/owner-page";
-import { PropertyGeneralForm } from "@/components/owner/property-general-form";
-import { PropertyLocationForm } from "@/components/owner/property-location-form";
+import { PropertySetupForm } from "@/components/owner/property-setup-form";
 import { PropertyStatusActions } from "@/components/owner/property-status-actions";
 import { PublishChecklist } from "@/components/owner/publish-checklist";
 import { RoomForm } from "@/components/owner/room-form";
@@ -13,22 +12,18 @@ import { SetupSteps } from "@/components/owner/setup-steps";
 import { primaryButtonClassName, secondaryButtonClassName } from "@/components/owner/styles";
 import { getApiData } from "@/lib/server-api";
 import { formatCents, propertyDetailSchema } from "@/lib/properties";
-import { firstPendingStep, parseSetupStep, setupStepHref, setupSteps, type SetupStepId } from "@/lib/setup-steps";
+import { firstPendingStep, parseRoomCount, parseSetupStep, setupStepHref, setupSteps, type SetupStepId } from "@/lib/setup-steps";
 
 const stepCopy: Record<SetupStepId, { title: string; description: string }> = {
-  basico: {
-    title: "Informações básicas",
-    description: "Conte o essencial sobre o imóvel. Os detalhes opcionais podem ficar para depois.",
-  },
-  endereco: {
-    title: "Onde fica o imóvel?",
-    description: "O endereço completo é privado. No anúncio público aparecem apenas bairro, cidade e UF.",
+  imovel: {
+    title: "Sobre o imóvel",
+    description: "Conte o essencial e informe o endereço. O endereço completo é privado: no anúncio aparecem apenas bairro, cidade e UF.",
   },
   fotos: {
     title: "Fotos e vídeos do imóvel",
     description: "Adicione ao menos uma foto. A primeira foto é a capa do anúncio.",
   },
-  quarto: {
+  quartos: {
     title: "Adicione o primeiro quarto",
     description: "Cada quarto é reservado de forma independente, com preço e público próprios. Você poderá adicionar outros depois.",
   },
@@ -39,7 +34,7 @@ const stepCopy: Record<SetupStepId, { title: string; description: string }> = {
 };
 
 export default async function SetupPropertyPage({ params, searchParams }: PageProps<"/meus-imoveis/[propertyId]/configurar">) {
-  const [{ propertyId }, { passo }] = await Promise.all([params, searchParams]);
+  const [{ propertyId }, { passo, quartos }] = await Promise.all([params, searchParams]);
   const result = await getApiData(`/owner/properties/${propertyId}`, propertyDetailSchema);
 
   if (result.status !== "ok") {
@@ -53,9 +48,10 @@ export default async function SetupPropertyPage({ params, searchParams }: PagePr
   const index = setupSteps.findIndex((item) => item.id === step);
   const previous = setupSteps[index - 1];
   const next = setupSteps[index + 1];
-  const nextHref = next ? setupStepHref(property.id, next.id) : undefined;
-  const previousHref = previous ? setupStepHref(property.id, previous.id) : undefined;
-  const formStep = step === "basico" || step === "endereco" || (step === "quarto" && property.rooms.length === 0);
+  const roomCount = parseRoomCount(quartos);
+  const nextHref = next ? setupStepHref(property.id, next.id, roomCount) : undefined;
+  const previousHref = previous ? setupStepHref(property.id, previous.id, roomCount) : undefined;
+  const formStep = step === "imovel" || (step === "quartos" && property.rooms.length === 0);
   const { title, description } = stepCopy[step];
 
   return (
@@ -64,10 +60,9 @@ export default async function SetupPropertyPage({ params, searchParams }: PagePr
       description={description}
       back={{ href: `/meus-imoveis/${property.id}`, label: property.title }}
     >
-      <SetupSteps current={step} propertyId={property.id} missing={property.missingRequirements} />
+      <SetupSteps current={step} propertyId={property.id} missing={property.missingRequirements} roomCount={roomCount} />
 
-      {step === "basico" && nextHref ? <PropertyGeneralForm key={property.id} property={property} guided={{ nextHref }} /> : null}
-      {step === "endereco" && nextHref ? <PropertyLocationForm property={property} guided={{ nextHref, previousHref }} /> : null}
+      {step === "imovel" ? <PropertySetupForm key={property.id} property={property} roomCount={roomCount} /> : null}
 
       {step === "fotos" ? (
         <div className="py-8">
@@ -75,7 +70,7 @@ export default async function SetupPropertyPage({ params, searchParams }: PagePr
         </div>
       ) : null}
 
-      {step === "quarto" ? (
+      {step === "quartos" ? (
         property.rooms.length === 0 && nextHref ? (
           <RoomForm propertyId={property.id} createdHref={nextHref} backHref={previousHref} />
         ) : (
@@ -128,7 +123,7 @@ export default async function SetupPropertyPage({ params, searchParams }: PagePr
               Voltar
             </Link>
           ) : null}
-          {(step === "fotos" || (step === "quarto" && property.rooms.length > 0)) && nextHref ? (
+          {(step === "fotos" || (step === "quartos" && property.rooms.length > 0)) && nextHref ? (
             <Link href={nextHref} className={primaryButtonClassName}>
               Continuar
             </Link>
