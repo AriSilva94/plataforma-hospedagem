@@ -150,7 +150,7 @@ export const roomSchema = z.object({
     .int({ error: "Informe um número inteiro." })
     .min(1, { error: "A capacidade mínima é 1 pessoa." })
     .max(20, { error: "A capacidade máxima é 20 pessoas." }),
-  bathroomType: z.enum(bathroomTypes, { error: "Selecione o tipo de banheiro." }),
+  bathroomType: z.enum(bathroomTypes).nullable().pipe(z.enum(bathroomTypes, { error: "Selecione o tipo de banheiro." })),
   acceptedAudiences: z.array(z.enum(genderIdentities)).min(1, { error: "Selecione ao menos um público aceito." }),
   amenities: z.array(z.string()),
   additionalInfo: optionalText(2000),

@@ -67,6 +67,21 @@ function roomDetailsSummary(room: RoomDetail): string {
   return parts.length > 0 ? `Preenchido: ${parts.join(" · ")}.` : ROOM_DETAILS_HINT;
 }
 
+export function roomFormValues(room?: RoomDetail): RoomInput {
+  return {
+    title: room?.title ?? "",
+    description: room?.description ?? "",
+    price: room ? centsToInput(room.priceCents) : "",
+    capacity: room?.capacity ?? 1,
+    bathroomType: room?.bathroomType ?? null,
+    acceptedAudiences: room?.acceptedAudiences ?? [],
+    amenities: room?.amenities ?? [],
+    additionalInfo: room?.additionalInfo ?? "",
+    beds: room?.beds ?? [],
+    ...houseServicesDefaults(room),
+  };
+}
+
 export function RoomForm({
   propertyId,
   room,
@@ -96,19 +111,7 @@ export function RoomForm({
   const [archiving, setArchiving] = useState(false);
   const { register, handleSubmit, control, getValues, reset, formState } = useForm<RoomInput, unknown, RoomValues>({
     resolver: zodResolver(roomSchema),
-    defaultValues: {
-      title: room?.title ?? "",
-      description: room?.description ?? "",
-      price: room ? centsToInput(room.priceCents) : "",
-      capacity: room?.capacity ?? 1,
-      bathroomType: room?.bathroomType,
-      acceptedAudiences: room?.acceptedAudiences ?? [],
-      amenities: room?.amenities ?? [],
-      additionalInfo: room?.additionalInfo ?? "",
-      beds: room?.beds ?? [],
-      ...houseServicesDefaults(room),
-      ...(room ? {} : initialValues),
-    },
+    defaultValues: { ...roomFormValues(room), ...(room ? {} : initialValues) },
     mode: "onBlur",
   });
   const { errors, isSubmitting, isDirty } = formState;
@@ -208,7 +211,7 @@ export function RoomForm({
               min={1}
               max={20}
               inputMode="numeric"
-              {...register("capacity")}
+              {...register("capacity", { valueAsNumber: true })}
               aria-invalid={errors.capacity ? "true" : undefined}
               aria-describedby={errors.capacity ? `${uid}-capacity-error` : undefined}
               className={fieldClassName}
@@ -326,7 +329,7 @@ export function RoomForm({
           </Link>
         ) : null}
         <button type="submit" disabled={pending || (Boolean(room) && !isDirty)} className={primaryButtonClassName}>
-          {isSubmitting ? "Salvando..." : room ? "Salvar quarto" : createdHref ? "Salvar e continuar" : "Criar quarto"}
+          {isSubmitting ? "Salvando..." : room || inline ? "Salvar quarto" : createdHref ? "Salvar e continuar" : "Criar quarto"}
         </button>
         {room && isDirty ? (
           <button type="button" disabled={pending} onClick={() => reset()} className={secondaryButtonClassName}>

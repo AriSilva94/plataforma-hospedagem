@@ -1,17 +1,17 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { LuArrowLeft, LuPlus } from "react-icons/lu";
+import { LuArrowLeft } from "react-icons/lu";
 import { MediaGallery } from "@/components/owner/media-gallery";
 import { OwnerDataNotice } from "@/components/owner/owner-notice";
 import { OwnerPage } from "@/components/owner/owner-page";
 import { PropertySetupForm } from "@/components/owner/property-setup-form";
 import { PropertyStatusActions } from "@/components/owner/property-status-actions";
 import { PublishChecklist } from "@/components/owner/publish-checklist";
-import { RoomForm } from "@/components/owner/room-form";
+import { RoomsSetup } from "@/components/owner/rooms-setup";
 import { SetupSteps } from "@/components/owner/setup-steps";
 import { primaryButtonClassName, secondaryButtonClassName } from "@/components/owner/styles";
 import { getApiData } from "@/lib/server-api";
-import { formatCents, propertyDetailSchema } from "@/lib/properties";
+import { bedsSummary, formatCents, propertyDetailSchema, roomDetailSchema } from "@/lib/properties";
 import { firstPendingStep, parseRoomCount, parseSetupStep, setupStepHref, setupSteps, type SetupStepId } from "@/lib/setup-steps";
 
 const stepCopy: Record<SetupStepId, { title: string; description: string }> = {
@@ -21,15 +21,15 @@ const stepCopy: Record<SetupStepId, { title: string; description: string }> = {
   },
   fotos: {
     title: "Fotos e vídeos do imóvel",
-    description: "Adicione ao menos uma foto. A primeira foto é a capa do anúncio.",
+    description: "Mostre as áreas da casa. Adicione ao menos uma foto; a primeira é a capa do anúncio.",
   },
   quartos: {
-    title: "Adicione o primeiro quarto",
-    description: "Cada quarto é reservado de forma independente, com preço e público próprios. Você poderá adicionar outros depois.",
+    title: "Cadastre os quartos",
+    description: "Cada quarto é reservado de forma independente, com preço, camas e fotos próprios. Salve cada cartão para registrar o quarto.",
   },
   revisao: {
     title: "Revise e publique",
-    description: "Confira o que falta. Publicar torna o imóvel visível para hóspedes quando houver um quarto disponível.",
+    description: "Confira os quartos e o que ainda falta. Publicar torna o imóvel visível para hóspedes quando houver um quarto disponível.",
   },
 };
 
@@ -51,8 +51,19 @@ export default async function SetupPropertyPage({ params, searchParams }: PagePr
   const roomCount = parseRoomCount(quartos);
   const nextHref = next ? setupStepHref(property.id, next.id, roomCount) : undefined;
   const previousHref = previous ? setupStepHref(property.id, previous.id, roomCount) : undefined;
-  const formStep = step === "imovel" || (step === "quartos" && property.rooms.length === 0);
   const { title, description } = stepCopy[step];
+  const roomResults =
+    step === "quartos" || step === "revisao"
+      ? await Promise.all(property.rooms.map((room) => getApiData(`/owner/rooms/${room.id}`, roomDetailSchema)))
+      : [];
+  const failedRoom = roomResults.find((room) => room.status !== "ok");
+  const rooms = roomResults.flatMap((room) => (room.status === "ok" ? [room.data] : []));
+
+  if (failedRoom) {
+    return <OwnerDataNotice status={failedRoom.status} retryHref={setupStepHref(property.id, step, roomCount)} />;
+  }
+
+  const emptyCount = Math.max((roomCount ?? (rooms.length === 0 ? 1 : 0)) - rooms.length, 0);
 
   return (
     <OwnerPage
@@ -71,35 +82,40 @@ export default async function SetupPropertyPage({ params, searchParams }: PagePr
       ) : null}
 
       {step === "quartos" ? (
-        property.rooms.length === 0 && nextHref ? (
-          <RoomForm propertyId={property.id} createdHref={nextHref} backHref={previousHref} />
-        ) : (
-          <div className="flex flex-col gap-4 py-8">
-            <ul className="flex flex-col gap-3">
-              {property.rooms.map((room) => (
-                <li key={room.id} className="flex items-center justify-between gap-4 rounded-2xl border border-(--border) bg-(--surface) p-4">
-                  <Link
-                    href={`/meus-imoveis/${property.id}/quartos/${room.id}`}
-                    className="min-w-0 wrap-break-word font-bold text-(--text-primary) hover:text-(--primary-text) focus-visible:outline-2 focus-visible:outline-(--focus-ring)"
-                  >
-                    {room.title}
-                  </Link>
-                  <span className="shrink-0 text-sm font-semibold text-(--text-secondary)">{formatCents(room.priceCents)} / diária</span>
-                </li>
-              ))}
-            </ul>
-            <div>
-              <Link href={`/meus-imoveis/${property.id}/quartos/novo`} className={secondaryButtonClassName}>
-                <LuPlus aria-hidden="true" size={17} />
-                Adicionar outro quarto
-              </Link>
-            </div>
-          </div>
-        )
+        <RoomsSetup
+          propertyId={property.id}
+          rooms={rooms}
+          emptyCount={emptyCount}
+          reviewHref={setupStepHref(property.id, "revisao", roomCount)}
+        />
       ) : null}
 
       {step === "revisao" ? (
         <div className="flex flex-col gap-6 py-8">
+          <section aria-labelledby="review-rooms-heading" className="flex flex-col gap-3">
+            <h2 id="review-rooms-heading" className="text-lg font-bold text-(--text-primary)">
+              Quartos
+            </h2>
+            {rooms.length > 0 ? (
+              <ul className="flex flex-col gap-3">
+                {rooms.map((room) => (
+                  <li key={room.id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-2xl border border-(--border) bg-(--surface) p-4">
+                    <div className="min-w-0">
+                      <p className="wrap-break-word font-bold text-(--text-primary)">{room.title}</p>
+                      <p className="text-sm text-(--text-secondary)">
+                        {[room.beds.length > 0 ? bedsSummary(room.beds) : null, room.media.length === 1 ? "1 foto" : `${room.media.length} fotos`]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                    </div>
+                    <span className="shrink-0 text-sm font-semibold text-(--text-secondary)">{formatCents(room.priceCents)} / diária</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-(--text-secondary)">Nenhum quarto salvo ainda.</p>
+            )}
+          </section>
           <PublishChecklist propertyId={property.id} missing={property.missingRequirements} />
           <p className="text-sm leading-relaxed text-(--text-secondary)">
             Opcional: cadastre as{" "}
@@ -115,7 +131,7 @@ export default async function SetupPropertyPage({ params, searchParams }: PagePr
         </div>
       ) : null}
 
-      {formStep ? null : (
+      {step === "imovel" ? null : (
         <div className="flex flex-wrap items-center gap-3 border-t border-(--border) pt-6 pb-4">
           {previousHref ? (
             <Link href={previousHref} className={secondaryButtonClassName}>
@@ -123,7 +139,7 @@ export default async function SetupPropertyPage({ params, searchParams }: PagePr
               Voltar
             </Link>
           ) : null}
-          {(step === "fotos" || (step === "quartos" && property.rooms.length > 0)) && nextHref ? (
+          {step === "fotos" && nextHref ? (
             <Link href={nextHref} className={primaryButtonClassName}>
               Continuar
             </Link>

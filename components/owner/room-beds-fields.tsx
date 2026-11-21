@@ -30,7 +30,7 @@ export function RoomBedsFields({
   return (
     <div className="flex flex-col gap-3">
       {fields.map((field, index) => {
-        const rowId = `${id}-${field.id}`;
+        const rowId = `${id}-${index}`;
         const rowErrors = errors.beds?.[index];
         const options = bedTypes
           .filter((type) => type === beds?.[index]?.type || !chosen.has(type))
@@ -71,7 +71,7 @@ export function RoomBedsFields({
                   min={1}
                   max={10}
                   inputMode="numeric"
-                  {...register(`beds.${index}.quantity`)}
+                  {...register(`beds.${index}.quantity`, { valueAsNumber: true })}
                   aria-invalid={rowErrors?.quantity ? "true" : undefined}
                   aria-describedby={rowErrors?.quantity ? `${rowId}-quantity-error` : undefined}
                   className={fieldClassName}
