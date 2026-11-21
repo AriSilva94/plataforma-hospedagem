@@ -130,16 +130,18 @@ export function RoomForm({
     try {
       if (room) {
         const updated = await sendApiRequest(`/owner/rooms/${room.id}`, { method: "PATCH", body });
+        const saved = inline ? roomDetailSchema.parse(updated) : undefined;
         setMessage("Quarto salvo.");
         reset(getValues());
-        if (inline) onSaved?.(roomDetailSchema.parse(updated));
+        if (saved) onSaved?.(saved);
         else router.refresh();
         return;
       }
       const created = await sendApiRequest(`/owner/properties/${propertyId}/rooms`, { method: "POST", body });
       if (inline) {
+        const saved = roomDetailSchema.parse(created);
         reset(getValues());
-        onSaved?.(roomDetailSchema.parse(created));
+        onSaved?.(saved);
         return;
       }
       const id = typeof created === "object" && created !== null && "id" in created ? String(created.id) : undefined;
