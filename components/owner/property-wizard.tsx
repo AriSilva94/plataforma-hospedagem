@@ -1447,7 +1447,7 @@ export function PropertyWizard({
       <div className="flex min-h-0 flex-1">
         <main
           className={`flex min-h-0 min-w-0 flex-1 justify-center px-4 sm:px-6 lg:items-center lg:px-14 ${
-            step.kind === "inicio" ? "overflow-y-auto pt-5 pb-[6.75rem] [container-type:size] sm:pt-10 md:items-center md:pb-10 lg:py-12" : "pt-3 pb-[6.75rem] sm:pt-8 md:pb-10 lg:py-6"
+            step.kind === "inicio" ? "overflow-y-auto pt-5 pb-27 @container-size sm:pt-10 md:items-center md:pb-10 lg:py-12" : "pt-3 pb-27 sm:pt-8 md:pb-10 lg:py-6"
           }`}
         >
           <div

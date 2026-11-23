@@ -19,7 +19,7 @@ export function PropertyTypeTag({ type, compact = false }: { type: PropertyType;
 
   return (
     <span
-      className={`inline-flex w-fit items-center gap-1.5 rounded-full border font-bold ${compact ? "-my-[3px] px-3 py-0.5 align-top text-[13px] leading-5" : "px-2.5 py-1 text-xs"} ${propertyTypeColorClassNames[type]}`}
+      className={`inline-flex w-fit items-center gap-1.5 rounded-full border font-bold ${compact ? "-my-0.75 px-3 py-0.5 align-top text-[13px] leading-5" : "px-2.5 py-1 text-xs"} ${propertyTypeColorClassNames[type]}`}
     >
       <Icon aria-hidden="true" size={compact ? 15 : 13} />
       {propertyTypeLabels[type]}

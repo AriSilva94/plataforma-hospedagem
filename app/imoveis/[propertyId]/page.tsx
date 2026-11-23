@@ -383,7 +383,7 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
                   <p className="text-xs whitespace-nowrap text-(--text-secondary)">Desde {formatHostSince(property.host.since)}</p>
                 </div>
                 {verifiedRoomCount > 0 ? (
-                  <p className="order-last -mt-1 flex w-full items-center gap-2 pl-17.5 text-sm text-(--text-secondary) sm:order-none sm:mt-0 sm:w-auto sm:border-l sm:border-(--border) sm:py-1 sm:pl-4">
+                  <p className="order-last -mt-1 flex w-full items-center gap-2 pl-17.5 text-sm text-(--text-secondary) sm:order-0 sm:mt-0 sm:w-auto sm:border-l sm:border-(--border) sm:py-1 sm:pl-4">
                     <LuShieldCheck aria-hidden="true" className="size-5 shrink-0 text-(--success)" />
                     <span>
                       <strong className="font-bold text-(--text-primary) tabular-nums">

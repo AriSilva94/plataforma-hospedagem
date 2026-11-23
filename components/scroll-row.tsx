@@ -46,7 +46,7 @@ export function ScrollRow({ className, children }: { className: string; children
   }, []);
 
   return (
-    <ul ref={rowRef} className={`flex overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${maskClassNames[overflow]} ${className}`}>
+    <ul ref={rowRef} className={`flex overflow-x-auto overscroll-x-contain scrollbar-none [&::-webkit-scrollbar]:hidden ${maskClassNames[overflow]} ${className}`}>
       {children}
     </ul>
   );

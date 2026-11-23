@@ -63,7 +63,7 @@ export function FeaturedRooms({
       <ul
         ref={railRef}
         onScroll={measure}
-        className={`-mx-6 snap-x snap-mandatory scroll-px-6 gap-4 overflow-x-auto scroll-smooth px-6 [scrollbar-width:none] motion-reduce:scroll-auto md:mx-0 md:scroll-px-0 md:px-0 [&::-webkit-scrollbar]:hidden ${fill ? "grid min-h-0 flex-1 grid-flow-col auto-cols-[78%] grid-rows-[repeat(auto-fill,minmax(16rem,1fr))] sm:auto-cols-[calc((100%-1rem)/2)] lg:auto-cols-[calc((100%-2rem)/3)] xl:auto-cols-[calc((100%-3rem)/4)]" : "flex"}`}
+        className={`-mx-6 snap-x snap-mandatory scroll-px-6 gap-4 overflow-x-auto scroll-smooth px-6 scrollbar-none motion-reduce:scroll-auto md:mx-0 md:scroll-px-0 md:px-0 [&::-webkit-scrollbar]:hidden ${fill ? "grid min-h-0 flex-1 grid-flow-col auto-cols-[78%] grid-rows-[repeat(auto-fill,minmax(16rem,1fr))] sm:auto-cols-[calc((100%-1rem)/2)] lg:auto-cols-[calc((100%-2rem)/3)] xl:auto-cols-[calc((100%-3rem)/4)]" : "flex"}`}
       >
         {rooms.map((room) => (
           <li

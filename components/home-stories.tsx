@@ -52,7 +52,7 @@ export function HomeStories({ stories }: { stories: Story[] }) {
         </Link>
       </div>
 
-      <ul className="-mx-6 flex gap-4 overflow-x-auto px-6 py-2 [scrollbar-width:none] md:-mx-10 md:px-10 lg:-mx-12 lg:px-12 [&::-webkit-scrollbar]:hidden">
+      <ul className="-mx-6 flex gap-4 overflow-x-auto px-6 py-2 scrollbar-none md:-mx-10 md:px-10 lg:-mx-12 lg:px-12 [&::-webkit-scrollbar]:hidden">
         {ordered.map((story, index) => {
           const [first] = story.media;
           return (

@@ -130,7 +130,7 @@ function RoomsPanel({ stories, summary, rooms, favoriteRoomIds }: { stories: Sto
 function JourneyPanel() {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 short:max-sm:gap-2 md:gap-6 short:md:gap-4">
-      <ol className="grid min-h-0 flex-1 divide-y divide-(--border) rounded-2xl border border-(--border-accent) bg-(--surface) [scrollbar-width:none] rail:snap-x rail:snap-mandatory rail:auto-cols-[84%] rail:grid-flow-col rail:grid-rows-[auto_1fr] rail:divide-x rail:divide-y-0 rail:overflow-x-auto md:grid-cols-3 md:grid-rows-[auto_1fr] md:divide-x md:divide-y-0 rows:grid-cols-1! rows:grid-rows-none! rows:divide-x-0! rows:divide-y! [&::-webkit-scrollbar]:hidden">
+      <ol className="grid min-h-0 flex-1 divide-y divide-(--border) rounded-2xl border border-(--border-accent) bg-(--surface) scrollbar-none rail:snap-x rail:snap-mandatory rail:auto-cols-[84%] rail:grid-flow-col rail:grid-rows-[auto_1fr] rail:divide-x rail:divide-y-0 rail:overflow-x-auto md:grid-cols-3 md:grid-rows-[auto_1fr] md:divide-x md:divide-y-0 rows:grid-cols-1! rows:grid-rows-none! rows:divide-x-0! rows:divide-y! [&::-webkit-scrollbar]:hidden">
         {journey.map((step, index) => (
           <li
             key={step.title}

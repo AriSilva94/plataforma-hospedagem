@@ -23,7 +23,7 @@ export function PropertyTabs({ tabs, label }: { tabs: PropertyTab[]; label: stri
         role="tablist"
         aria-label={label}
         onKeyDown={moveWithArrows}
-        className="flex overflow-x-auto rounded-2xl border border-(--border) bg-(--surface) p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex overflow-x-auto rounded-2xl border border-(--border) bg-(--surface) p-1 scrollbar-none [&::-webkit-scrollbar]:hidden"
       >
         {tabs.map((tab, index) => {
           const active = index === activeIndex;

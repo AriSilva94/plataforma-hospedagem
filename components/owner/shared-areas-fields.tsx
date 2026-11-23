@@ -43,7 +43,7 @@ export function SharedAreasFields({ property }: { property: PropertyDetail }) {
             return (
               <li key={field.id} className="flex flex-col gap-3 border-t border-(--border) py-5 first:border-t-0 first:pt-0">
                 <div className="flex items-start gap-3">
-                  <span aria-hidden="true" className="mt-[3px] flex size-9 shrink-0 items-center justify-center rounded-lg bg-(--champagne-soft) text-(--champagne)">
+                  <span aria-hidden="true" className="mt-0.75 flex size-9 shrink-0 items-center justify-center rounded-lg bg-(--champagne-soft) text-(--champagne)">
                     <AreaIcon size={18} />
                   </span>
                   <div className="grid min-w-0 flex-1 gap-2.5 sm:grid-cols-[minmax(0,13rem)_minmax(0,1fr)]">

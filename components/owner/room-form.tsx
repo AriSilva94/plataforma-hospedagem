@@ -170,7 +170,7 @@ export function RoomForm({
   const pending = isSubmitting || deleting;
 
   return (
-    <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col pt-6 [&_[id]]:scroll-mt-32">
+    <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col pt-6 **:[[id]]:scroll-mt-32">
       <FormSection id={`${uid}-data-heading`} icon={LuDoorOpen} tone="lavender" title="Sobre o quarto" description="Nome e descrição que o hóspede vê no anúncio.">
         <div>
           <label htmlFor={`${uid}-title`} className={labelClassName}>Nome do quarto</label>
