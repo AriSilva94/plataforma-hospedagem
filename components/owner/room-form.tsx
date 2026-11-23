@@ -1,19 +1,20 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useId, useState, type RefObject } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
-import { LuArrowLeft } from "react-icons/lu";
+import { LuArchive, LuArrowLeft, LuBanknote, LuBath, LuBedDouble, LuCigaretteOff, LuDoorOpen, LuSparkles, LuTrash2, LuUsers } from "react-icons/lu";
 import { FormActions, FormStatus } from "@/components/owner/form-actions";
 import { UnsavedChangesGuard } from "@/components/owner/unsaved-changes-guard";
 import { ChoiceGroup, optionsFrom } from "@/components/owner/choice-group";
 import { ConfirmDialog } from "@/components/owner/confirm-dialog";
 import { FieldError } from "@/components/field-error";
-import { FieldHint } from "@/components/owner/field-hint";
+import { FormSection } from "@/components/owner/form-section";
 import { HouseServicesFields } from "@/components/owner/house-services-fields";
-import { OptionalDetails } from "@/components/owner/optional-details";
+import { RoomBedsFields } from "@/components/owner/room-beds-fields";
+import { roomAmenityIcons } from "@/lib/amenity-icons";
 import {
   dangerButtonClassName,
   fieldClassName,
@@ -34,38 +35,52 @@ import { sendApiRequest, toErrorMessage } from "@/lib/api";
 import {
   bathroomTypeLabels,
   genderIdentityLabels,
-  labelOf,
   roomAmenityGroups,
   roomAmenityLabels,
+  roomDetailSchema,
   type RoomDetail,
 } from "@/lib/properties";
 
-function FormSection({ id, title, description, children }: { id: string; title: string; description?: string; children: ReactNode }) {
-  return (
-    <section aria-labelledby={id} className="flex flex-col gap-4 border-t border-(--border) pt-6 first:border-t-0 first:pt-0">
-      <div>
-        <h2 id={id} className="text-lg font-bold text-(--text-primary)">{title}</h2>
-        {description ? <p className="mt-1 max-w-prose text-sm leading-relaxed text-(--text-secondary)">{description}</p> : null}
-      </div>
-      {children}
-    </section>
-  );
+const bathroomOptions = optionsFrom(bathroomTypeLabels).map((option) => ({ ...option, icon: option.value === "PRIVATE" ? LuBath : LuUsers }));
+
+export function roomFormValues(room?: RoomDetail): RoomInput {
+  return {
+    title: room?.title ?? "",
+    description: room?.description ?? "",
+    price: room ? centsToInput(room.priceCents) : "",
+    capacity: room?.capacity ?? 1,
+    bathroomType: room?.bathroomType ?? null,
+    acceptedAudiences: room?.acceptedAudiences ?? [],
+    amenities: room?.amenities ?? [],
+    additionalInfo: room?.additionalInfo ?? "",
+    beds: room?.beds ?? [],
+    ...houseServicesDefaults(room),
+  };
 }
 
-const ROOM_DETAILS_HINT = "Comodidades e informações adicionais ajudam o hóspede a escolher e completam o anúncio.";
-const SUMMARY_AMENITY_LIMIT = 3;
-
-function roomDetailsSummary(room: RoomDetail): string {
-  const amenityNames = room.amenities.map((amenity) => labelOf(roomAmenityLabels, amenity));
-  const amenities =
-    amenityNames.length > SUMMARY_AMENITY_LIMIT
-      ? `${amenityNames.slice(0, SUMMARY_AMENITY_LIMIT).join(", ")} +${amenityNames.length - SUMMARY_AMENITY_LIMIT}`
-      : amenityNames.join(", ");
-  const parts = [amenities || null, room.additionalInfo ? "informações adicionais" : null].filter(Boolean);
-  return parts.length > 0 ? `Preenchido: ${parts.join(" · ")}.` : ROOM_DETAILS_HINT;
-}
-
-export function RoomForm({ propertyId, room, createdHref, backHref }: { propertyId: string; room?: RoomDetail; createdHref?: string; backHref?: string }) {
+export function RoomForm({
+  propertyId,
+  room,
+  createdHref,
+  backHref,
+  inline = false,
+  initialValues,
+  onSaved,
+  onDirtyChange,
+  valuesRef,
+}: {
+  propertyId: string;
+  room?: RoomDetail;
+  createdHref?: string;
+  backHref?: string;
+  inline?: boolean;
+  initialValues?: Partial<RoomInput>;
+  onSaved?: (room: RoomDetail) => void;
+  onDirtyChange?: (dirty: boolean) => void;
+  valuesRef?: RefObject<(() => RoomInput) | null>;
+}) {
+  const generatedId = useId();
+  const uid = inline ? generatedId : "room";
   const router = useRouter();
   const [error, setError] = useState<string>();
   const [message, setMessage] = useState<string>();
@@ -75,20 +90,16 @@ export function RoomForm({ propertyId, room, createdHref, backHref }: { property
   const [archiving, setArchiving] = useState(false);
   const { register, handleSubmit, control, getValues, reset, formState } = useForm<RoomInput, unknown, RoomValues>({
     resolver: zodResolver(roomSchema),
-    defaultValues: {
-      title: room?.title ?? "",
-      description: room?.description ?? "",
-      price: room ? centsToInput(room.priceCents) : "",
-      capacity: room?.capacity ?? 1,
-      bathroomType: room?.bathroomType,
-      acceptedAudiences: room?.acceptedAudiences ?? [],
-      amenities: room?.amenities ?? [],
-      additionalInfo: room?.additionalInfo ?? "",
-      ...houseServicesDefaults(room),
-    },
+    defaultValues: { ...roomFormValues(room), ...(room ? {} : initialValues) },
     mode: "onBlur",
   });
   const { errors, isSubmitting, isDirty } = formState;
+  useEffect(() => {
+    if (valuesRef) valuesRef.current = getValues;
+  }, [valuesRef, getValues]);
+  useEffect(() => {
+    onDirtyChange?.(isDirty);
+  }, [isDirty, onDirtyChange]);
   const hasCleaner = useWatch({ control, name: "hasCleaner" });
   const lastAvailableRoom = room?.property.status === "ACTIVE" && room.status === "AVAILABLE" && room.property.availableRoomCount === 1;
 
@@ -103,13 +114,21 @@ export function RoomForm({ propertyId, room, createdHref, backHref }: { property
     const body = JSON.stringify({ ...values, ...houseServicesPayload(values), priceCents: price });
     try {
       if (room) {
-        await sendApiRequest(`/owner/rooms/${room.id}`, { method: "PATCH", body });
+        const updated = await sendApiRequest(`/owner/rooms/${room.id}`, { method: "PATCH", body });
+        const saved = inline ? roomDetailSchema.parse(updated) : undefined;
         setMessage("Quarto salvo.");
         reset(getValues());
-        router.refresh();
+        if (saved) onSaved?.(saved);
+        else router.refresh();
         return;
       }
       const created = await sendApiRequest(`/owner/properties/${propertyId}/rooms`, { method: "POST", body });
+      if (inline) {
+        const saved = roomDetailSchema.parse(created);
+        reset(getValues());
+        onSaved?.(saved);
+        return;
+      }
       const id = typeof created === "object" && created !== null && "id" in created ? String(created.id) : undefined;
       router.push(createdHref ?? (id ? `/meus-imoveis/${propertyId}/quartos/${id}?secao=fotos` : `/meus-imoveis/${propertyId}`));
     } catch (requestError) {
@@ -151,133 +170,174 @@ export function RoomForm({ propertyId, room, createdHref, backHref }: { property
   const pending = isSubmitting || deleting;
 
   return (
-    <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col gap-6 pt-6 pb-8">
-      <FormSection id="room-data-heading" title="Dados do quarto">
-        <div className="grid gap-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
+    <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col pt-6 **:[[id]]:scroll-mt-32">
+      <FormSection id={`${uid}-data-heading`} icon={LuDoorOpen} tone="lavender" title="Sobre o quarto" description="Nome e descrição que o hóspede vê no anúncio.">
+        <div>
+          <label htmlFor={`${uid}-title`} className={labelClassName}>Nome do quarto</label>
+          <input
+            id={`${uid}-title`}
+            {...register("title")}
+            placeholder="Ex.: Suíte master"
+            aria-invalid={errors.title ? "true" : undefined}
+            aria-describedby={errors.title ? `${uid}-title-error` : undefined}
+            className={fieldClassName}
+          />
+          <FieldError id={`${uid}-title-error`} message={errors.title?.message} />
+        </div>
+        <div>
+          <label htmlFor={`${uid}-description`} className={labelClassName}>Descrição</label>
+          <textarea
+            id={`${uid}-description`}
+            rows={3}
+            {...register("description")}
+            placeholder="Ex.: luz natural, vista, silêncio, tamanho do quarto."
+            aria-invalid={errors.description ? "true" : undefined}
+            aria-describedby={errors.description ? `${uid}-description-error` : undefined}
+            className={`${fieldClassName} resize-y leading-relaxed`}
+          />
+          <FieldError id={`${uid}-description-error`} message={errors.description?.message} />
+        </div>
+      </FormSection>
+
+      <FormSection id={`${uid}-price-heading`} icon={LuBanknote} title="Diária e capacidade" description="Valor base por noite, em reais, e quantas pessoas o quarto recebe (até 20).">
+        <div className="grid grid-cols-[minmax(0,1fr)_6.5rem] gap-3 sm:grid-cols-[minmax(0,1fr)_11rem] sm:gap-4">
           <div>
-            <label htmlFor="room-title" className={labelClassName}>Nome do quarto</label>
-            <input
-              id="room-title"
-              {...register("title")}
-              placeholder="Ex.: Suíte master"
-              aria-invalid={errors.title ? "true" : undefined}
-              aria-describedby={errors.title ? "room-title-error" : undefined}
-              className={fieldClassName}
-            />
-            <FieldError id="room-title-error" message={errors.title?.message} />
+            <label htmlFor={`${uid}-price`} className={labelClassName}>Valor da diária</label>
+            <div className="relative mt-1.5">
+              <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-lg font-bold text-(--text-secondary)">
+                R$
+              </span>
+              <input
+                id={`${uid}-price`}
+                inputMode="decimal"
+                placeholder="150,00"
+                {...register("price")}
+                aria-invalid={errors.price ? "true" : undefined}
+                aria-describedby={errors.price ? `${uid}-price-error` : undefined}
+                className={`${fieldClassName} mt-0! py-2.5! pr-4! pl-11! text-xl! font-extrabold tracking-tight tabular-nums sm:pr-20! sm:text-2xl!`}
+              />
+              <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-4 hidden items-center text-sm text-(--text-secondary) sm:flex">
+                / noite
+              </span>
+            </div>
+            <FieldError id={`${uid}-price-error`} message={errors.price?.message} />
           </div>
           <div>
-            <label htmlFor="room-capacity" className={labelClassName}>Capacidade (pessoas)</label>
-            <input
-              id="room-capacity"
-              type="number"
-              min={1}
-              max={20}
-              inputMode="numeric"
-              {...register("capacity")}
-              aria-invalid={errors.capacity ? "true" : undefined}
-              aria-describedby={errors.capacity ? "room-capacity-error" : undefined}
-              className={fieldClassName}
-            />
-            <FieldError id="room-capacity-error" message={errors.capacity?.message} />
-          </div>
-          <div>
-            <label htmlFor="room-price" className={labelClassName}>Valor da diária (R$)</label>
-            <input
-              id="room-price"
-              inputMode="decimal"
-              placeholder="150,00"
-              {...register("price")}
-              aria-invalid={errors.price ? "true" : undefined}
-              aria-describedby={`room-price-hint${errors.price ? " room-price-error" : ""}`}
-              className={fieldClassName}
-            />
-            <FieldHint id="room-price-hint">Valor base por noite.</FieldHint>
-            <FieldError id="room-price-error" message={errors.price?.message} />
+            <label htmlFor={`${uid}-capacity`} className={labelClassName}>Capacidade</label>
+            <div className="relative mt-1.5">
+              <input
+                id={`${uid}-capacity`}
+                type="number"
+                min={1}
+                max={20}
+                inputMode="numeric"
+                {...register("capacity", { valueAsNumber: true })}
+                aria-invalid={errors.capacity ? "true" : undefined}
+                aria-describedby={errors.capacity ? `${uid}-capacity-error` : undefined}
+                className={`${fieldClassName} mt-0! py-2.5! text-xl! font-extrabold tracking-tight tabular-nums sm:pr-20! sm:text-2xl!`}
+              />
+              <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-4 hidden items-center text-sm text-(--text-secondary) sm:flex">
+                pessoas
+              </span>
+            </div>
+            <FieldError id={`${uid}-capacity-error`} message={errors.capacity?.message} />
           </div>
         </div>
+      </FormSection>
+
+      <FormSection id={`${uid}-beds-heading`} icon={LuBedDouble} tone="lavender" title="Camas" description="Opcional. Ajuda o hóspede a entender como vai dormir.">
+        <RoomBedsFields id={`${uid}-beds`} control={control} errors={errors} />
+      </FormSection>
+
+      <FormSection id={`${uid}-guests-heading`} icon={LuUsers} tone="lavender" title="Banheiro e público" description="Quem pode se hospedar e como é o banheiro.">
         <ChoiceGroup
-          id="room-bathroom"
+          id={`${uid}-bathroom`}
           legend="Banheiro"
           type="radio"
-          options={optionsFrom(bathroomTypeLabels)}
+          options={bathroomOptions}
           registration={register("bathroomType")}
           error={errors.bathroomType?.message}
         />
         <ChoiceGroup
-          id="room-audiences"
+          id={`${uid}-audiences`}
           legend="Público aceito"
-          description="Marque todos os públicos que podem se hospedar neste quarto."
+          description="Marque todos que se aplicam."
           type="checkbox"
           options={optionsFrom(genderIdentityLabels)}
           registration={register("acceptedAudiences")}
           error={errors.acceptedAudiences?.message}
         />
-        <div>
-          <label htmlFor="room-description" className={labelClassName}>Descrição</label>
-          <textarea
-            id="room-description"
-            rows={4}
-            {...register("description")}
-            aria-invalid={errors.description ? "true" : undefined}
-            aria-describedby={errors.description ? "room-description-error" : undefined}
-            className={fieldClassName}
-          />
-          <FieldError id="room-description-error" message={errors.description?.message} />
-        </div>
       </FormSection>
 
-      <FormSection id="room-services-heading" title="Faxina e fumantes" description="Deixe no padrão do imóvel ou defina uma regra própria para este quarto.">
-        <HouseServicesFields register={register} hasCleaner={hasCleaner} inherited={room?.property} />
-      </FormSection>
-
-      <OptionalDetails
+      <FormSection
+        id={`${uid}-amenities-heading`}
+        icon={LuSparkles}
+        tone="champagne"
         title="Comodidades e informações"
-        tag="recomendado"
-        description={room ? roomDetailsSummary(room) : ROOM_DETAILS_HINT}
-        forceOpen={Boolean(errors.additionalInfo)}
+        description="Recomendado. Ajudam o hóspede a escolher e contam para a completude do anúncio."
       >
         {roomAmenityGroups.map((group) => (
           <ChoiceGroup
             key={group.id}
-            id={`room-amenities-${group.id}`}
+            id={`${uid}-amenities-${group.id}`}
             legend={group.legend}
             type="checkbox"
-            options={group.amenities.map((amenity) => ({ value: amenity, label: roomAmenityLabels[amenity] }))}
+            options={group.amenities.map((amenity) => ({ value: amenity, label: roomAmenityLabels[amenity], icon: roomAmenityIcons[amenity] }))}
             registration={register("amenities")}
           />
         ))}
         <div>
-          <label htmlFor="room-additional-info" className={labelClassName}>Informações adicionais</label>
+          <label htmlFor={`${uid}-additional-info`} className={labelClassName}>Informações adicionais</label>
           <textarea
-            id="room-additional-info"
+            id={`${uid}-additional-info`}
             rows={3}
             {...register("additionalInfo")}
+            placeholder="Ex.: janela voltada para o jardim, cortina blackout, tomada ao lado da cama."
             aria-invalid={errors.additionalInfo ? "true" : undefined}
-            aria-describedby={errors.additionalInfo ? "room-additional-info-error" : undefined}
-            className={fieldClassName}
+            aria-describedby={errors.additionalInfo ? `${uid}-additional-info-error` : undefined}
+            className={`${fieldClassName} resize-y leading-relaxed`}
           />
-          <FieldError id="room-additional-info-error" message={errors.additionalInfo?.message} />
+          <FieldError id={`${uid}-additional-info-error`} message={errors.additionalInfo?.message} />
         </div>
-      </OptionalDetails>
+      </FormSection>
 
-      {room ? (
-        <FormSection
-          id="room-danger-heading"
-          title="Arquivar ou excluir"
-          description="Arquivar tira o quarto do anúncio sem apagar nada, e você pode reativá-lo depois. Excluir remove o quarto e as fotos de vez."
+      <FormSection
+        id={`${uid}-services-heading`}
+        icon={LuCigaretteOff}
+        tone="champagne"
+        title="Faxina e fumantes"
+        description="Deixe no padrão do imóvel ou defina uma regra própria para este quarto."
+      >
+        <HouseServicesFields id={`${uid}-services`} register={register} hasCleaner={hasCleaner} inherited={room?.property} />
+      </FormSection>
+
+      {room && !inline ? (
+        <section
+          aria-labelledby={`${uid}-danger-heading`}
+          className="flex flex-col gap-1 border-t border-(--border) py-4"
         >
-          <div className="flex flex-wrap gap-3">
-            {room.status !== "INACTIVE" ? (
-              <button type="button" disabled={pending || archiving} onClick={() => setConfirmingArchive(true)} className={secondaryButtonClassName}>
-                Arquivar quarto
+          <div className="flex items-center justify-between gap-3">
+            <h2 id={`${uid}-danger-heading`} className="text-[13px] font-bold text-(--text-secondary)">
+              Arquivar ou excluir
+            </h2>
+            <div className="flex shrink-0 gap-1.5">
+              {room.status !== "INACTIVE" ? (
+                <button type="button" disabled={pending || archiving} onClick={() => setConfirmingArchive(true)} className={`${secondaryButtonClassName} min-h-9 rounded-lg! px-3! py-1.5! text-xs!`}>
+                  <LuArchive aria-hidden="true" size={14} />
+                  Arquivar
+                </button>
+              ) : null}
+              <button type="button" disabled={pending || archiving} onClick={() => setConfirmingDelete(true)} className={`${dangerButtonClassName} min-h-9 rounded-lg! px-3! py-1.5! text-xs!`}>
+                <LuTrash2 aria-hidden="true" size={14} />
+                Excluir
               </button>
-            ) : null}
-            <button type="button" disabled={pending || archiving} onClick={() => setConfirmingDelete(true)} className={dangerButtonClassName}>
-              Excluir quarto
-            </button>
+            </div>
           </div>
-        </FormSection>
+          <p className="max-w-[62ch] text-xs leading-relaxed text-pretty text-(--text-secondary)">
+            Arquivar tira o quarto do anúncio sem apagar nada, e você pode reativá-lo depois.
+            <span className="block">Excluir remove o quarto e as fotos de vez.</span>
+          </p>
+        </section>
       ) : null}
 
       <FormActions>
@@ -288,7 +348,7 @@ export function RoomForm({ propertyId, room, createdHref, backHref }: { property
           </Link>
         ) : null}
         <button type="submit" disabled={pending || (Boolean(room) && !isDirty)} className={primaryButtonClassName}>
-          {isSubmitting ? "Salvando..." : room ? "Salvar quarto" : createdHref ? "Salvar e continuar" : "Criar quarto"}
+          {isSubmitting ? "Salvando..." : room || inline ? "Salvar quarto" : createdHref ? "Salvar e continuar" : "Criar quarto"}
         </button>
         {room && isDirty ? (
           <button type="button" disabled={pending} onClick={() => reset()} className={secondaryButtonClassName}>
@@ -297,7 +357,7 @@ export function RoomForm({ propertyId, room, createdHref, backHref }: { property
         ) : null}
         <FormStatus error={error} saved={message} dirty={Boolean(room) && isDirty} />
       </FormActions>
-      <UnsavedChangesGuard dirty={isDirty && !pending} />
+      {inline ? null : <UnsavedChangesGuard dirty={isDirty && !pending} />}
       <ConfirmDialog
         open={confirmingDelete}
         title="Excluir este quarto?"

@@ -5,9 +5,9 @@ import { Chips } from "@/components/chips";
 import { PageNotice } from "@/components/page-notice";
 import { formatLocation, type PropertySummary } from "@/lib/properties";
 
-export function PublicListingAside({ preview, children }: { preview: boolean; children: ReactNode }) {
+export function PublicListingAside({ preview, flush = false, children }: { preview: boolean; flush?: boolean; children: ReactNode }) {
   return (
-    <aside className={`flex flex-col gap-4 lg:sticky lg:mt-8 ${preview ? "lg:top-36" : "lg:top-24"}`}>
+    <aside className={`flex flex-col gap-4 lg:sticky ${flush ? "" : "lg:mt-8"} ${preview ? "lg:top-36" : "lg:top-24"}`}>
       <Link
         href="/meus-imoveis/novo"
         className="flex items-center gap-2 rounded-2xl border border-(--success)/35 bg-(--success-soft) px-4 py-3 text-sm font-semibold text-(--success) transition-colors hover:border-(--success)/60"

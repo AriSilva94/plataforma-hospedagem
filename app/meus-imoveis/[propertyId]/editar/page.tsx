@@ -45,7 +45,7 @@ export default async function EditPropertyPage({ params, searchParams }: PagePro
       {section === "localizacao" ? <PropertyLocationForm property={property} /> : null}
       {section === "areas" ? <SharedAreasForm property={property} /> : null}
       {section === "midia" ? (
-        <MediaGallery basePath={`/owner/properties/${property.id}`} initialMedia={property.media} allowVideo maxImages={30} maxVideos={3} />
+        <MediaGallery label="Fotos do imóvel" basePath={`/owner/properties/${property.id}`} initialMedia={property.media} allowVideo maxImages={30} maxVideos={3} />
       ) : null}
     </OwnerPage>
   );

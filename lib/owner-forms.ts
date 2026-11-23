@@ -1,6 +1,7 @@
 import { z } from "@/lib/zod";
 import {
   bathroomTypes,
+  bedTypes,
   brazilianStates,
   cleaningFrequencies,
   smokingPolicies,
@@ -106,6 +107,7 @@ export const sharedAreasSchema = z.object({
     .array(
       z
         .object({
+          id: z.string().optional(),
           type: z.enum(sharedAreaTypes),
           label: optionalText(60),
           description: optionalText(500),
@@ -142,10 +144,29 @@ export const roomSchema = z.object({
     .int({ error: "Informe um número inteiro." })
     .min(1, { error: "A capacidade mínima é 1 pessoa." })
     .max(20, { error: "A capacidade máxima é 20 pessoas." }),
-  bathroomType: z.enum(bathroomTypes, { error: "Selecione o tipo de banheiro." }),
+  bathroomType: z.enum(bathroomTypes).nullable().pipe(z.enum(bathroomTypes, { error: "Selecione o tipo de banheiro." })),
   acceptedAudiences: z.array(z.enum(genderIdentities)).min(1, { error: "Selecione ao menos um público aceito." }),
   amenities: z.array(z.string()),
   additionalInfo: optionalText(2000),
+  beds: z
+    .array(
+      z.object({
+        type: z.enum(bedTypes, { error: "Selecione o tipo de cama." }),
+        quantity: z.coerce
+          .number({ error: "Informe a quantidade." })
+          .int({ error: "Informe um número inteiro." })
+          .min(1, { error: "A quantidade mínima é 1." })
+          .max(10, { error: "A quantidade máxima é 10." }),
+      }),
+    )
+    .max(6, { error: "Informe no máximo 6 tipos de cama." })
+    .superRefine((beds, ctx) => {
+      const seen = new Set<string>();
+      beds.forEach((bed, index) => {
+        if (seen.has(bed.type)) ctx.addIssue({ code: "custom", message: "Cada tipo de cama só pode aparecer uma vez.", path: [index, "type"] });
+        seen.add(bed.type);
+      });
+    }),
   ...houseServicesFields,
 });
 

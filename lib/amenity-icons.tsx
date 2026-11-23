@@ -3,10 +3,13 @@ import {
   LuAirVent,
   LuAppWindow,
   LuArchive,
-  LuBath,
-  LuBedDouble,
-  LuBedSingle,
   LuBlinds,
+  LuBriefcase,
+  LuFlame,
+  LuHeater,
+  LuUtensils,
+  LuVault,
+  LuWaves,
   LuCamera,
   LuChefHat,
   LuCigarette,
@@ -32,8 +35,21 @@ import {
   LuArrowUpDown,
   LuHouse,
   LuCircleCheck,
+  LuBed,
+  LuBedDouble,
+  LuBedSingle,
+  LuCrown,
 } from "react-icons/lu";
-import type { propertyFeatures, roomAmenities, sharedAreaTypes } from "@/lib/properties";
+import type { BedType, propertyFeatures, roomAmenities, sharedAreaTypes } from "@/lib/properties";
+
+export const bedTypeIcons: Record<BedType, IconType> = {
+  SINGLE: LuBedSingle,
+  DOUBLE: LuBedDouble,
+  QUEEN: LuBed,
+  KING: LuCrown,
+  BUNK: LuLayers,
+  SOFA_BED: LuSofa,
+};
 
 export function iconOf(icons: Partial<Record<string, IconType>>, key: string): IconType {
   return icons[key] ?? LuCircleCheck;
@@ -42,8 +58,6 @@ export function iconOf(icons: Partial<Record<string, IconType>>, key: string): I
 export const roomAmenityIcons: Record<(typeof roomAmenities)[number], IconType> = {
   AIR_CONDITIONING: LuAirVent,
   FAN: LuWind,
-  DOUBLE_BED: LuBedDouble,
-  SINGLE_BED: LuBedSingle,
   WARDROBE: LuArchive,
   DESK: LuLampDesk,
   TV: LuTv,
@@ -54,6 +68,8 @@ export const roomAmenityIcons: Record<(typeof roomAmenities)[number], IconType> 
   DOOR_LOCK: LuLock,
   BED_LINEN: LuLayers,
   TOWELS: LuDroplet,
+  SAFE: LuVault,
+  HAIR_DRYER: LuHeater,
 };
 
 export const propertyFeatureIcons: Record<(typeof propertyFeatures)[number], IconType> = {
@@ -72,9 +88,13 @@ export const propertyFeatureIcons: Record<(typeof propertyFeatures)[number], Ico
 export const sharedAreaTypeIcons: Record<(typeof sharedAreaTypes)[number], IconType> = {
   LIVING_ROOM: LuSofa,
   KITCHEN: LuChefHat,
-  SHARED_BATHROOM: LuBath,
+  DINING_ROOM: LuUtensils,
   LAUNDRY: LuWashingMachine,
+  BALCONY: LuDoorOpen,
   OUTDOOR_AREA: LuTrees,
+  POOL: LuWaves,
+  BARBECUE: LuFlame,
   GARAGE: LuWarehouse,
+  OFFICE: LuBriefcase,
   OTHER: LuHouse,
 };

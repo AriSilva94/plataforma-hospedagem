@@ -2,12 +2,14 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { LuImagePlus, LuLoaderCircle, LuTrash2 } from "react-icons/lu";
+import type { IconType } from "react-icons";
+import { LuClock, LuEye, LuImagePlus, LuLoaderCircle, LuTrash2, LuUsers } from "react-icons/lu";
 import { FormFeedback } from "@/components/form-feedback";
 import { StatusBadge } from "@/components/owner/status-badge";
 import { cardClassName, secondaryButtonClassName } from "@/components/owner/styles";
 import { sendApiRequest, toErrorMessage } from "@/lib/api";
-import { mediaSchema, type Media } from "@/lib/properties";
+import { MediaKind, mediaSchema, type Media } from "@/lib/properties";
+import { formatDateTime } from "@/lib/admin";
 import { MAX_STORY_MEDIA, storyStatusLabels, type StoryStatus } from "@/lib/stories";
 
 const MB = 1024 * 1024;
@@ -20,11 +22,17 @@ export function RoomStoryEditor({
   initialMedia,
   status,
   rejectedReason,
+  expiresAt,
+  expired,
+  views,
 }: {
   roomId: string;
   initialMedia: Media[];
   status: StoryStatus;
   rejectedReason: string | null;
+  expiresAt: string | null;
+  expired: boolean;
+  views: { unique: number; total: number };
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [media, setMedia] = useState(initialMedia);
@@ -32,6 +40,7 @@ export function RoomStoryEditor({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
   const full = media.length >= MAX_STORY_MEDIA;
+  const approvedAndExpired = currentStatus === "APPROVED" && expired;
 
   function validate(file: File): string | undefined {
     if (imageTypes.includes(file.type)) return file.size > 10 * MB ? "A foto excede 10 MB." : undefined;
@@ -87,15 +96,29 @@ export function RoomStoryEditor({
             Até {MAX_STORY_MEDIA} fotos ou vídeos, vistos no formato stories na home enquanto o quarto estiver em destaque. Cada alteração passa por nova análise.
           </p>
         </div>
-        {media.length > 0 ? <StatusBadge tone={storyTones[currentStatus]}>{storyStatusLabels[currentStatus]}</StatusBadge> : null}
+        {media.length > 0 ? <StatusBadge tone={approvedAndExpired ? "neutral" : storyTones[currentStatus]}>{approvedAndExpired ? "Expirado" : storyStatusLabels[currentStatus]}</StatusBadge> : null}
       </div>
 
       {currentStatus === "REJECTED" && rejectedReason && media.length > 0 ? <p className="text-sm text-(--error)">Motivo da recusa: {rejectedReason}</p> : null}
 
+      {currentStatus === "APPROVED" && expiresAt && media.length > 0 ? (
+        <section aria-labelledby="story-metricas-titulo" className="flex flex-col gap-2.5">
+          <h3 id="story-metricas-titulo" className="text-sm font-bold text-(--text-primary)">
+            Desempenho do story
+          </h3>
+          <dl className="grid divide-y divide-(--border) overflow-hidden rounded-2xl border border-(--border-accent) bg-(--surface-accent) sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            <StoryMetric icon={LuClock} label={expired ? "Expirou em" : "Visível até"} value={formatDateTime(expiresAt)} />
+            <StoryMetric icon={LuUsers} label="Visualizações únicas" value={String(views.unique)} emphasized />
+            <StoryMetric icon={LuEye} label="Visualizações no total" value={String(views.total)} emphasized />
+          </dl>
+          {expired ? <p className="text-sm text-(--text-secondary)">Envie uma nova mídia ou aguarde a administração renovar a aprovação.</p> : null}
+        </section>
+      ) : null}
+
       <ul className="grid grid-cols-3 gap-3 sm:max-w-md">
         {media.map((item, index) => (
           <li key={item.id} className="relative aspect-9/16 overflow-hidden rounded-2xl bg-(--surface-raised) ring-1 ring-(--border)">
-            {item.type === "IMAGE" ? (
+            {item.type === MediaKind.IMAGE ? (
               <Image src={item.url} alt={`Mídia ${index + 1} do story`} fill sizes="(min-width: 640px) 140px, 30vw" className="object-cover" />
             ) : (
               <video src={`${item.url}#t=0.1`} muted playsInline preload="metadata" aria-label={`Mídia ${index + 1} do story`} className="size-full object-cover" />
@@ -126,5 +149,19 @@ export function RoomStoryEditor({
 
       {error ? <FormFeedback tone="error">{error}</FormFeedback> : null}
     </section>
+  );
+}
+
+function StoryMetric({ icon: Icon, label, value, emphasized = false }: { icon: IconType; label: string; value: string; emphasized?: boolean }) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2.5 sm:flex-col sm:items-start sm:justify-center sm:gap-2 sm:py-3">
+      <dt className="flex min-w-0 items-center gap-3 text-sm whitespace-nowrap text-(--text-secondary) sm:whitespace-normal">
+        <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-full bg-(--surface) text-(--primary-text) ring-1 ring-(--primary-border)">
+          <Icon size={16} />
+        </span>
+        {label}
+      </dt>
+      <dd className={emphasized ? "text-2xl font-extrabold tabular-nums text-(--text-primary)" : "text-sm font-bold whitespace-nowrap tabular-nums text-(--text-primary)"}>{value}</dd>
+    </div>
   );
 }

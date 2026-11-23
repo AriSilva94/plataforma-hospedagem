@@ -11,7 +11,7 @@ export function SectionTabs({
   current: string;
 }) {
   return (
-    <nav aria-label={label} className="-mx-4 mt-4 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
+    <nav aria-label={label} className="-mx-4 mt-4 overflow-x-auto px-4 scrollbar-none sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
       <ul className="flex min-w-max gap-6 shadow-[inset_0_-1px_0_var(--border)]">
         {tabs.map((tab) => {
           const active = tab.id === current;

@@ -1,170 +1,182 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
-import { LuPlus, LuTrash2 } from "react-icons/lu";
-import { Combobox } from "@/components/combobox";
+import { FormProvider, useForm } from "react-hook-form";
+import { LuBath, LuImagePlus, LuPlus, LuShowerHead, LuSofa, LuTrash2 } from "react-icons/lu";
 import { FormActions, FormStatus } from "@/components/owner/form-actions";
+import { FormSection } from "@/components/owner/form-section";
+import { MediaGallery } from "@/components/owner/media-gallery";
 import { UnsavedChangesGuard } from "@/components/owner/unsaved-changes-guard";
-import { optionsFrom } from "@/components/owner/choice-group";
-import { FieldError } from "@/components/field-error";
-import {
-  cardClassName,
-  fieldClassName,
-  labelClassName,
-  primaryButtonClassName,
-  secondaryButtonClassName,
-} from "@/components/owner/styles";
+import { SharedAreasFields, sharedAreasDefaults } from "@/components/owner/shared-areas-fields";
+import { primaryButtonClassName, secondaryButtonClassName } from "@/components/owner/styles";
 import { sendApiRequest, toErrorMessage } from "@/lib/api";
 import { sharedAreasSchema, type SharedAreasValues } from "@/lib/owner-forms";
-import { sharedAreaTypeLabels, type PropertyDetail } from "@/lib/properties";
+import { propertyDetailSchema, type Media, type PropertyDetail } from "@/lib/properties";
 
-const sharedAreaTypeOptions = optionsFrom(sharedAreaTypeLabels);
+const MAX_SHARED_BATHROOMS = 20;
+
+type BathroomDraft = { key: string; id?: string; media: Media[] };
+
+function bathroomsFrom(property: PropertyDetail): BathroomDraft[] {
+  return property.sharedBathrooms.map((bathroom) => ({ key: bathroom.id, id: bathroom.id, media: bathroom.media }));
+}
+
+function bathroomIds(bathrooms: BathroomDraft[]): string {
+  return bathrooms.map((bathroom) => bathroom.id ?? "new").join(",");
+}
 
 export function SharedAreasForm({ property }: { property: PropertyDetail }) {
   const router = useRouter();
   const [error, setError] = useState<string>();
   const [message, setMessage] = useState<string>();
-  const { register, control, handleSubmit, getValues, reset, formState } = useForm<SharedAreasValues>({
+  const [savedBathrooms, setSavedBathrooms] = useState(() => bathroomsFrom(property));
+  const [bathrooms, setBathrooms] = useState(savedBathrooms);
+  const nextKey = useRef(0);
+  const form = useForm<SharedAreasValues>({
     resolver: zodResolver(sharedAreasSchema),
-    defaultValues: {
-      areas: property.sharedAreas.map((area) => ({
-        type: area.type,
-        label: area.label ?? "",
-        description: area.description ?? "",
-      })),
-    },
+    defaultValues: { areas: sharedAreasDefaults(property) },
   });
-  const { fields, append, remove } = useFieldArray({ control, name: "areas" });
-  const { errors, isSubmitting, isDirty } = formState;
-  const areas = useWatch({ control, name: "areas" });
+  const { handleSubmit, reset, formState } = form;
+  const { isSubmitting, isDirty: areasDirty } = formState;
+  const bathroomsDirty = bathroomIds(bathrooms) !== bathroomIds(savedBathrooms);
+  const isDirty = areasDirty || bathroomsDirty;
 
   async function save(values: SharedAreasValues) {
     setError(undefined);
     setMessage(undefined);
     try {
-      await sendApiRequest(`/owner/properties/${property.id}/shared-areas`, {
-        method: "PUT",
-        body: JSON.stringify(values),
-      });
+      let updated = property;
+      if (areasDirty) {
+        updated = propertyDetailSchema.parse(
+          await sendApiRequest(`/owner/properties/${property.id}/shared-areas`, { method: "PUT", body: JSON.stringify(values) }),
+        );
+      }
+      if (bathroomsDirty) {
+        updated = propertyDetailSchema.parse(
+          await sendApiRequest(`/owner/properties/${property.id}/shared-bathrooms`, {
+            method: "PUT",
+            body: JSON.stringify({ bathrooms: bathrooms.map((bathroom) => (bathroom.id ? { id: bathroom.id } : {})) }),
+          }),
+        );
+        const saved = bathroomsFrom(updated);
+        setSavedBathrooms(saved);
+        setBathrooms(saved);
+      }
       setMessage("Áreas compartilhadas salvas.");
-      reset(getValues());
+      reset({ areas: sharedAreasDefaults(updated) });
       router.refresh();
     } catch (requestError) {
       setError(toErrorMessage(requestError));
     }
   }
 
+  function addBathroom() {
+    nextKey.current += 1;
+    setBathrooms((current) => [...current, { key: `new-${nextKey.current}`, media: [] }]);
+  }
+
   return (
-    <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col gap-5 py-6">
-      <p className="max-w-prose text-sm leading-relaxed text-(--text-secondary)">
-        Opcional. Áreas que pertencem à casa como um todo e são compartilhadas entre os quartos. Não é necessário repeti-las em cada quarto.
-      </p>
+    <div className="flex flex-col pt-6">
+      <FormProvider {...form}>
+        <form id="shared-areas-form" noValidate onSubmit={handleSubmit(save)} className="flex flex-col">
+          <FormSection
+            id="shared-areas-heading"
+            icon={LuSofa}
+            tone="champagne"
+            title="Áreas compartilhadas"
+            description="Opcional. Espaços usados por todos os quartos, com uma foto de cada um."
+          >
+            <SharedAreasFields property={property} />
+          </FormSection>
 
-      {fields.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-(--border) p-6 text-sm text-(--text-secondary)">
-          Nenhuma área cadastrada.
-        </p>
-      ) : (
-        <ul className="flex flex-col gap-4">
-          {fields.map((field, index) => {
-            const areaErrors = errors.areas?.[index];
-            return (
-              <li key={field.id} className={`${cardClassName} grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:items-start`}>
-                <div>
-                  <label id={`area-${index}-type-label`} htmlFor={`area-${index}-type`} className={labelClassName}>Área</label>
-                  <div className="mt-1.5">
-                    <Controller
-                      control={control}
-                      name={`areas.${index}.type`}
-                      render={({ field: typeField }) => (
-                        <Combobox
-                          ref={typeField.ref}
-                          id={`area-${index}-type`}
-                          labelId={`area-${index}-type-label`}
-                          value={typeField.value}
-                          options={sharedAreaTypeOptions}
-                          onChange={typeField.onChange}
-                          onBlur={typeField.onBlur}
-                          placeholder="Selecione"
-                          searchLabel="Buscar área"
-                          emptyMessage="Nenhuma área encontrada."
-                          clearable={false}
-                          size="compact"
-                        />
-                      )}
-                    />
-                  </div>
-                  {areas[index]?.type === "OTHER" ? (
-                    <>
-                      <label htmlFor={`area-${index}-label`} className={`${labelClassName} mt-4`}>Nome da área</label>
-                      <input
-                        id={`area-${index}-label`}
-                        {...register(`areas.${index}.label`)}
-                        placeholder="Ex.: Terraço"
-                        aria-invalid={areaErrors?.label ? "true" : undefined}
-                        aria-describedby={areaErrors?.label ? `area-${index}-label-error` : undefined}
-                        className={fieldClassName}
-                      />
-                      <FieldError id={`area-${index}-label-error`} message={areaErrors?.label?.message} />
-                    </>
-                  ) : null}
-                </div>
-                <div>
-                  <label htmlFor={`area-${index}-description`} className={labelClassName}>Detalhes (opcional)</label>
-                  <textarea
-                    id={`area-${index}-description`}
-                    rows={2}
-                    {...register(`areas.${index}.description`)}
-                    placeholder="Ex.: cozinha equipada com geladeira e fogão"
-                    aria-invalid={areaErrors?.description ? "true" : undefined}
-                    className={fieldClassName}
-                  />
-                  <FieldError id={`area-${index}-description-error`} message={areaErrors?.description?.message} />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => remove(index)}
-                  aria-label={`Remover área ${index + 1}`}
-                  className={`${secondaryButtonClassName} md:mt-7`}
-                >
-                  <LuTrash2 aria-hidden="true" size={16} />
-                  <span className="md:hidden">Remover</span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+          <FormSection
+            id="shared-bathrooms-heading"
+            icon={LuBath}
+            tone="champagne"
+            title="Banheiros nas áreas comuns"
+            description="Não conte os banheiros que ficam dentro dos quartos. Adicione uma foto de cada um."
+          >
+            {bathrooms.length === 0 ? (
+              <p className="text-sm text-(--text-secondary)">Nenhum banheiro nas áreas comuns.</p>
+            ) : (
+              <ul className="flex flex-col">
+                {bathrooms.map((bathroom, index) => {
+                  const name = `Banheiro ${index + 1}`;
+                  return (
+                    <li key={bathroom.key} className="flex flex-col gap-3 border-t border-(--border) py-5 first:border-t-0 first:pt-0">
+                      <div className="flex items-center gap-3">
+                        <span aria-hidden="true" className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-(--champagne-soft) text-(--champagne)">
+                          <LuShowerHead size={18} />
+                        </span>
+                        <h3 className="flex flex-1 items-baseline gap-2 text-sm font-semibold text-(--text-primary)">
+                          {name}
+                          {bathroom.id ? null : <span className="text-xs font-normal text-(--text-secondary)">não salvo</span>}
+                        </h3>
+                        <button
+                          type="button"
+                          onClick={() => setBathrooms((current) => current.filter((item) => item.key !== bathroom.key))}
+                          aria-label={`Remover ${name}`}
+                          className="flex size-10.5 shrink-0 items-center justify-center rounded-xl text-(--text-secondary) transition-colors hover:bg-(--error-soft) hover:text-(--error) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)"
+                        >
+                          <LuTrash2 aria-hidden="true" size={17} />
+                        </button>
+                      </div>
+                      <div className="pl-12">
+                        {bathroom.id ? (
+                          <MediaGallery
+                            compact
+                            key={bathroom.id}
+                            label={`Foto do ${name.toLowerCase()}`}
+                            basePath={`/owner/properties/${property.id}/shared-bathrooms/${bathroom.id}`}
+                            initialMedia={bathroom.media}
+                            allowVideo={false}
+                            maxImages={1}
+                          />
+                        ) : (
+                          <p className="flex items-center gap-2 text-[13px] text-(--text-secondary)">
+                            <LuImagePlus aria-hidden="true" size={15} className="shrink-0 text-(--champagne)" />
+                            Salve para adicionar a foto deste banheiro.
+                          </p>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            <div>
+              <button type="button" onClick={addBathroom} disabled={bathrooms.length >= MAX_SHARED_BATHROOMS} className={secondaryButtonClassName}>
+                <LuPlus aria-hidden="true" size={16} />
+                Adicionar banheiro
+              </button>
+            </div>
+          </FormSection>
 
-      <FieldError id="areas-error" message={errors.areas?.message} />
-
-      <div>
-        <button
-          type="button"
-          onClick={() => append({ type: "LIVING_ROOM", label: "", description: "" })}
-          disabled={fields.length >= 30}
-          className={secondaryButtonClassName}
-        >
-          <LuPlus aria-hidden="true" size={16} />
-          Adicionar área
-        </button>
-      </div>
+          <UnsavedChangesGuard dirty={isDirty && !isSubmitting} />
+        </form>
+      </FormProvider>
 
       <FormActions>
-        <button type="submit" disabled={isSubmitting || !isDirty} className={primaryButtonClassName}>
+        <button type="submit" form="shared-areas-form" disabled={isSubmitting || !isDirty} className={primaryButtonClassName}>
           {isSubmitting ? "Salvando..." : "Salvar áreas"}
         </button>
         {isDirty ? (
-          <button type="button" disabled={isSubmitting} onClick={() => reset()} className={secondaryButtonClassName}>
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => {
+              reset();
+              setBathrooms(savedBathrooms);
+            }}
+            className={secondaryButtonClassName}
+          >
             Descartar
           </button>
         ) : null}
         <FormStatus error={error} saved={message} dirty={isDirty} />
       </FormActions>
-      <UnsavedChangesGuard dirty={isDirty && !isSubmitting} />
-    </form>
+    </div>
   );
 }

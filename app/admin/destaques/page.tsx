@@ -21,7 +21,7 @@ import {
 } from "@/lib/admin";
 import { getApiData } from "@/lib/server-api";
 import { storyStatuses } from "@/lib/properties";
-import { storyStatusLabels } from "@/lib/stories";
+import { isStoryExpired, storyStatusLabels } from "@/lib/stories";
 
 const storyTones = { PENDING: "warning", APPROVED: "success", REJECTED: "danger" } as const;
 
@@ -66,7 +66,11 @@ export default async function AdminFeaturingPage({ searchParams }: PageProps<"/a
             badges={
               <>
                 <StatusBadge tone={featuringTones[room.featuringStatus]}>{featuringStatusLabels[room.featuringStatus]}</StatusBadge>
-                {room.storyMedia.length > 0 ? <StatusBadge tone={storyTones[room.storyStatus]}>{`Story: ${storyStatusLabels[room.storyStatus].toLowerCase()}`}</StatusBadge> : null}
+                {room.storyMedia.length > 0 ? (
+                  <StatusBadge tone={room.storyStatus === "APPROVED" && isStoryExpired(room.storyExpiresAt) ? "neutral" : storyTones[room.storyStatus]}>
+                    {room.storyStatus === "APPROVED" && isStoryExpired(room.storyExpiresAt) ? "Story: expirado" : `Story: ${storyStatusLabels[room.storyStatus].toLowerCase()}`}
+                  </StatusBadge>
+                ) : null}
               </>
             }
             details={
@@ -74,7 +78,7 @@ export default async function AdminFeaturingPage({ searchParams }: PageProps<"/a
                 <p className="mt-2 text-sm text-(--text-secondary)">{periodText(room)}</p>
                 {room.storyMedia.length > 0 ? (
                   <div className="mt-3">
-                    <RoomStoryActions room={room} />
+                    <RoomStoryActions room={room} expired={isStoryExpired(room.storyExpiresAt)} />
                   </div>
                 ) : null}
               </>

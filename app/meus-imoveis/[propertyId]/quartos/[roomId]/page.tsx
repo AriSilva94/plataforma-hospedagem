@@ -1,4 +1,4 @@
-import { LuBedDouble, LuCalendarDays, LuCrown, LuImages } from "react-icons/lu";
+import { LuBanknote, LuBath, LuBedDouble, LuCalendarDays, LuCrown, LuImages, LuUsers } from "react-icons/lu";
 import { AvailabilityEditor } from "@/components/owner/availability-editor";
 import { MediaGallery } from "@/components/owner/media-gallery";
 import { OwnerDataNotice } from "@/components/owner/owner-notice";
@@ -12,6 +12,7 @@ import { roomAvailabilitySchema } from "@/lib/availability";
 import { roomCriterionSection } from "@/lib/completeness";
 import { getApiData } from "@/lib/server-api";
 import { bathroomTypeLabels, formatCents, roomDetailSchema } from "@/lib/properties";
+import { isStoryExpired } from "@/lib/stories";
 
 const sections = [
   { id: "dados", label: "Dados e preço", icon: LuBedDouble },
@@ -34,11 +35,22 @@ export default async function EditRoomPage({ params, searchParams }: PageProps<"
 
   const availability = section === "disponibilidade" ? await getApiData(`/owner/rooms/${roomId}/availability`, roomAvailabilitySchema) : undefined;
   const room = result.data;
-  const summary = [
-    room.capacity === 1 ? "1 pessoa" : `${room.capacity} pessoas`,
-    `${formatCents(room.priceCents)} / diária`,
-    `Banheiro ${bathroomTypeLabels[room.bathroomType].toLowerCase()}`,
-  ].join(" · ");
+  const summary = (
+    <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
+      <span className="inline-flex items-center gap-1.5">
+        <LuBanknote aria-hidden="true" size={15} className="text-(--primary-text)" />
+        <strong className="font-bold text-(--text-primary) tabular-nums">{formatCents(room.priceCents)}</strong> / diária
+      </span>
+      <span className="inline-flex items-center gap-1.5">
+        <LuUsers aria-hidden="true" size={15} className="text-(--lavender)" />
+        {room.capacity === 1 ? "1 pessoa" : `${room.capacity} pessoas`}
+      </span>
+      <span className="inline-flex items-center gap-1.5">
+        <LuBath aria-hidden="true" size={15} className="text-(--lavender)" />
+        Banheiro {bathroomTypeLabels[room.bathroomType].toLowerCase()}
+      </span>
+    </span>
+  );
   const showCompleteness = room.status !== "INACTIVE";
   const pendingSections = new Set<string | undefined>(showCompleteness ? room.completenessMissing.map(roomCriterionSection) : []);
 
@@ -71,9 +83,9 @@ export default async function EditRoomPage({ params, searchParams }: PageProps<"
       />
       {section === "dados" ? <RoomForm propertyId={propertyId} room={room} /> : null}
       {section === "fotos" ? (
-        <MediaGallery basePath={`/owner/rooms/${room.id}`} initialMedia={room.media} allowVideo maxImages={20} maxVideos={3} />
+        <MediaGallery label={`Fotos de ${room.title}`} basePath={`/owner/rooms/${room.id}`} initialMedia={room.media} allowVideo maxImages={20} maxVideos={3} />
       ) : null}
-      {section === "story" ? <RoomStoryEditor roomId={room.id} initialMedia={room.storyMedia} status={room.storyStatus} rejectedReason={room.storyRejectedReason} /> : null}
+      {section === "story" ? <RoomStoryEditor roomId={room.id} initialMedia={room.storyMedia} status={room.storyStatus} rejectedReason={room.storyRejectedReason} expiresAt={room.storyExpiresAt} expired={isStoryExpired(room.storyExpiresAt)} views={room.storyViews} /> : null}
       {availability?.status === "ok" ? <AvailabilityEditor roomId={room.id} initial={availability.data} /> : null}
       {availability && availability.status !== "ok" ? (
         <OwnerDataNotice status={availability.status} retryHref={`/meus-imoveis/${propertyId}/quartos/${roomId}?secao=${section}`} />

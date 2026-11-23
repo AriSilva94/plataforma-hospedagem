@@ -27,9 +27,14 @@ export const storySchema = z.object({
   neighborhood: z.string().nullable(),
   city: z.string().nullable(),
   state: z.string().nullable(),
+  viewed: z.boolean(),
   media: z.array(storyMediaSchema).min(1),
 });
 
 export const storyListSchema = z.object({ items: z.array(storySchema) });
 
 export type Story = z.infer<typeof storySchema>;
+
+export function isStoryExpired(expiresAt: string | null): boolean {
+  return expiresAt !== null && new Date(expiresAt).getTime() <= Date.now();
+}

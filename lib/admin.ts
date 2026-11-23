@@ -87,6 +87,7 @@ export const adminRoomSchema = z.object({
   verificationRejectedReason: z.string().nullable(),
   storyStatus: z.enum(storyStatuses),
   storyRejectedReason: z.string().nullable(),
+  storyExpiresAt: z.string().nullable(),
   storyMedia: z.array(mediaSchema),
   property: z.object({
     id: z.string(),
