@@ -64,22 +64,10 @@ export function SiteHeader({ user }: { user?: { name: string; roles: string[] } 
       <header className="sticky top-0 z-20 border-b border-(--border) bg-(--background)/85 backdrop-blur-sm">
         <InstallAppBanner />
         <div className="flex h-16 items-center px-4 md:hidden">
-          {user ? (
-            <>
-              <BrandMark size="md" href="/" />
-              <div className="flex-1" />
-              <ThemeToggle />
-              <NotificationsPlaceholder />
-            </>
-          ) : (
-            <div className="grid w-full grid-cols-[1fr_auto_1fr] items-center">
-              <span />
-              <BrandMark size="md" href="/" />
-              <div className="flex justify-end">
-                <ThemeToggle />
-              </div>
-            </div>
-          )}
+          <BrandMark size="md" href="/" />
+          <div className="flex-1" />
+          <ThemeToggle />
+          {user ? <NotificationsPlaceholder /> : null}
         </div>
         <div className="mx-auto hidden h-18 w-full max-w-360 items-center px-6 md:grid md:grid-cols-[auto_1fr_auto] md:gap-4 md:px-10 lg:gap-6 lg:px-12">
           <BrandMark size="md" href="/" />
