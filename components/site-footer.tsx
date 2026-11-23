@@ -25,7 +25,7 @@ export function SiteFooter() {
         </div>
         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 md:contents">
           <p className="whitespace-nowrap md:col-span-2 md:row-start-2 xl:col-span-1 xl:col-start-2 xl:row-start-1 xl:text-center">
-            © 2026 DOMUS X<span className="hidden sm:inline">. Todos os direitos reservados.</span>
+            © 2026 CliqueQuarto<span className="hidden sm:inline">. Todos os direitos reservados.</span>
           </p>
           <a
             href="https://arisilva.tech/pt-br"

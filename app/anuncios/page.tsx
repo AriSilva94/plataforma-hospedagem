@@ -14,7 +14,7 @@ export async function generateMetadata({ searchParams }: PageProps<"/anuncios">)
   const { cidade, uf } = await searchParams;
   const requested = listingLocation(cidade, uf);
   const location = requested ? await resolveCity(requested.city, requested.state) : null;
-  return { title: location ? `Quartos em ${location.city} – ${location.state} | DOMUS X` : "Anúncios | DOMUS X" };
+  return { title: location ? `Quartos em ${location.city} – ${location.state} | CliqueQuarto` : "Anúncios | CliqueQuarto" };
 }
 
 export default async function AnnouncementsPage({ searchParams }: PageProps<"/anuncios">) {

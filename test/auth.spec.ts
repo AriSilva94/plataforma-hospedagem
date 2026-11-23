@@ -80,7 +80,7 @@ for (const viewport of [
       await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight),
     ).toBe(true);
     await expect(page.getByText("Seus dados estão seguros com a gente")).toBeInViewport();
-    await expect(page.getByText("© 2026 DOMUS X. Todos os direitos reservados.")).toBeInViewport();
+    await expect(page.getByText("© 2026 CliqueQuarto. Todos os direitos reservados.")).toBeInViewport();
   });
 }
 

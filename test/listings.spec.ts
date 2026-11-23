@@ -154,12 +154,12 @@ test("diária fora da escala do slider é ignorada", async ({ page }) => {
 
 test("cidade da URL é validada: nome oficial no título e aviso para cidade inexistente", async ({ page }) => {
   await page.goto("/anuncios?cidade=sao%20paulo&uf=SP");
-  await expect(page).toHaveTitle("Quartos em São Paulo – SP | DOMUS X");
+  await expect(page).toHaveTitle("Quartos em São Paulo – SP | CliqueQuarto");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Quartos em São Paulo – SP");
   await expect(page.getByRole("combobox", { name: "Cidade" })).toHaveValue("São Paulo, SP");
 
   await page.goto("/anuncios?cidade=Ligue%2099999-0000&uf=SP");
-  await expect(page).toHaveTitle("Anúncios | DOMUS X");
+  await expect(page).toHaveTitle("Anúncios | CliqueQuarto");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Anúncios");
   await expect(page.getByText("Não encontramos essa cidade. Mostrando todos os anúncios.")).toBeVisible();
   await expect(page.getByText("Ligue 99999-0000")).toHaveCount(0);

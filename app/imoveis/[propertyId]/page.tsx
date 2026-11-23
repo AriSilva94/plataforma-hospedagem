@@ -70,10 +70,10 @@ function PanelBlock({ icon: Icon, title, count, aside, children }: { icon: IconT
 export async function generateMetadata({ params }: PageProps<"/imoveis/[propertyId]">): Promise<Metadata> {
   const { propertyId } = await params;
   const result = await getApiData(`/properties/${propertyId}`, publicPropertyDetailSchema);
-  if (result.status !== "ok") return { title: "Local não encontrado | DOMUS X" };
+  if (result.status !== "ok") return { title: "Local não encontrado | CliqueQuarto" };
   const place = [result.data.city, result.data.state].filter(Boolean).join(" · ");
   return {
-    title: `${result.data.title}${place ? ` · ${place}` : ""} | DOMUS X`,
+    title: `${result.data.title}${place ? ` · ${place}` : ""} | CliqueQuarto`,
   };
 }
 

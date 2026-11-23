@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalPage } from "@/components/legal-page";
 
-export const metadata: Metadata = { title: "Política de Privacidade | DOMUS X" };
+export const metadata: Metadata = { title: "Política de Privacidade | CliqueQuarto" };
 
 export default function PrivacyPolicyPage() {
   return (
@@ -10,7 +10,7 @@ export default function PrivacyPolicyPage() {
       <section>
         <h2>1. Quem somos</h2>
         <p>
-          A DOMUS X é uma plataforma que conecta proprietários de imóveis com quartos e suítes reserváveis a hóspedes que procuram estadias flexíveis. Esta política explica quais dados
+          O CliqueQuarto é uma plataforma que conecta proprietários de imóveis com quartos e suítes reserváveis a hóspedes que procuram estadias flexíveis. Esta política explica quais dados
           pessoais tratamos, para quê e quais são os seus direitos, conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).
         </p>
       </section>

@@ -1,11 +1,14 @@
+import Image from "next/image";
 import Link from "next/link";
+import logoDark from "@/public/assets/img/logo-full-dark.png";
+import logoLight from "@/public/assets/img/logo-full.png";
 
 type BrandSize = "sm" | "md" | "lg";
 
-const sizes: Record<BrandSize, { label: string; badge: string }> = {
-  sm: { label: "text-sm", badge: "size-7 rounded-lg text-xs" },
-  md: { label: "text-base", badge: "size-8 rounded-xl text-sm" },
-  lg: { label: "text-xl", badge: "size-8 rounded-xl text-sm" },
+const heights: Record<BrandSize, string> = {
+  sm: "h-8",
+  md: "h-10",
+  lg: "h-12",
 };
 
 export function BrandMark({
@@ -15,24 +18,19 @@ export function BrandMark({
   size?: BrandSize;
   href?: string;
 }) {
-  const style = sizes[size];
-  const className = `inline-flex items-center gap-2 font-extrabold whitespace-nowrap text-(--text-primary) ${style.label}`;
+  const imageClassName = `w-auto ${heights[size]}`;
   const content = (
     <>
-      <span
-        className={`flex items-center justify-center bg-(--primary) text-(--on-primary) ${style.badge}`}
-      >
-        D
-      </span>
-      DOMUS X
+      <Image src={logoLight} alt="CliqueQuarto" priority className={`${imageClassName} dark:hidden`} />
+      <Image src={logoDark} alt="CliqueQuarto" priority className={`${imageClassName} hidden dark:block`} />
     </>
   );
 
   return href ? (
-    <Link href={href} className={className}>
+    <Link href={href} className="inline-flex shrink-0 items-center">
       {content}
     </Link>
   ) : (
-    <span className={className}>{content}</span>
+    <span className="inline-flex shrink-0 items-center">{content}</span>
   );
 }
