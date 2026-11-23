@@ -1,11 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode, type Ref } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode, type Ref } from "react";
 import type { IconType } from "react-icons";
 import { LuCheck, LuChevronDown, LuLoaderCircle, LuSearch } from "react-icons/lu";
 import { useFieldPopover } from "@/components/use-field-popover";
 
 export type ComboboxOption = { value: string; label: string; detail?: string };
+
+const ROW_HEIGHT = 40;
+const LIST_PADDING = 6;
+const LIST_MAX_HEIGHT = 240;
+const OVERSCAN = 4;
 
 function normalize(text: string) {
   return text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -59,6 +64,7 @@ export function Combobox({
   invalid = false,
   describedBy,
   renderOption,
+  virtualized = false,
   ref,
 }: {
   id: string;
@@ -80,6 +86,7 @@ export function Combobox({
   invalid?: boolean;
   describedBy?: string;
   renderOption?: (option: ComboboxOption) => ReactNode;
+  virtualized?: boolean;
   ref?: Ref<HTMLButtonElement>;
 }) {
   const { anchorRef, isOpen, open, close, rootProps, panelProps } = useFieldPopover<HTMLButtonElement>();
@@ -87,23 +94,40 @@ export function Combobox({
   const listRef = useRef<HTMLUListElement>(null);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [scrollTop, setScrollTop] = useState(0);
   const filtered = useMemo(() => filterOptions(options, query), [options, query]);
   const selected = options.find((option) => option.value === value);
   const listId = `${id}-listbox`;
   const valueId = `${id}-value`;
   const activeOption = filtered[activeIndex];
+  const firstVisible = virtualized ? Math.max(0, Math.floor((scrollTop - LIST_PADDING) / ROW_HEIGHT) - OVERSCAN) : 0;
+  const lastVisible = virtualized ? Math.min(filtered.length, Math.ceil((scrollTop + LIST_MAX_HEIGHT) / ROW_HEIGHT) + OVERSCAN) : filtered.length;
+
+  useLayoutEffect(() => {
+    if (!virtualized) return;
+    listRef.current?.style.setProperty("--list-offset-top", `${firstVisible * ROW_HEIGHT}px`);
+    listRef.current?.style.setProperty("--list-offset-bottom", `${(filtered.length - lastVisible) * ROW_HEIGHT}px`);
+  }, [virtualized, firstVisible, lastVisible, filtered.length]);
 
   useEffect(() => {
     if (isOpen) searchRef.current?.focus();
   }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen) return;
-    listRef.current?.querySelector('[data-active="true"]')?.scrollIntoView({ block: "nearest" });
-  }, [isOpen, activeIndex, filtered]);
+    const list = listRef.current;
+    if (!isOpen || !list) return;
+    if (!virtualized) {
+      list.querySelector('[data-active="true"]')?.scrollIntoView({ block: "nearest" });
+      return;
+    }
+    const top = LIST_PADDING + activeIndex * ROW_HEIGHT;
+    if (top < list.scrollTop + LIST_PADDING) list.scrollTop = top - LIST_PADDING;
+    else if (top + ROW_HEIGHT + LIST_PADDING > list.scrollTop + list.clientHeight) list.scrollTop = top + ROW_HEIGHT + LIST_PADDING - list.clientHeight;
+  }, [isOpen, activeIndex, filtered, virtualized]);
 
   function openList() {
     setQuery("");
+    setScrollTop(0);
     setActiveIndex(Math.max(0, options.findIndex((option) => option.value === value)));
     open();
   }
@@ -167,7 +191,7 @@ export function Combobox({
             className="-mr-0.5 shrink-0 text-(--primary-text) transition-colors group-focus-visible:text-(--primary-text) group-disabled:text-(--text-secondary) group-disabled:opacity-60 group-data-[open=true]:text-(--primary-text)"
           />
         ) : null}
-        <span id={valueId} className={`min-w-0 flex-1 truncate ${selected ? "" : "text-(--text-secondary)"}`}>
+        <span id={valueId} className={`-my-1 min-w-0 flex-1 truncate py-1 ${selected ? "" : "text-(--text-secondary)"}`}>
           {selected ? (renderOption?.(selected) ?? selected.label) : placeholder}
         </span>
         {selected?.detail ? (
@@ -209,13 +233,23 @@ export function Combobox({
             onChange={(event) => {
               setQuery(event.target.value);
               setActiveIndex(0);
+              setScrollTop(0);
             }}
             onKeyDown={handleSearchKeyDown}
             className="w-full bg-transparent py-3 text-base text-(--text-primary) caret-(--primary) outline-hidden placeholder:text-(--text-secondary) sm:text-sm"
           />
         </div>
-        <ul ref={listRef} id={listId} role="listbox" aria-labelledby={labelId} className="field-scroll max-h-60 overflow-y-auto p-1.5">
-          {filtered.map((option, index) => {
+        <ul
+          ref={listRef}
+          id={listId}
+          role="listbox"
+          aria-labelledby={labelId}
+          onScroll={virtualized ? (event) => setScrollTop(event.currentTarget.scrollTop) : undefined}
+          className="field-scroll max-h-60 overflow-y-auto p-1.5"
+        >
+          {virtualized && firstVisible > 0 ? <li role="presentation" aria-hidden="true" className="h-(--list-offset-top)" /> : null}
+          {filtered.slice(firstVisible, lastVisible).map((option, offset) => {
+            const index = firstVisible + offset;
             const isSelected = option.value === value;
             return (
               <li
@@ -223,12 +257,16 @@ export function Combobox({
                 id={`${id}-option-${index}`}
                 role="option"
                 aria-selected={isSelected}
+                aria-setsize={filtered.length}
+                aria-posinset={index + 1}
                 data-active={index === activeIndex}
                 onPointerMove={() => setActiveIndex(index)}
                 onClick={() => select(option.value)}
-                className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 text-sm text-(--text-primary) data-[active=true]:bg-(--text-primary)/8 aria-selected:font-semibold aria-selected:text-(--text-primary) sm:min-h-10"
+                className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 text-sm text-(--text-primary) data-[active=true]:bg-(--text-primary)/8 aria-selected:font-semibold aria-selected:text-(--text-primary) ${
+                  virtualized ? "h-10" : "min-h-11 sm:min-h-10"
+                }`}
               >
-                <span className="min-w-0 flex-1 truncate">
+                <span className="-my-1 min-w-0 flex-1 truncate py-1">
                   {renderOption?.(option) ?? <HighlightedLabel label={option.label} query={query} />}
                 </span>
                 {option.detail ? (
@@ -244,6 +282,7 @@ export function Combobox({
               </li>
             );
           })}
+          {virtualized && lastVisible < filtered.length ? <li role="presentation" aria-hidden="true" className="h-(--list-offset-bottom)" /> : null}
           {filtered.length === 0 ? (
             <li role="presentation" className="px-3 py-6 text-center text-sm text-(--text-secondary)">
               {emptyMessage}

@@ -1,20 +1,20 @@
 "use client";
 
-import { useEffect, useId, useState, type ReactNode, type RefObject } from "react";
+import { useEffect, useId, useState, type RefObject } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
-import { LuArrowLeft } from "react-icons/lu";
+import { LuArchive, LuArrowLeft, LuBanknote, LuBath, LuBedDouble, LuCigaretteOff, LuDoorOpen, LuSparkles, LuTrash2, LuUsers } from "react-icons/lu";
 import { FormActions, FormStatus } from "@/components/owner/form-actions";
 import { UnsavedChangesGuard } from "@/components/owner/unsaved-changes-guard";
 import { ChoiceGroup, optionsFrom } from "@/components/owner/choice-group";
 import { ConfirmDialog } from "@/components/owner/confirm-dialog";
 import { FieldError } from "@/components/field-error";
-import { FieldHint } from "@/components/owner/field-hint";
+import { FormSection } from "@/components/owner/form-section";
 import { HouseServicesFields } from "@/components/owner/house-services-fields";
 import { RoomBedsFields } from "@/components/owner/room-beds-fields";
-import { OptionalDetails } from "@/components/owner/optional-details";
+import { roomAmenityIcons } from "@/lib/amenity-icons";
 import {
   dangerButtonClassName,
   fieldClassName,
@@ -35,37 +35,13 @@ import { sendApiRequest, toErrorMessage } from "@/lib/api";
 import {
   bathroomTypeLabels,
   genderIdentityLabels,
-  labelOf,
   roomAmenityGroups,
   roomAmenityLabels,
   roomDetailSchema,
   type RoomDetail,
 } from "@/lib/properties";
 
-function FormSection({ id, title, description, children }: { id: string; title: string; description?: string; children: ReactNode }) {
-  return (
-    <section aria-labelledby={id} className="flex flex-col gap-4 border-t border-(--border) pt-6 first:border-t-0 first:pt-0">
-      <div>
-        <h2 id={id} className="text-lg font-bold text-(--text-primary)">{title}</h2>
-        {description ? <p className="mt-1 max-w-prose text-sm leading-relaxed text-(--text-secondary)">{description}</p> : null}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-const ROOM_DETAILS_HINT = "Comodidades e informações adicionais ajudam o hóspede a escolher e completam o anúncio.";
-const SUMMARY_AMENITY_LIMIT = 3;
-
-function roomDetailsSummary(room: RoomDetail): string {
-  const amenityNames = room.amenities.map((amenity) => labelOf(roomAmenityLabels, amenity));
-  const amenities =
-    amenityNames.length > SUMMARY_AMENITY_LIMIT
-      ? `${amenityNames.slice(0, SUMMARY_AMENITY_LIMIT).join(", ")} +${amenityNames.length - SUMMARY_AMENITY_LIMIT}`
-      : amenityNames.join(", ");
-  const parts = [amenities || null, room.additionalInfo ? "informações adicionais" : null].filter(Boolean);
-  return parts.length > 0 ? `Preenchido: ${parts.join(" · ")}.` : ROOM_DETAILS_HINT;
-}
+const bathroomOptions = optionsFrom(bathroomTypeLabels).map((option) => ({ ...option, icon: option.value === "PRIVATE" ? LuBath : LuUsers }));
 
 export function roomFormValues(room?: RoomDetail): RoomInput {
   return {
@@ -103,7 +79,8 @@ export function RoomForm({
   onDirtyChange?: (dirty: boolean) => void;
   valuesRef?: RefObject<(() => RoomInput) | null>;
 }) {
-  const uid = useId();
+  const generatedId = useId();
+  const uid = inline ? generatedId : "room";
   const router = useRouter();
   const [error, setError] = useState<string>();
   const [message, setMessage] = useState<string>();
@@ -193,95 +170,111 @@ export function RoomForm({
   const pending = isSubmitting || deleting;
 
   return (
-    <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col gap-6 pt-6 pb-8">
-      <FormSection id={`${uid}-data-heading`} title="Dados do quarto">
-        <div className="grid gap-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
+    <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col pt-6 [&_[id]]:scroll-mt-32">
+      <FormSection id={`${uid}-data-heading`} icon={LuDoorOpen} tone="lavender" title="Sobre o quarto" description="Nome e descrição que o hóspede vê no anúncio.">
+        <div>
+          <label htmlFor={`${uid}-title`} className={labelClassName}>Nome do quarto</label>
+          <input
+            id={`${uid}-title`}
+            {...register("title")}
+            placeholder="Ex.: Suíte master"
+            aria-invalid={errors.title ? "true" : undefined}
+            aria-describedby={errors.title ? `${uid}-title-error` : undefined}
+            className={fieldClassName}
+          />
+          <FieldError id={`${uid}-title-error`} message={errors.title?.message} />
+        </div>
+        <div>
+          <label htmlFor={`${uid}-description`} className={labelClassName}>Descrição</label>
+          <textarea
+            id={`${uid}-description`}
+            rows={3}
+            {...register("description")}
+            placeholder="Ex.: luz natural, vista, silêncio, tamanho do quarto."
+            aria-invalid={errors.description ? "true" : undefined}
+            aria-describedby={errors.description ? `${uid}-description-error` : undefined}
+            className={`${fieldClassName} resize-y leading-relaxed`}
+          />
+          <FieldError id={`${uid}-description-error`} message={errors.description?.message} />
+        </div>
+      </FormSection>
+
+      <FormSection id={`${uid}-price-heading`} icon={LuBanknote} title="Diária e capacidade" description="Valor base por noite, em reais, e quantas pessoas o quarto recebe (até 20).">
+        <div className="grid grid-cols-[minmax(0,1fr)_6.5rem] gap-3 sm:grid-cols-[minmax(0,1fr)_11rem] sm:gap-4">
           <div>
-            <label htmlFor={`${uid}-title`} className={labelClassName}>Nome do quarto</label>
-            <input
-              id={`${uid}-title`}
-              {...register("title")}
-              placeholder="Ex.: Suíte master"
-              aria-invalid={errors.title ? "true" : undefined}
-              aria-describedby={errors.title ? `${uid}-title-error` : undefined}
-              className={fieldClassName}
-            />
-            <FieldError id={`${uid}-title-error`} message={errors.title?.message} />
-          </div>
-          <div>
-            <label htmlFor={`${uid}-capacity`} className={labelClassName}>Capacidade (pessoas)</label>
-            <input
-              id={`${uid}-capacity`}
-              type="number"
-              min={1}
-              max={20}
-              inputMode="numeric"
-              {...register("capacity", { valueAsNumber: true })}
-              aria-invalid={errors.capacity ? "true" : undefined}
-              aria-describedby={errors.capacity ? `${uid}-capacity-error` : undefined}
-              className={fieldClassName}
-            />
-            <FieldError id={`${uid}-capacity-error`} message={errors.capacity?.message} />
-          </div>
-          <div>
-            <label htmlFor={`${uid}-price`} className={labelClassName}>Valor da diária (R$)</label>
-            <input
-              id={`${uid}-price`}
-              inputMode="decimal"
-              placeholder="150,00"
-              {...register("price")}
-              aria-invalid={errors.price ? "true" : undefined}
-              aria-describedby={`${uid}-price-hint${errors.price ? ` ${uid}-price-error` : ""}`}
-              className={fieldClassName}
-            />
-            <FieldHint id={`${uid}-price-hint`}>Valor base por noite.</FieldHint>
+            <label htmlFor={`${uid}-price`} className={labelClassName}>Valor da diária</label>
+            <div className="relative mt-1.5">
+              <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-lg font-bold text-(--text-secondary)">
+                R$
+              </span>
+              <input
+                id={`${uid}-price`}
+                inputMode="decimal"
+                placeholder="150,00"
+                {...register("price")}
+                aria-invalid={errors.price ? "true" : undefined}
+                aria-describedby={errors.price ? `${uid}-price-error` : undefined}
+                className={`${fieldClassName} mt-0! py-2.5! pr-4! pl-11! text-xl! font-extrabold tracking-tight tabular-nums sm:pr-20! sm:text-2xl!`}
+              />
+              <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-4 hidden items-center text-sm text-(--text-secondary) sm:flex">
+                / noite
+              </span>
+            </div>
             <FieldError id={`${uid}-price-error`} message={errors.price?.message} />
           </div>
+          <div>
+            <label htmlFor={`${uid}-capacity`} className={labelClassName}>Capacidade</label>
+            <div className="relative mt-1.5">
+              <input
+                id={`${uid}-capacity`}
+                type="number"
+                min={1}
+                max={20}
+                inputMode="numeric"
+                {...register("capacity", { valueAsNumber: true })}
+                aria-invalid={errors.capacity ? "true" : undefined}
+                aria-describedby={errors.capacity ? `${uid}-capacity-error` : undefined}
+                className={`${fieldClassName} mt-0! py-2.5! text-xl! font-extrabold tracking-tight tabular-nums sm:pr-20! sm:text-2xl!`}
+              />
+              <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-4 hidden items-center text-sm text-(--text-secondary) sm:flex">
+                pessoas
+              </span>
+            </div>
+            <FieldError id={`${uid}-capacity-error`} message={errors.capacity?.message} />
+          </div>
         </div>
+      </FormSection>
+
+      <FormSection id={`${uid}-beds-heading`} icon={LuBedDouble} tone="lavender" title="Camas" description="Opcional. Ajuda o hóspede a entender como vai dormir.">
+        <RoomBedsFields id={`${uid}-beds`} control={control} errors={errors} />
+      </FormSection>
+
+      <FormSection id={`${uid}-guests-heading`} icon={LuUsers} tone="lavender" title="Banheiro e público" description="Quem pode se hospedar e como é o banheiro.">
         <ChoiceGroup
           id={`${uid}-bathroom`}
           legend="Banheiro"
           type="radio"
-          options={optionsFrom(bathroomTypeLabels)}
+          options={bathroomOptions}
           registration={register("bathroomType")}
           error={errors.bathroomType?.message}
         />
         <ChoiceGroup
           id={`${uid}-audiences`}
           legend="Público aceito"
-          description="Marque todos os públicos que podem se hospedar neste quarto."
+          description="Marque todos que se aplicam."
           type="checkbox"
           options={optionsFrom(genderIdentityLabels)}
           registration={register("acceptedAudiences")}
           error={errors.acceptedAudiences?.message}
         />
-        <div>
-          <label htmlFor={`${uid}-description`} className={labelClassName}>Descrição</label>
-          <textarea
-            id={`${uid}-description`}
-            rows={4}
-            {...register("description")}
-            aria-invalid={errors.description ? "true" : undefined}
-            aria-describedby={errors.description ? `${uid}-description-error` : undefined}
-            className={fieldClassName}
-          />
-          <FieldError id={`${uid}-description-error`} message={errors.description?.message} />
-        </div>
       </FormSection>
 
-      <FormSection id={`${uid}-beds-heading`} title="Camas" description="Informe as camas do quarto. Opcional.">
-        <RoomBedsFields id={`${uid}-beds`} control={control} register={register} errors={errors} />
-      </FormSection>
-
-      <FormSection id={`${uid}-services-heading`} title="Faxina e fumantes" description="Deixe no padrão do imóvel ou defina uma regra própria para este quarto.">
-        <HouseServicesFields id={`${uid}-services`} register={register} hasCleaner={hasCleaner} inherited={room?.property} />
-      </FormSection>
-
-      <OptionalDetails
+      <FormSection
+        id={`${uid}-amenities-heading`}
+        icon={LuSparkles}
+        tone="champagne"
         title="Comodidades e informações"
-        tag="recomendado"
-        description={room ? roomDetailsSummary(room) : ROOM_DETAILS_HINT}
-        forceOpen={Boolean(errors.additionalInfo)}
+        description="Recomendado. Ajudam o hóspede a escolher e contam para a completude do anúncio."
       >
         {roomAmenityGroups.map((group) => (
           <ChoiceGroup
@@ -289,7 +282,7 @@ export function RoomForm({
             id={`${uid}-amenities-${group.id}`}
             legend={group.legend}
             type="checkbox"
-            options={group.amenities.map((amenity) => ({ value: amenity, label: roomAmenityLabels[amenity] }))}
+            options={group.amenities.map((amenity) => ({ value: amenity, label: roomAmenityLabels[amenity], icon: roomAmenityIcons[amenity] }))}
             registration={register("amenities")}
           />
         ))}
@@ -299,31 +292,52 @@ export function RoomForm({
             id={`${uid}-additional-info`}
             rows={3}
             {...register("additionalInfo")}
+            placeholder="Ex.: janela voltada para o jardim, cortina blackout, tomada ao lado da cama."
             aria-invalid={errors.additionalInfo ? "true" : undefined}
             aria-describedby={errors.additionalInfo ? `${uid}-additional-info-error` : undefined}
-            className={fieldClassName}
+            className={`${fieldClassName} resize-y leading-relaxed`}
           />
           <FieldError id={`${uid}-additional-info-error`} message={errors.additionalInfo?.message} />
         </div>
-      </OptionalDetails>
+      </FormSection>
+
+      <FormSection
+        id={`${uid}-services-heading`}
+        icon={LuCigaretteOff}
+        tone="champagne"
+        title="Faxina e fumantes"
+        description="Deixe no padrão do imóvel ou defina uma regra própria para este quarto."
+      >
+        <HouseServicesFields id={`${uid}-services`} register={register} hasCleaner={hasCleaner} inherited={room?.property} />
+      </FormSection>
 
       {room && !inline ? (
-        <FormSection
-          id={`${uid}-danger-heading`}
-          title="Arquivar ou excluir"
-          description="Arquivar tira o quarto do anúncio sem apagar nada, e você pode reativá-lo depois. Excluir remove o quarto e as fotos de vez."
+        <section
+          aria-labelledby={`${uid}-danger-heading`}
+          className="flex flex-col gap-1 border-t border-(--border) py-4"
         >
-          <div className="flex flex-wrap gap-3">
-            {room.status !== "INACTIVE" ? (
-              <button type="button" disabled={pending || archiving} onClick={() => setConfirmingArchive(true)} className={secondaryButtonClassName}>
-                Arquivar quarto
+          <div className="flex items-center justify-between gap-3">
+            <h2 id={`${uid}-danger-heading`} className="text-[13px] font-bold text-(--text-secondary)">
+              Arquivar ou excluir
+            </h2>
+            <div className="flex shrink-0 gap-1.5">
+              {room.status !== "INACTIVE" ? (
+                <button type="button" disabled={pending || archiving} onClick={() => setConfirmingArchive(true)} className={`${secondaryButtonClassName} min-h-9 rounded-lg! px-3! py-1.5! text-xs!`}>
+                  <LuArchive aria-hidden="true" size={14} />
+                  Arquivar
+                </button>
+              ) : null}
+              <button type="button" disabled={pending || archiving} onClick={() => setConfirmingDelete(true)} className={`${dangerButtonClassName} min-h-9 rounded-lg! px-3! py-1.5! text-xs!`}>
+                <LuTrash2 aria-hidden="true" size={14} />
+                Excluir
               </button>
-            ) : null}
-            <button type="button" disabled={pending || archiving} onClick={() => setConfirmingDelete(true)} className={dangerButtonClassName}>
-              Excluir quarto
-            </button>
+            </div>
           </div>
-        </FormSection>
+          <p className="max-w-[62ch] text-xs leading-relaxed text-pretty text-(--text-secondary)">
+            Arquivar tira o quarto do anúncio sem apagar nada, e você pode reativá-lo depois.
+            <span className="block">Excluir remove o quarto e as fotos de vez.</span>
+          </p>
+        </section>
       ) : null}
 
       <FormActions>

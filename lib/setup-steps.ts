@@ -1,21 +1,20 @@
 import type { PublishRequirement } from "@/lib/properties";
 
-export const setupSteps = [
-  { id: "imovel", label: "Imóvel", requirements: ["DESCRIPTION", "ADDRESS"] },
-  { id: "fotos", label: "Fotos", requirements: ["PHOTO"] },
-  { id: "quartos", label: "Quartos", requirements: ["ROOM"] },
-  { id: "revisao", label: "Revisar e publicar", requirements: [] },
-] as const satisfies readonly { id: string; label: string; requirements: readonly PublishRequirement[] }[];
+export const roomStepKinds = ["nome", "camas", "banheiro", "publico", "comodidades", "diaria", "fotos"] as const;
+export type RoomStepKind = (typeof roomStepKinds)[number];
 
-export type SetupStepId = (typeof setupSteps)[number]["id"];
+const propertyStepIds = ["inicio", "endereco", "tipo", "nome", "descricao", "fotos", "areas", "fotos-areas", "banheiros", "fotos-banheiros", "quartos", "revisao", "concluido"] as const;
+type PropertyStepId = (typeof propertyStepIds)[number];
 
-const legacyStepIds = new Map<string, SetupStepId>([
-  ["basico", "imovel"],
-  ["endereco", "imovel"],
+export type SetupStep = { kind: PropertyStepId; room?: undefined } | { kind: RoomStepKind; room: number };
+
+export const maxRoomCount = 20;
+
+const legacyStepIds = new Map<string, PropertyStepId>([
+  ["imovel", "endereco"],
+  ["basico", "endereco"],
   ["quarto", "quartos"],
 ]);
-
-const maxRoomCount = 20;
 
 export const requirementLabels: Record<PublishRequirement, string> = {
   DESCRIPTION: "Descrição do imóvel",
@@ -24,31 +23,42 @@ export const requirementLabels: Record<PublishRequirement, string> = {
   ROOM: "Pelo menos 1 quarto disponível",
 };
 
-function stepRequirements(step: (typeof setupSteps)[number]): readonly PublishRequirement[] {
-  return step.requirements;
+const requirementSteps: Record<PublishRequirement, PropertyStepId> = {
+  ADDRESS: "endereco",
+  DESCRIPTION: "descricao",
+  PHOTO: "fotos",
+  ROOM: "quartos",
+};
+
+export function stepKey(step: SetupStep): string {
+  return step.room === undefined ? step.kind : `quarto-${step.room + 1}-${step.kind}`;
 }
 
-export function setupStepHref(propertyId: string, step: SetupStepId, roomCount?: number): string {
-  const href = `/meus-imoveis/${propertyId}/configurar?passo=${step}`;
+export function setupStepHref(propertyId: string, step: SetupStep | string, roomCount?: number): string {
+  const href = `/meus-imoveis/${propertyId}/configurar?passo=${typeof step === "string" ? step : stepKey(step)}`;
   return roomCount === undefined ? href : `${href}&quartos=${roomCount}`;
 }
 
-export function stepForRequirement(requirement: PublishRequirement): SetupStepId {
-  return setupSteps.find((step) => stepRequirements(step).includes(requirement))?.id ?? "revisao";
+export function stepForRequirement(requirement: PublishRequirement): string {
+  return requirementSteps[requirement];
 }
 
-export function firstPendingStep(missing: PublishRequirement[]): SetupStepId {
-  return setupSteps.find((step) => stepRequirements(step).some((requirement) => missing.includes(requirement)))?.id ?? "revisao";
+export function firstPendingStep(missing: PublishRequirement[]): string {
+  const order: PublishRequirement[] = ["ADDRESS", "DESCRIPTION", "PHOTO", "ROOM"];
+  const pending = order.find((requirement) => missing.includes(requirement));
+  return pending ? requirementSteps[pending] : "revisao";
 }
 
-export function isStepComplete(step: (typeof setupSteps)[number], missing: PublishRequirement[]): boolean {
-  const requirements = stepRequirements(step);
-  return requirements.length > 0 && requirements.every((requirement) => !missing.includes(requirement));
-}
-
-export function parseSetupStep(value: string | string[] | undefined): SetupStepId | undefined {
+export function parseSetupStep(value: string | string[] | undefined): SetupStep | undefined {
   if (typeof value !== "string") return undefined;
-  return setupSteps.find((step) => step.id === value)?.id ?? legacyStepIds.get(value);
+  const room = /^quarto-(\d{1,2})-([a-z]+)$/.exec(value);
+  if (room) {
+    const index = Number(room[1]) - 1;
+    const kind = roomStepKinds.find((item) => item === room[2]);
+    return kind && index >= 0 && index < maxRoomCount ? { kind, room: index } : undefined;
+  }
+  const kind = propertyStepIds.find((item) => item === value) ?? legacyStepIds.get(value);
+  return kind ? { kind } : undefined;
 }
 
 export function parseRoomCount(value: string | string[] | undefined): number | undefined {

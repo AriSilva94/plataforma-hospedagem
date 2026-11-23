@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { secondaryButtonClassName } from "@/components/owner/styles";
 import { formatDateTime, type AdminRoom } from "@/lib/admin";
 import { sendApiRequest, toErrorMessage } from "@/lib/api";
+import { MediaKind } from "@/lib/properties";
 
 type Room = Pick<AdminRoom, "id" | "title" | "storyStatus" | "storyRejectedReason" | "storyExpiresAt" | "storyMedia">;
 
@@ -36,7 +37,7 @@ export function RoomStoryActions({ room, expired }: { room: Room; expired: boole
       <ul className="flex gap-2">
         {room.storyMedia.map((item, index) => (
           <li key={item.id} className="relative h-28 w-16 shrink-0 overflow-hidden rounded-xl bg-(--surface-raised) ring-1 ring-(--border)">
-            {item.type === "IMAGE" ? (
+            {item.type === MediaKind.IMAGE ? (
               <Image src={item.url} alt={`Mídia ${index + 1} do story de ${room.title}`} fill sizes="64px" className="object-cover" />
             ) : (
               <video src={`${item.url}#t=0.1`} controls preload="metadata" aria-label={`Mídia ${index + 1} do story de ${room.title}`} className="size-full object-cover" />

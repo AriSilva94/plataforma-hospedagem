@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { LuChevronLeft, LuChevronRight, LuX } from "react-icons/lu";
+import { MediaKind } from "@/lib/properties";
 
 export type ViewerPhoto = { id: string; url: string; alt: string; type?: "IMAGE" | "VIDEO" };
 
@@ -84,7 +85,7 @@ export function PhotoViewer({
               if (Math.abs(distance) > SWIPE_THRESHOLD) go(distance < 0 ? 1 : -1);
             }}
           >
-            {photo.type === "VIDEO" ? (
+            {photo.type === MediaKind.VIDEO ? (
               <video key={photo.id} src={photo.url} controls autoPlay muted loop playsInline aria-label={photo.alt} className="size-full object-contain" />
             ) : (
               <Image key={photo.id} src={photo.url} alt={photo.alt} fill sizes="100vw" className="object-contain" />

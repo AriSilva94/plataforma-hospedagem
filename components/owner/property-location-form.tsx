@@ -39,7 +39,7 @@ export function PropertyLocationForm({ property }: { property: PropertyDetail })
 
   return (
     <FormProvider {...form}>
-      <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col gap-6 py-6">
+      <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col pt-6">
         <PropertyAddressFields />
         <FormActions>
           <button type="submit" disabled={isSubmitting || !isDirty} className={primaryButtonClassName}>

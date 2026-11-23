@@ -10,10 +10,12 @@ import { UnsavedChangesGuard } from "@/components/owner/unsaved-changes-guard";
 import { ChoiceGroup, optionsFrom } from "@/components/owner/choice-group";
 import { FieldError } from "@/components/field-error";
 import { PropertyTypeTag } from "@/components/property-type-tag";
+import { LuCigaretteOff, LuHouse, LuNotebookPen } from "react-icons/lu";
 import { CharacterCount, FieldHint } from "@/components/owner/field-hint";
+import { FormSection } from "@/components/owner/form-section";
 import { HouseServicesFields } from "@/components/owner/house-services-fields";
-import { OptionalDetails } from "@/components/owner/optional-details";
 import { fieldClassName, labelClassName, primaryButtonClassName, secondaryButtonClassName } from "@/components/owner/styles";
+import { propertyFeatureIcons } from "@/lib/amenity-icons";
 import {
   houseServicesDefaults,
   houseServicesError,
@@ -31,16 +33,6 @@ import {
   type PropertyDetail,
 } from "@/lib/properties";
 
-export function detailsSummary(property?: PropertyDetail): string {
-  if (!property) return "Regras da casa, informações úteis e características.";
-  const parts = [
-    property.houseRules ? "regras da casa" : null,
-    property.generalInfo ? "informações úteis" : null,
-    property.features.length > 0 ? `${property.features.length} ${property.features.length === 1 ? "característica" : "características"}` : null,
-  ].filter(Boolean);
-  return parts.length > 0 ? `Preenchido: ${parts.join(", ")}.` : "Regras da casa, informações úteis e características.";
-}
-
 export function generalDefaults(property?: PropertyDetail) {
   return {
     title: property?.title ?? "",
@@ -57,7 +49,7 @@ const propertyTypeOptions = optionsFrom(propertyTypeLabels);
 
 function renderPropertyTypeOption(option: ComboboxOption) {
   const type = propertyTypes.find((candidate) => candidate === option.value);
-  return type ? <PropertyTypeTag type={type} /> : option.label;
+  return type ? <PropertyTypeTag compact type={type} /> : option.label;
 }
 
 export function PropertyBasicFields({ published }: { published: boolean }) {
@@ -176,19 +168,16 @@ export function PropertyDetailsFields() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-4">
-        <p className="text-[13px] leading-relaxed text-(--text-secondary)">Marque o que o imóvel oferece. Os hóspedes veem isso no anúncio.</p>
-        {propertyFeatureGroups.map((group) => (
-          <ChoiceGroup
-            key={group.id}
-            id={`property-features-${group.id}`}
-            legend={group.legend}
-            type="checkbox"
-            options={group.features.map((feature) => ({ value: feature, label: propertyFeatureLabels[feature] }))}
-            registration={register("features")}
-          />
-        ))}
-      </div>
+      {propertyFeatureGroups.map((group) => (
+        <ChoiceGroup
+          key={group.id}
+          id={`property-features-${group.id}`}
+          legend={group.legend}
+          type="checkbox"
+          options={group.features.map((feature) => ({ value: feature, label: propertyFeatureLabels[feature], icon: propertyFeatureIcons[feature] }))}
+          registration={register("features")}
+        />
+      ))}
     </>
   );
 }
@@ -203,10 +192,9 @@ export function PropertyGeneralForm({ property }: { property: PropertyDetail }) 
     mode: "onBlur",
   });
   const { register, handleSubmit, control, getValues, reset, formState } = form;
-  const { errors, isSubmitting, isDirty } = formState;
+  const { isSubmitting, isDirty } = formState;
   const published = property.status !== "DRAFT";
   const hasCleaner = useWatch({ control, name: "hasCleaner" });
-  const detailsHaveErrors = Boolean(errors.houseRules || errors.generalInfo);
 
   async function save(values: PropertyGeneralValues) {
     setError(undefined);
@@ -231,25 +219,30 @@ export function PropertyGeneralForm({ property }: { property: PropertyDetail }) 
 
   return (
     <FormProvider {...form}>
-      <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col gap-5 py-6">
-        <PropertyBasicFields published={published} />
+      <form noValidate onSubmit={handleSubmit(save)} className="flex flex-col pt-6">
+        <FormSection id="property-basic-heading" icon={LuHouse} title="Sobre o imóvel" description="Título, tipo e descrição exibidos no anúncio.">
+          <PropertyBasicFields published={published} />
+        </FormSection>
 
-        <section aria-labelledby="property-services-heading" className="flex flex-col gap-3">
-          <h2 id="property-services-heading" className="text-lg font-bold text-(--text-primary)">
-            Faxina e fumantes
-          </h2>
-          <p className="max-w-prose text-sm leading-relaxed text-(--text-secondary)">Vale para todos os quartos. Cada quarto pode ter uma regra própria.</p>
-          <HouseServicesFields register={register} hasCleaner={hasCleaner} />
-        </section>
-
-        <OptionalDetails
-          title="Mais detalhes"
-          tag="recomendado"
-          description={detailsSummary(property)}
-          forceOpen={detailsHaveErrors}
+        <FormSection
+          id="property-details-heading"
+          icon={LuNotebookPen}
+          tone="champagne"
+          title="Regras e características"
+          description="Recomendado. Marque o que o imóvel oferece; os hóspedes veem isso no anúncio."
         >
           <PropertyDetailsFields />
-        </OptionalDetails>
+        </FormSection>
+
+        <FormSection
+          id="property-services-heading"
+          icon={LuCigaretteOff}
+          tone="champagne"
+          title="Faxina e fumantes"
+          description="Vale para todos os quartos. Cada quarto pode ter uma regra própria."
+        >
+          <HouseServicesFields register={register} hasCleaner={hasCleaner} />
+        </FormSection>
 
         <FormActions>
           <button type="submit" disabled={isSubmitting || !isDirty} className={primaryButtonClassName}>

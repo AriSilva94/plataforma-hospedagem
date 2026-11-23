@@ -21,7 +21,7 @@ export function HouseServicesFields<T extends FieldValues & HouseServicesInput>(
 }) {
   const inheritedCleaning = inherited ? cleaningSummary(inherited.hasCleaner, inherited.cleaningFrequency) : null;
   const inheritedSmoking = inherited?.smokingPolicy ? smokingPolicyLabels[inherited.smokingPolicy] : null;
-  const inheritOption = (detail: string | null) => ({ value: "", label: detail ? `Padrão do imóvel: ${detail}` : "Padrão do imóvel" });
+  const inheritOption = (detail: string | null) => ({ value: "", label: "Padrão do imóvel", detail: detail ?? undefined });
 
   return (
     <div className="flex flex-col gap-4">

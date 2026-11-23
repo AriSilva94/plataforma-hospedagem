@@ -1,6 +1,4 @@
-import { OwnerPage } from "@/components/owner/owner-page";
-import { PropertySetupForm } from "@/components/owner/property-setup-form";
-import { SetupSteps } from "@/components/owner/setup-steps";
+import { PropertyWizard } from "@/components/owner/property-wizard";
 import { PageNotice } from "@/components/page-notice";
 import { getCurrentUser } from "@/lib/current-user";
 import { hasListingPersonalData } from "@/lib/user";
@@ -19,14 +17,5 @@ export default async function NewPropertyPage() {
     );
   }
 
-  return (
-    <OwnerPage
-      title="Novo imóvel"
-      description="Conte sobre o imóvel e informe o endereço. Em seguida você adiciona fotos e cadastra os quartos."
-      back={{ href: "/meus-imoveis", label: "Meus imóveis" }}
-    >
-      <SetupSteps current="imovel" missing={[]} />
-      <PropertySetupForm />
-    </OwnerPage>
-  );
+  return <PropertyWizard />;
 }

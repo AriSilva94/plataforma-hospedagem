@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { LuImage, LuImages, LuMaximize2, LuMinimize2, LuPause, LuPlay, LuVolume2, LuVolumeX } from "react-icons/lu";
 import { PhotoViewer, type ViewerPhoto } from "@/components/photo-viewer";
+import { MediaKind } from "@/lib/properties";
 
 const MAX_TILES = 6;
 
@@ -44,7 +45,7 @@ function PhotoTile({
 }) {
   return (
     <button type="button" onClick={onOpen} aria-label={`Ampliar ${photo.alt}`} className={`${tileClassName} ${className}`}>
-      {photo.type === "VIDEO" ? (
+      {photo.type === MediaKind.VIDEO ? (
         <video src={`${photo.url}#t=0.1`} muted playsInline preload="metadata" aria-hidden="true" className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-102" />
       ) : (
         <Image
@@ -207,13 +208,13 @@ export function PropertyPhotoGrid({ title, photos }: { title: string; photos: Vi
   const remaining = photos.length - MAX_TILES;
   const tileCount = thumbs.length + (hasMore ? 1 : 0);
   const spans = thumbSpans[tileCount];
-  const hasVideo = photos.some((photo) => photo.type === "VIDEO");
+  const hasVideo = photos.some((photo) => photo.type === MediaKind.VIDEO);
   const coverClassName = spans ? "col-span-6 row-span-2" : "size-full";
 
   return (
     <div className="mt-3">
       <div className={`grid gap-1.5 aspect-10/3 md:aspect-auto md:h-64 lg:h-72 ${spans ? "grid-cols-12 grid-rows-2" : ""}`}>
-        {cover.type === "VIDEO" ? (
+        {cover.type === MediaKind.VIDEO ? (
           <CoverVideo photo={cover} className={coverClassName} />
         ) : (
           <PhotoTile photo={cover} eager sizes={spans ? "50vw" : "100vw"} className={coverClassName} onOpen={() => setViewing(0)}>
@@ -225,7 +226,7 @@ export function PropertyPhotoGrid({ title, photos }: { title: string; photos: Vi
 
         {thumbs.map((photo, index) => (
           <PhotoTile key={photo.id} photo={photo} sizes="(min-width: 768px) 17vw, 20vw" className={spans[index]} onOpen={() => setViewing(index + 1)}>
-            {photo.type === "VIDEO" ? (
+            {photo.type === MediaKind.VIDEO ? (
               <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center">
                 <span className="flex size-6 items-center justify-center rounded-full bg-(--black)/45 text-(--white) md:size-7">
                   <LuPlay size={12} fill="currentColor" />

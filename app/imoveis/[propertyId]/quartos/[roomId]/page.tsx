@@ -46,6 +46,7 @@ import {
   roomAmenityLabels,
   sharedAreaTypeLabels,
   smokingPolicyLabels,
+  MediaKind,
 } from "@/lib/properties";
 import { getFavoriteRoomIds } from "@/lib/room-listings";
 import { getApiData } from "@/lib/server-api";
@@ -177,7 +178,7 @@ export default async function PublicRoomPage({ params, searchParams }: PageProps
     id: item.id,
     url: item.url,
     type: item.type,
-    alt: `${item.type === "VIDEO" ? "Vídeo" : "Foto"} ${index === 0 ? "principal" : index + 1} de ${room.title}`,
+    alt: `${item.type === MediaKind.VIDEO ? "Vídeo" : "Foto"} ${index === 0 ? "principal" : index + 1} de ${room.title}`,
   }));
   const propertyHref = `/imoveis/${property.id}${preview ? "?previa=1" : ""}`;
   const cleaning = cleaningSummary(room.hasCleaner, room.cleaningFrequency);
@@ -289,7 +290,7 @@ export default async function PublicRoomPage({ params, searchParams }: PageProps
                 </RoomPanel>
               ) : null}
 
-              {property.sharedAreas.length > 0 ? (
+              {property.sharedAreas.length > 0 || property.sharedBathroomCount > 0 ? (
                 <RoomPanel icon={LuSofa} title="Áreas compartilhadas">
                   <ul className="grid grid-cols-2 gap-2">
                     {property.sharedAreas.map((area, index) => {
@@ -301,6 +302,14 @@ export default async function PublicRoomPage({ params, searchParams }: PageProps
                         </li>
                       );
                     })}
+                    {property.sharedBathroomCount > 0 ? (
+                      <li className="flex items-center gap-2 rounded-xl bg-(--surface-raised) px-3 py-2.5 font-semibold text-(--text-primary)">
+                        <LuBath aria-hidden="true" size={18} className="shrink-0 text-(--primary-text)" />
+                        <span className="min-w-0 truncate">
+                          {property.sharedBathroomCount} {property.sharedBathroomCount === 1 ? "banheiro" : "banheiros"}
+                        </span>
+                      </li>
+                    ) : null}
                   </ul>
                   <Link
                     href={propertyHref}

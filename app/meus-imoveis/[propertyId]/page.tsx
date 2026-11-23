@@ -31,6 +31,7 @@ import {
   type PropertyDetail,
   type PropertyStatus,
   type PropertyType,
+  MediaKind,
 } from "@/lib/properties";
 
 type Room = PropertyDetail["rooms"][number];
@@ -226,7 +227,7 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
 
   const property = result.data;
   const editHref = (section: string) => `/meus-imoveis/${property.id}/editar?secao=${section}`;
-  const images = property.media.filter((item) => item.type === "IMAGE");
+  const images = property.media.filter((item) => item.type === MediaKind.IMAGE);
   const cover = property.media[0];
   const videoCount = property.media.length - images.length;
   const address = privateAddress(property);
@@ -433,16 +434,16 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
             </div>
           ) : null}
           <div className="mt-3 divide-y divide-(--border)">
+            <PropertySection title="Sobre" editHref={editHref("geral")}>
+              <p className="truncate">{property.description || "Sem descrição."}</p>
+              <p>{property.features.length === 1 ? "1 comodidade" : `${property.features.length} comodidades`}</p>
+            </PropertySection>
+
             <PropertySection title="Fotos e vídeos" editHref={editHref("midia")}>
               <p>
                 {images.length === 1 ? "1 foto" : `${images.length} fotos`}
                 {videoCount > 0 ? ` · ${videoCount === 1 ? "1 vídeo" : `${videoCount} vídeos`}` : null}
               </p>
-            </PropertySection>
-
-            <PropertySection title="Sobre" editHref={editHref("geral")}>
-              <p className="truncate">{property.description || "Sem descrição."}</p>
-              <p>{property.features.length === 1 ? "1 comodidade" : `${property.features.length} comodidades`}</p>
             </PropertySection>
 
             <PropertySection title="Faxina e fumantes" editHref={editHref("geral")}>
@@ -463,8 +464,11 @@ export default async function PropertyDetailsPage({ params, searchParams }: Page
 
             <PropertySection title="Áreas compartilhadas" editHref={editHref("areas")}>
               <p className="truncate">
-                {property.sharedAreas.length > 0
-                  ? property.sharedAreas.map((area) => area.label ?? sharedAreaTypeLabels[area.type]).join(" · ")
+                {property.sharedAreas.length > 0 || property.sharedBathroomCount > 0
+                  ? [
+                      ...property.sharedAreas.map((area) => area.label ?? sharedAreaTypeLabels[area.type]),
+                      ...(property.sharedBathroomCount > 0 ? [`${property.sharedBathroomCount} ${property.sharedBathroomCount === 1 ? "banheiro" : "banheiros"}`] : []),
+                    ].join(" · ")
                   : "Nenhuma. Opcional."}
               </p>
             </PropertySection>

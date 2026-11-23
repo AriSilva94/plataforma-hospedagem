@@ -107,6 +107,7 @@ export const sharedAreasSchema = z.object({
     .array(
       z
         .object({
+          id: z.string().optional(),
           type: z.enum(sharedAreaTypes),
           label: optionalText(60),
           description: optionalText(500),
@@ -118,13 +119,6 @@ export const sharedAreasSchema = z.object({
     )
     .max(30, { error: "Cadastre no máximo 30 áreas." }),
 });
-
-export const propertySetupSchema = propertyGuidedGeneralSchema
-  .merge(propertyGuidedLocationSchema)
-  .merge(sharedAreasSchema)
-  .extend({
-    roomCount: z.coerce.number().int().min(1, "Informe ao menos 1 quarto.").max(20, "Cadastre até 20 quartos por vez."),
-  });
 
 export const roomSchema = z.object({
   title: z
@@ -181,8 +175,6 @@ export type PropertyGeneralValues = z.output<typeof propertyGeneralSchema>;
 export type PropertyLocationInput = z.input<typeof propertyLocationSchema>;
 export type PropertyLocationValues = z.output<typeof propertyLocationSchema>;
 export type SharedAreasValues = z.output<typeof sharedAreasSchema>;
-export type PropertySetupInput = z.input<typeof propertySetupSchema>;
-export type PropertySetupValues = z.output<typeof propertySetupSchema>;
 export type RoomInput = z.input<typeof roomSchema>;
 export type RoomValues = z.output<typeof roomSchema>;
 

@@ -1,7 +1,7 @@
 import type { UseFormRegisterReturn } from "react-hook-form";
-import { LuCheck } from "react-icons/lu";
+import type { IconType } from "react-icons";
 import { FieldError } from "@/components/field-error";
-import { checkboxClassName, choiceClassName, radioClassName } from "@/components/owner/styles";
+import { choiceClassName } from "@/components/owner/styles";
 
 export function ChoiceGroup({
   id,
@@ -17,7 +17,7 @@ export function ChoiceGroup({
   legend: string;
   description?: string;
   type: "checkbox" | "radio";
-  options: { value: string; label: string }[];
+  options: { value: string; label: string; detail?: string; icon?: IconType }[];
   registration: UseFormRegisterReturn;
   error?: string;
   disabled?: boolean;
@@ -26,20 +26,20 @@ export function ChoiceGroup({
 
   return (
     <fieldset id={id} aria-describedby={error ? errorId : undefined} disabled={disabled}>
-      <legend className="text-sm font-semibold text-(--text-secondary)">{legend}</legend>
-      {description ? <p className="mt-1 text-[13px] leading-relaxed text-(--text-secondary)">{description}</p> : null}
-      <div className="mt-2 flex flex-wrap gap-2">
-        {options.map((option) => (
-          <label key={option.value} className={choiceClassName}>
-            {type === "radio" ? (
-              <input type="radio" value={option.value} className={radioClassName} {...registration} />
-            ) : (
-              <span className="relative flex size-4 shrink-0">
-                <input type="checkbox" value={option.value} className={checkboxClassName} {...registration} />
-                <LuCheck aria-hidden="true" size={12} strokeWidth={3} className="pointer-events-none absolute inset-0 m-auto text-(--on-primary) opacity-0 transition-opacity peer-checked:opacity-100" />
-              </span>
-            )}
+      <legend className="text-sm font-semibold text-(--text-primary)">{legend}</legend>
+      {description ? <p className="mt-0.5 text-[13px] leading-relaxed text-(--text-secondary)">{description}</p> : null}
+      <div className="mt-2 flex flex-wrap gap-1.5 sm:gap-2">
+        {options.map(({ icon: Icon, ...option }) => (
+          <label key={option.value} className={`group/choice ${choiceClassName}`}>
+            <input type={type} value={option.value} className="sr-only" {...registration} />
+            {Icon ? <Icon aria-hidden="true" size={15} className="shrink-0 text-(--text-secondary) group-has-checked/choice:text-(--primary-text)" /> : null}
             {option.label}
+            {option.detail ? (
+              <span className="font-medium text-(--text-secondary) tabular-nums">
+                <span className="sr-only">: </span>
+                {option.detail}
+              </span>
+            ) : null}
           </label>
         ))}
       </div>

@@ -8,6 +8,7 @@ import { Combobox } from "@/components/combobox";
 import { useCities } from "@/components/profile-location-fields";
 import { FieldError } from "@/components/field-error";
 import { OptionalTag } from "@/components/owner/field-hint";
+import { FormSection } from "@/components/owner/form-section";
 import { fieldClassName, labelClassName } from "@/components/owner/styles";
 import type { PropertyLocationInput } from "@/lib/owner-forms";
 import { sendApiRequest, toErrorMessage } from "@/lib/api";
@@ -89,17 +90,8 @@ export function PropertyAddressFields() {
 
   return (
     <>
-      <section aria-labelledby="private-address-heading">
-        <div className="flex items-start gap-3">
-          <LuEyeOff aria-hidden="true" size={20} className="mt-0.5 shrink-0 text-(--primary-text)" />
-          <div>
-            <h2 id="private-address-heading" className="text-lg font-bold text-(--text-primary)">Endereço completo</h2>
-            <p className="mt-1 text-sm leading-relaxed text-(--text-secondary)">
-              Informação privada. Não é exibida no anúncio público.
-            </p>
-          </div>
-        </div>
-        <div className="mt-4 grid grid-cols-6 gap-4 sm:grid-cols-12">
+      <FormSection id="private-address-heading" icon={LuEyeOff} title="Endereço completo" description="Informação privada. Não é exibida no anúncio público.">
+        <div className="grid grid-cols-6 gap-4 sm:grid-cols-12">
           {addressFields.map((field) => (
             <div key={field.name} className={field.className}>
               <label htmlFor={`location-${field.name}`} className={labelClassName}>
@@ -190,6 +182,7 @@ export function PropertyAddressFields() {
                     align="end"
                     disabled={isLookingUpPostalCode || !state || cities.loading || cities.failed}
                     loading={cities.loading}
+                    virtualized
                     invalid={Boolean(errors.city)}
                     describedBy={cities.failed ? "location-city-status" : errors.city ? "location-city-error" : undefined}
                   />
@@ -207,19 +200,16 @@ export function PropertyAddressFields() {
             ) : null}
           </div>
         </div>
-      </section>
+      </FormSection>
 
-      <section aria-labelledby="public-location-heading" className="border-t border-(--border) pt-6">
-        <div className="flex items-start gap-3">
-          <LuMapPin aria-hidden="true" size={20} className="mt-0.5 shrink-0 text-(--primary-text)" />
-          <div>
-            <h2 id="public-location-heading" className="text-lg font-bold text-(--text-primary)">Localização aproximada</h2>
-            <p className="mt-1 text-sm leading-relaxed text-(--text-secondary)">
-              No anúncio público aparecerão apenas bairro, cidade, UF e os pontos de referência abaixo.
-            </p>
-          </div>
-        </div>
-        <div className="mt-5">
+      <FormSection
+        id="public-location-heading"
+        icon={LuMapPin}
+        tone="champagne"
+        title="Localização aproximada"
+        description="No anúncio público aparecerão apenas bairro, cidade, UF e os pontos de referência."
+      >
+        <div>
           <label htmlFor="location-reference-points" className={labelClassName}>
             Pontos de referência (um por linha)<OptionalTag />
           </label>
@@ -234,7 +224,7 @@ export function PropertyAddressFields() {
           />
           <FieldError id="location-reference-points-error" message={errors.referencePoints?.message} />
         </div>
-      </section>
+      </FormSection>
     </>
   );
 }

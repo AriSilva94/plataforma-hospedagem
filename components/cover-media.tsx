@@ -1,8 +1,8 @@
 import Image from "next/image";
-import type { MediaKind } from "@/lib/properties";
+import { MediaKind } from "@/lib/properties";
 
 export function CoverMedia({ url, type, alt = "", sizes, className = "" }: { url: string; type: MediaKind | null; alt?: string; sizes: string; className?: string }) {
-  if (type === "VIDEO") {
+  if (type === MediaKind.VIDEO) {
     return (
       <video src={url} autoPlay muted loop playsInline preload="auto" aria-hidden="true" className={`absolute inset-0 size-full object-cover ${className}`} />
     );

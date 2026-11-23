@@ -6,6 +6,7 @@ import type { IconType } from "react-icons";
 import {
   LuArrowDown,
   LuArrowLeft,
+  LuBath,
   LuBedDouble,
   LuCalendarCheck,
   LuChevronRight,
@@ -30,6 +31,7 @@ import { propertyTypeColorClassNames, propertyTypeIcons } from "@/components/pro
 import { OwnerPreviewBanner, PublicListingAside, PublicPropertyLoadNotice } from "@/components/public-property-parts";
 import { RoomRow, RoomStatusLegend } from "@/components/room-row";
 import { ScrollRow } from "@/components/scroll-row";
+import { SharedAreaPhotos } from "@/components/shared-area-photos";
 import { SiteHeader } from "@/components/site-header";
 import { iconOf, propertyFeatureIcons, sharedAreaTypeIcons } from "@/lib/amenity-icons";
 import { getCurrentUser } from "@/lib/current-user";
@@ -44,6 +46,7 @@ import {
   publicPropertyDetailSchema,
   sharedAreaTypeLabels,
   smokingPolicyLabels,
+  MediaKind,
 } from "@/lib/properties";
 import { getFavoriteRoomIds } from "@/lib/room-listings";
 import { getApiData } from "@/lib/server-api";
@@ -110,7 +113,7 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
     id: item.id,
     url: item.url,
     type: item.type,
-    alt: `${item.type === "VIDEO" ? "Vídeo" : "Foto"} ${index === 0 ? "principal" : index + 1} de ${property.title}`,
+    alt: `${item.type === MediaKind.VIDEO ? "Vídeo" : "Foto"} ${index === 0 ? "principal" : index + 1} de ${property.title}`,
   }));
   const cleaning = cleaningSummary(property.hasCleaner, property.cleaningFrequency);
   const lowestPrice = property.rooms.length > 0 ? Math.min(...property.rooms.map((room) => room.priceCents)) : undefined;
@@ -204,7 +207,7 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
     },
   ];
 
-  if (property.features.length > 0 || property.sharedAreas.length > 0) {
+  if (property.features.length > 0 || property.sharedAreas.length > 0 || property.sharedBathroomCount > 0) {
     tabs.push({
       id: "ambientes",
       label: "Ambientes",
@@ -221,21 +224,36 @@ export default async function PublicPropertyPage({ params, searchParams }: PageP
               />
             </PanelBlock>
           ) : null}
-          {property.sharedAreas.length > 0 ? (
+          {property.sharedAreas.length > 0 || property.sharedBathroomCount > 0 ? (
             <PanelBlock icon={LuSofa} title="Áreas compartilhadas">
               <ul className="grid gap-3 sm:grid-cols-2">
                 {property.sharedAreas.map((area, index) => {
                   const Icon = sharedAreaTypeIcons[area.type];
+                  const name = area.label ?? sharedAreaTypeLabels[area.type];
                   return (
                     <li key={`${area.type}-${index}`} className="flex items-start gap-3 rounded-xl border border-(--border) bg-(--surface) p-4">
                       <Icon aria-hidden="true" size={18} className="mt-0.5 shrink-0 text-(--primary-text)" />
-                      <div>
-                        <p className="font-semibold text-(--text-primary)">{area.label ?? sharedAreaTypeLabels[area.type]}</p>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-(--text-primary)">{name}</p>
                         {area.description ? <p className="mt-1">{area.description}</p> : null}
+                        {area.media.length > 0 ? <SharedAreaPhotos areaName={name} media={area.media} /> : null}
                       </div>
                     </li>
                   );
                 })}
+                {property.sharedBathroomCount > 0 ? (
+                  <li className="flex items-start gap-3 rounded-xl border border-(--border) bg-(--surface) p-4">
+                    <LuBath aria-hidden="true" size={18} className="mt-0.5 shrink-0 text-(--primary-text)" />
+                    <div className="min-w-0">
+                      <p className="font-semibold text-(--text-primary)">
+                        {property.sharedBathroomCount} {property.sharedBathroomCount === 1 ? "banheiro compartilhado" : "banheiros compartilhados"}
+                      </p>
+                      {property.sharedBathrooms.some((bathroom) => bathroom.media.length > 0) ? (
+                        <SharedAreaPhotos areaName="Banheiros compartilhados" media={property.sharedBathrooms.flatMap((bathroom) => bathroom.media)} />
+                      ) : null}
+                    </div>
+                  </li>
+                ) : null}
               </ul>
             </PanelBlock>
           ) : null}

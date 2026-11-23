@@ -1,103 +1,75 @@
 "use client";
 
-import { Controller, useFieldArray, useWatch, type Control, type FieldErrors, type UseFormRegister } from "react-hook-form";
-import { LuPlus, LuTrash2 } from "react-icons/lu";
-import { Combobox } from "@/components/combobox";
+import { useController, type Control, type FieldErrors } from "react-hook-form";
+import { LuUsers } from "react-icons/lu";
 import { FieldError } from "@/components/field-error";
-import { fieldClassName, secondaryButtonClassName } from "@/components/owner/styles";
+import { Counter } from "@/components/owner/wizard-controls";
+import { bedTypeIcons } from "@/lib/amenity-icons";
 import type { RoomInput, RoomValues } from "@/lib/owner-forms";
-import { bedTypeLabels, bedTypes } from "@/lib/properties";
+import { bedCapacity, bedTypeLabels, bedTypes, type BedType } from "@/lib/properties";
 
-const MAX_BEDS = 6;
+const MAX_PER_TYPE = 10;
 
 export function RoomBedsFields({
   id,
   control,
-  register,
   errors,
 }: {
   id: string;
   control: Control<RoomInput, unknown, RoomValues>;
-  register: UseFormRegister<RoomInput>;
   errors: FieldErrors<RoomInput>;
 }) {
-  const { fields, append, remove } = useFieldArray({ control, name: "beds" });
-  const beds = useWatch({ control, name: "beds" });
-  const chosen = new Set((beds ?? []).map((bed) => bed?.type));
-  const nextType = bedTypes.find((type) => !chosen.has(type));
-  const arrayError = errors.beds?.root?.message ?? errors.beds?.message;
+  const { field } = useController({ control, name: "beds" });
+  const beds = field.value ?? [];
+  const quantityOf = (type: BedType) => Number(beds.find((bed) => bed.type === type)?.quantity ?? 0);
+  const sleeps = bedTypes.reduce((total, type) => total + quantityOf(type) * bedCapacity[type], 0);
+  const error = errors.beds?.root?.message ?? errors.beds?.message;
+
+  function setQuantity(type: BedType, quantity: number) {
+    field.onChange(
+      bedTypes.flatMap((candidate) => {
+        const next = candidate === type ? quantity : quantityOf(candidate);
+        return next > 0 ? [{ type: candidate, quantity: next }] : [];
+      }),
+    );
+  }
 
   return (
-    <div className="flex flex-col gap-3">
-      {fields.map((field, index) => {
-        const rowId = `${id}-${index}`;
-        const rowErrors = errors.beds?.[index];
-        const options = bedTypes
-          .filter((type) => type === beds?.[index]?.type || !chosen.has(type))
-          .map((type) => ({ value: type, label: bedTypeLabels[type] }));
-        return (
-          <div key={field.id}>
-            <div className="grid grid-cols-[minmax(0,1fr)_6rem_auto] items-end gap-3">
-              <div>
-                <span id={`${rowId}-type-label`} className="sr-only">{`Tipo da cama ${index + 1}`}</span>
-                <Controller
-                  control={control}
-                  name={`beds.${index}.type`}
-                  render={({ field: typeField }) => (
-                    <Combobox
-                      ref={typeField.ref}
-                      id={`${rowId}-type`}
-                      labelId={`${rowId}-type-label`}
-                      value={typeField.value ?? ""}
-                      options={options}
-                      onChange={typeField.onChange}
-                      onBlur={typeField.onBlur}
-                      placeholder="Selecione"
-                      searchLabel="Buscar tipo de cama"
-                      emptyMessage="Nenhum tipo encontrado."
-                      clearable={false}
-                      size="compact"
-                      invalid={Boolean(rowErrors?.type)}
-                      describedBy={rowErrors?.type ? `${rowId}-type-error` : undefined}
-                    />
-                  )}
-                />
+    <div id={id} className="flex flex-col gap-3">
+      <ul className="grid border-t border-(--border) sm:grid-cols-2 sm:gap-x-8">
+        {bedTypes.map((type) => {
+          const Icon = bedTypeIcons[type];
+          const quantity = quantityOf(type);
+          return (
+            <li key={type} className="flex items-center gap-3 border-b border-(--border) py-1.5">
+              <span
+                aria-hidden="true"
+                className={`flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors ${
+                  quantity > 0 ? "bg-(--lavender-soft) text-(--lavender)" : "bg-(--surface) text-(--text-secondary)"
+                }`}
+              >
+                <Icon size={17} />
+              </span>
+              <div className="flex min-w-0 flex-1 flex-col">
+                <span className="text-sm font-semibold text-(--text-primary)">{bedTypeLabels[type]}</span>
+                <span className="text-xs text-(--text-secondary)">{bedCapacity[type] > 1 ? `${bedCapacity[type]} pessoas` : "1 pessoa"}</span>
               </div>
-              <div>
-                <label htmlFor={`${rowId}-quantity`} className="sr-only">{`Quantidade da cama ${index + 1}`}</label>
-                <input
-                  id={`${rowId}-quantity`}
-                  type="number"
-                  min={1}
-                  max={10}
-                  inputMode="numeric"
-                  {...register(`beds.${index}.quantity`, { valueAsNumber: true })}
-                  aria-invalid={rowErrors?.quantity ? "true" : undefined}
-                  aria-describedby={rowErrors?.quantity ? `${rowId}-quantity-error` : undefined}
-                  className={fieldClassName}
-                />
-              </div>
-              <button type="button" onClick={() => remove(index)} aria-label={`Remover cama ${index + 1}`} className={secondaryButtonClassName}>
-                <LuTrash2 aria-hidden="true" size={16} />
-              </button>
-            </div>
-            <FieldError id={`${rowId}-type-error`} message={rowErrors?.type?.message} />
-            <FieldError id={`${rowId}-quantity-error`} message={rowErrors?.quantity?.message} />
-          </div>
-        );
-      })}
-      <FieldError id={`${id}-error`} message={arrayError} />
-      <div>
-        <button
-          type="button"
-          disabled={fields.length >= MAX_BEDS || !nextType}
-          onClick={() => nextType && append({ type: nextType, quantity: 1 })}
-          className={secondaryButtonClassName}
-        >
-          <LuPlus aria-hidden="true" size={16} />
-          Adicionar cama
-        </button>
-      </div>
+              <Counter size="compact" label={`Camas ${bedTypeLabels[type]}`} value={quantity} min={0} max={MAX_PER_TYPE} onChange={(next) => setQuantity(type, next)} />
+            </li>
+          );
+        })}
+      </ul>
+      <p aria-live="polite" className="flex items-center gap-2 text-sm text-(--text-secondary)">
+        <LuUsers aria-hidden="true" size={16} className="shrink-0 text-(--lavender)" />
+        {sleeps > 0 ? (
+          <span>
+            Pelas camas, cabem até <strong className="font-bold text-(--text-primary) tabular-nums">{sleeps}</strong> {sleeps > 1 ? "pessoas" : "pessoa"}.
+          </span>
+        ) : (
+          "Nenhuma cama informada."
+        )}
+      </p>
+      <FieldError id={`${id}-error`} message={error} />
     </div>
   );
 }

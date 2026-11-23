@@ -7,7 +7,7 @@ type CompletenessTarget =
 const completenessHints: Record<CompletenessCriterion, { label: string; target: CompletenessTarget }> = {
   ROOM_DESCRIPTION: { label: "Descreva o quarto", target: { scope: "room", section: "dados", fieldId: "room-description" } },
   ROOM_PHOTOS: { label: "Adicione fotos do quarto", target: { scope: "room", section: "fotos" } },
-  ROOM_AMENITIES: { label: "Marque as comodidades do quarto", target: { scope: "room", section: "dados", fieldId: "room-amenities-beds" } },
+  ROOM_AMENITIES: { label: "Marque as comodidades do quarto", target: { scope: "room", section: "dados", fieldId: "room-amenities-linen" } },
   ROOM_ADDITIONAL_INFO: { label: "Inclua informações adicionais do quarto", target: { scope: "room", section: "dados", fieldId: "room-additional-info" } },
   PROPERTY_DESCRIPTION: { label: "Descreva o imóvel", target: { scope: "property", section: "geral" } },
   PROPERTY_PHOTOS: { label: "Adicione fotos do imóvel", target: { scope: "property", section: "midia" } },

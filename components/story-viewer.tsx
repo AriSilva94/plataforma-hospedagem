@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import { LuChevronRight, LuMapPin, LuPause, LuPlay, LuTag, LuUsers, LuX } from "react-icons/lu";
-import { formatCents, formatLocation, genderIdentities, genderIdentityLabels } from "@/lib/properties";
+import { MediaKind, formatCents, formatLocation, genderIdentities, genderIdentityLabels } from "@/lib/properties";
 import type { Story } from "@/lib/stories";
 
 const IMAGE_DURATION_MS = 5000;
@@ -175,7 +175,7 @@ function StorySlides({
       onPointerCancel={cancelHold}
       onPointerLeave={cancelHold}
     >
-      {media.type === "IMAGE" ? (
+      {media.type === MediaKind.IMAGE ? (
         <ImageSlide key={media.id} url={media.url} alt={story.title} paused={paused || mediaFailed} onProgress={setProgress} onDone={next} onError={() => setMediaFailed(true)} />
       ) : (
         <VideoSlide key={media.id} url={media.url} label={story.title} paused={paused} onProgress={setProgress} onDone={next} onError={() => setMediaFailed(true)} />
@@ -194,7 +194,7 @@ function StorySlides({
         </div>
         <div className="flex items-center justify-between gap-3">
           <p className="min-w-0 flex-1 truncate text-sm font-bold">{story.title}</p>
-          {media.type === "VIDEO" ? (
+          {media.type === MediaKind.VIDEO ? (
             <button
               type="button"
               aria-label={manuallyPaused ? "Retomar vídeo" : "Pausar vídeo"}
@@ -308,7 +308,7 @@ function VideoSlide({ url, label, paused, onProgress, onDone, onError }: SlidePr
 }
 
 function MediaPreload({ media }: { media: Story["media"][number] }) {
-  if (media.type === "IMAGE") {
+  if (media.type === MediaKind.IMAGE) {
     return <Image src={media.url} alt="" fill loading="eager" sizes={SLIDE_SIZES} aria-hidden="true" className="hidden" />;
   }
   return <video src={media.url} preload="auto" muted aria-hidden="true" className="hidden" />;

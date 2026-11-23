@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { memo, useEffect, useId, useLayoutEffect, useRef, useState, type DragEvent, type KeyboardEvent, type PointerEvent } from "react";
+import { memo, useEffect, useEffectEvent, useId, useLayoutEffect, useRef, useState, type DragEvent, type KeyboardEvent, type PointerEvent } from "react";
 import { flushSync } from "react-dom";
 import { z } from "@/lib/zod";
 import { LuCheck, LuGripVertical, LuImagePlus, LuImages, LuVideo, LuLoaderCircle, LuPlay, LuStar, LuTrash2 } from "react-icons/lu";
@@ -9,7 +9,7 @@ import { FormFeedback } from "@/components/form-feedback";
 import { ConfirmDialog } from "@/components/owner/confirm-dialog";
 import { secondaryButtonClassName } from "@/components/owner/styles";
 import { ApiRequestError, sendApiRequest, toErrorMessage } from "@/lib/api";
-import { mediaSchema, type Media, type MediaKind } from "@/lib/properties";
+import { MediaKind, mediaSchema, type Media } from "@/lib/properties";
 
 const MB = 1024 * 1024;
 const imageTypes = ["image/jpeg", "image/png", "image/webp"];
@@ -73,7 +73,7 @@ function shiftedIndex(index: number, from: number, to: number): number {
 }
 
 function mediaLabel(item: Media, index: number): string {
-  return item.type === "IMAGE" ? `Foto ${index + 1}` : `Vídeo ${index + 1}`;
+  return item.type === MediaKind.IMAGE ? `Foto ${index + 1}` : `Vídeo ${index + 1}`;
 }
 
 const MediaTile = memo(function MediaTile({
@@ -86,6 +86,7 @@ const MediaTile = memo(function MediaTile({
   canReorder,
   instructionsId,
   actions,
+  compact,
 }: {
   item: Media;
   index: number;
@@ -96,18 +97,15 @@ const MediaTile = memo(function MediaTile({
   canReorder: boolean;
   instructionsId: string;
   actions: TileActions;
+  compact: boolean;
 }) {
   const label = mediaLabel(item, index);
-  const stateClassName = lifted
-    ? "border-dashed border-(--primary) opacity-40"
-    : grabbed
-      ? "border-(--primary) ring-2 ring-(--focus-ring)"
-      : "border-(--border)";
+  const stateClassName = lifted ? "border-dashed border-(--primary) opacity-40" : grabbed ? "border-(--primary) ring-2 ring-(--focus-ring)" : "border-(--border)";
 
   return (
     <li ref={(node) => actions.registerTile(item.id, node)} className={`overflow-hidden rounded-xl border bg-(--surface) ${stateClassName}`}>
       <div className="relative aspect-4/3 bg-(--surface-raised)">
-        {item.type === "IMAGE" ? (
+        {item.type === MediaKind.IMAGE ? (
           <Image src={item.url} alt={label} fill draggable={false} sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw" className="object-cover" />
         ) : (
           <video src={`${item.url}#t=0.1`} controls preload="metadata" aria-label={label} className="size-full object-cover" />
@@ -152,10 +150,10 @@ const MediaTile = memo(function MediaTile({
             className="inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 text-xs font-semibold text-(--primary-text) transition-colors hover:bg-(--primary-soft) focus-visible:outline-2 focus-visible:outline-(--focus-ring) disabled:opacity-60 sm:min-h-9"
           >
             <LuStar aria-hidden="true" size={14} />
-            Tornar capa
+            <span className={compact ? "sr-only" : undefined}>Tornar capa</span>
           </button>
         ) : (
-          <span className="px-2 text-xs text-(--text-secondary)">{item.type === "IMAGE" ? "Foto de capa" : "Vídeo de capa"}</span>
+          <span className={compact ? "sr-only" : "px-2 text-xs text-(--text-secondary)"}>{item.type === MediaKind.IMAGE ? "Foto de capa" : "Vídeo de capa"}</span>
         )}
         <button
           type="button"
@@ -178,6 +176,8 @@ export function MediaGallery({
   allowVideo,
   maxImages,
   maxVideos = 0,
+  compact = false,
+  onChange,
 }: {
   label: string;
   basePath: string;
@@ -185,6 +185,8 @@ export function MediaGallery({
   allowVideo: boolean;
   maxImages: number;
   maxVideos?: number;
+  compact?: boolean;
+  onChange?: (media: Media[]) => void;
 }) {
   const reorderInstructionsId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -201,18 +203,26 @@ export function MediaGallery({
   const [message, setMessage] = useState<string>();
   const [removing, setRemoving] = useState<Media>();
   const [draggingId, setDraggingId] = useState<string>();
+  const notifyChange = useEffectEvent((next: Media[]) => onChange?.(next));
+
+  useEffect(() => {
+    notifyChange(media);
+  }, [media]);
   const [grabbedId, setGrabbedId] = useState<string>();
   const [orderStatus, setOrderStatus] = useState<"saving" | "saved">();
   const [announcement, setAnnouncement] = useState("");
   const [filesOver, setFilesOver] = useState(false);
   const [kind, setKind] = useState<MediaKind>("IMAGE");
-  const accept = (kind === "IMAGE" ? imageTypes : videoTypes).join(",");
+  const accept = (kind === MediaKind.IMAGE ? imageTypes : videoTypes).join(",");
   const coverId = media[0]?.id;
   const visible = media.filter((item) => item.type === kind);
-  const videoCount = media.length - media.filter((item) => item.type === "IMAGE").length;
+  const videoCount = media.length - media.filter((item) => item.type === MediaKind.IMAGE).length;
   const photoCount = media.length - videoCount;
   const disabled = busy || Boolean(progress) || orderStatus === "saving";
   const canReorder = visible.length > 1;
+  const single = kind === MediaKind.IMAGE && maxImages === 1;
+  const singleFull = single && photoCount >= 1;
+  const singlePhoto = single && media.length === 1 && media[0].type === MediaKind.IMAGE ? media[0] : undefined;
   const draggedItem = media.find((item) => item.id === draggingId);
   const stateRef = useRef({ media: visible, all: media, disabled, grabbedId });
 
@@ -245,7 +255,10 @@ export function MediaGallery({
       setMessage(undefined);
       try {
         const response = galleryResponseSchema.parse(
-          await sendApiRequest(`${basePath}/media/order`, { method: "PUT", body: JSON.stringify({ mediaIds: next.map((item) => item.id) }) }),
+          await sendApiRequest(`${basePath}/media/order`, {
+            method: "PUT",
+            body: JSON.stringify({ mediaIds: next.map((item) => item.id) }),
+          }),
         );
         setMedia(response.media);
         setOrderStatus("saved");
@@ -334,7 +347,10 @@ export function MediaGallery({
           offsetY: event.clientY - tileRect.top,
           width: tileRect.width,
           height: tileRect.height,
-          slots: nodes.map((node) => ({ left: node.offsetLeft, top: node.offsetTop })),
+          slots: nodes.map((node) => ({
+            left: node.offsetLeft,
+            top: node.offsetTop,
+          })),
           nodes,
           listPageLeft: listRect.left + window.scrollX,
           listPageTop: listRect.top + window.scrollY,
@@ -362,9 +378,7 @@ export function MediaGallery({
           keyboardSnapshotRef.current = all;
           setOrderStatus(undefined);
           setGrabbedId(id);
-          setAnnouncement(
-            `${mediaLabel(current[index], index)} selecionado. Posição ${index + 1} de ${current.length}. Use as setas para mover, Enter para confirmar ou Esc para cancelar.`,
-          );
+          setAnnouncement(`${mediaLabel(current[index], index)} selecionado. Posição ${index + 1} de ${current.length}. Use as setas para mover, Enter para confirmar ou Esc para cancelar.`);
           return;
         }
 
@@ -414,10 +428,10 @@ export function MediaGallery({
   });
 
   function validate(file: File): string | undefined {
-    if (kind === "IMAGE" && imageTypes.includes(file.type)) {
+    if (kind === MediaKind.IMAGE && imageTypes.includes(file.type)) {
       return file.size > 10 * MB ? `${file.name}: a foto excede 10 MB.` : undefined;
     }
-    if (kind === "VIDEO" && videoTypes.includes(file.type)) {
+    if (kind === MediaKind.VIDEO && videoTypes.includes(file.type)) {
       return file.size > 100 * MB ? `${file.name}: o vídeo excede 100 MB.` : undefined;
     }
     return `${file.name}: formato não suportado nesta aba.`;
@@ -466,7 +480,9 @@ export function MediaGallery({
     setMessage(undefined);
     setOrderStatus(undefined);
     try {
-      await sendApiRequest(`${basePath}/media/${item.id}`, { method: "DELETE" });
+      await sendApiRequest(`${basePath}/media/${item.id}`, {
+        method: "DELETE",
+      });
       setMedia((current) => current.filter((currentItem) => currentItem.id !== item.id));
     } catch (error) {
       setErrors([toErrorMessage(error)]);
@@ -497,16 +513,24 @@ export function MediaGallery({
     if (!disabled) void upload(Array.from(event.dataTransfer.files));
   }
 
-  const removingTitle = removing?.type === "VIDEO" ? "Remover este vídeo?" : "Remover esta foto?";
+  const removingTitle = removing?.type === MediaKind.VIDEO ? "Remover este vídeo?" : "Remover esta foto?";
 
   return (
-    <section aria-label={label} className="flex flex-col gap-5 py-6">
+    <section aria-label={label} className={compact ? "flex flex-col gap-3" : "flex flex-col gap-5 py-6"}>
       {allowVideo ? (
         <div role="tablist" aria-label="Tipo de mídia" className="flex w-full gap-1 rounded-[1.625rem] border border-(--border) bg-(--surface) p-1 sm:w-fit">
           {(
             [
-              { id: "IMAGE", label: `Fotos ${photoCount}/${maxImages}`, icon: LuImages },
-              { id: "VIDEO", label: `Vídeos ${videoCount}/${maxVideos}`, icon: LuVideo },
+              {
+                id: "IMAGE",
+                label: `Fotos ${photoCount}/${maxImages}`,
+                icon: LuImages,
+              },
+              {
+                id: "VIDEO",
+                label: `Vídeos ${videoCount}/${maxVideos}`,
+                icon: LuVideo,
+              },
             ] as const
           ).map((tab) => (
             <button
@@ -527,46 +551,88 @@ export function MediaGallery({
         </div>
       ) : null}
 
-      <div
-        onDragEnter={handleFilesOver}
-        onDragOver={handleFilesOver}
-        onDragLeave={handleFilesLeave}
-        onDrop={handleFilesDrop}
-        className={`flex flex-col gap-4 rounded-2xl border border-dashed p-5 transition-colors sm:flex-row sm:items-center sm:justify-between ${
-          filesOver ? "border-(--primary) bg-(--primary-soft)" : "border-(--border-strong) bg-(--surface)"
-        }`}
-      >
-        <div>
-          <h2 className="font-bold text-(--text-primary)">{kind === "IMAGE" ? label : "Vídeos"}</h2>
-          <p className="mt-1 text-sm leading-relaxed text-(--text-secondary)">
-            <span className="hidden sm:inline">Arraste arquivos para cá ou use o botão. </span>
-            {kind === "IMAGE" ? `JPEG, PNG ou WebP até 10 MB (máx. ${maxImages}).` : `MP4, MOV ou WebM até 100 MB (máx. ${maxVideos}).`}
-          </p>
+      {singlePhoto ? (
+        <div className="flex flex-col overflow-hidden rounded-2xl border border-(--border) bg-(--surface) sm:flex-row sm:items-center sm:gap-4 sm:p-2 sm:pr-3">
+          <div className="relative aspect-video w-full shrink-0 bg-(--surface-raised) sm:aspect-16/10 sm:w-44 sm:overflow-hidden sm:rounded-xl">
+            <Image src={singlePhoto.url} alt={label} fill sizes="(min-width: 640px) 176px, 100vw" className="object-cover" />
+          </div>
+          <div className="flex items-center gap-3 py-2 pr-2 pl-3.5 sm:contents">
+            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <span className="flex items-center gap-1.5 text-sm font-semibold text-(--text-primary)">
+                <LuCheck aria-hidden="true" size={15} className="shrink-0 text-(--success)" />
+                Foto adicionada
+              </span>
+              <span className="text-xs leading-relaxed text-pretty text-(--text-secondary)">
+                Aparece no anúncio.<span className="max-sm:hidden"> Para trocar, remova e envie outra.</span>
+              </span>
+            </div>
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={() => setRemoving(singlePhoto)}
+              className="flex min-h-10 shrink-0 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold text-(--text-secondary) transition-colors hover:bg-(--error-soft) hover:text-(--error) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) disabled:opacity-60"
+            >
+              <LuTrash2 aria-hidden="true" size={16} />
+              Remover
+              <span className="sr-only"> foto</span>
+            </button>
+          </div>
         </div>
-        <label className={`${secondaryButtonClassName} shrink-0 cursor-pointer has-disabled:cursor-not-allowed has-disabled:opacity-60`}>
-          <LuImagePlus aria-hidden="true" size={17} />
-          {progress ? `Enviando ${progress.done}/${progress.total}...` : kind === "IMAGE" ? "Adicionar fotos" : "Adicionar vídeos"}
-          <input
-            ref={inputRef}
-            type="file"
-            multiple
-            accept={accept}
-            disabled={disabled}
-            onChange={(event) => void upload(Array.from(event.target.files ?? []))}
-            className="sr-only"
-          />
-        </label>
-      </div>
+      ) : (
+        <div
+          onDragEnter={handleFilesOver}
+          onDragOver={handleFilesOver}
+          onDragLeave={handleFilesLeave}
+          onDrop={handleFilesDrop}
+          className={`flex rounded-2xl border border-dashed transition-colors ${compact ? "flex-row items-center justify-between gap-3 p-3.5" : "flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between"} ${
+            filesOver ? "border-(--primary) bg-(--primary-soft)" : "border-(--border-strong) bg-(--surface)"
+          }`}
+        >
+          <div>
+            <h2 className={compact ? "sr-only" : "font-bold text-(--text-primary)"}>{kind === MediaKind.IMAGE ? label : "Vídeos"}</h2>
+            <p className={compact ? "text-xs leading-relaxed text-(--text-secondary)" : "mt-1 text-sm leading-relaxed text-(--text-secondary)"}>
+              {singleFull ? (
+                "Para trocar, remova a foto atual e envie outra."
+              ) : single ? (
+                <>
+                  <span className="hidden sm:inline">Arraste a foto para cá ou use o botão. </span>
+                  JPEG, PNG ou WebP até 10 MB.
+                </>
+              ) : (
+                <>
+                  <span className="hidden sm:inline">Arraste arquivos para cá ou use o botão. </span>
+                  {kind === MediaKind.IMAGE ? `JPEG, PNG ou WebP até 10 MB (máx. ${maxImages}).` : `MP4, MOV ou WebM até 100 MB (máx. ${maxVideos}).`}
+                </>
+              )}
+            </p>
+          </div>
+          <label className={`${secondaryButtonClassName} shrink-0 cursor-pointer has-disabled:cursor-not-allowed has-disabled:opacity-60`}>
+            <LuImagePlus aria-hidden="true" size={17} />
+            {progress ? `Enviando ${progress.done}/${progress.total}...` : single ? "Adicionar foto" : kind === MediaKind.IMAGE ? "Adicionar fotos" : "Adicionar vídeos"}
+            <input
+              ref={inputRef}
+              type="file"
+              multiple={!single}
+              accept={accept}
+              disabled={disabled || singleFull}
+              onChange={(event) => void upload(Array.from(event.target.files ?? []))}
+              className="sr-only"
+            />
+          </label>
+        </div>
+      )}
 
       <div aria-live="polite" className="flex flex-col gap-3 empty:hidden">
         {errors.map((error) => (
-          <FormFeedback key={error} tone="error">{error}</FormFeedback>
+          <FormFeedback key={error} tone="error">
+            {error}
+          </FormFeedback>
         ))}
-        {message ? <FormFeedback tone="success">{message}</FormFeedback> : null}
+        {message && !single ? <FormFeedback tone="success">{message}</FormFeedback> : null}
       </div>
 
-      {visible.length === 0 ? (
-        <p className="text-sm text-(--text-secondary)">{kind === "IMAGE" ? "Nenhuma foto enviada ainda." : "Nenhum vídeo enviado ainda."}</p>
+      {singlePhoto || (single && visible.length === 0) ? null : visible.length === 0 ? (
+        <p className="text-sm text-(--text-secondary)">{kind === MediaKind.IMAGE ? "Nenhuma foto enviada ainda." : "Nenhum vídeo enviado ainda."}</p>
       ) : (
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-[13px] text-(--text-secondary)">
@@ -576,7 +642,7 @@ export function MediaGallery({
                 Arraste pelo ícone para reordenar. O primeiro item é a capa, seja foto ou vídeo.
                 <span className="sr-only">No teclado, foque o ícone, pressione Espaço, mova com as setas e confirme com Enter.</span>
               </p>
-            ) : (
+            ) : single ? null : (
               <p>O primeiro item é a capa, seja foto ou vídeo.</p>
             )}
             {orderStatus === "saving" ? (
@@ -592,7 +658,7 @@ export function MediaGallery({
             ) : null}
           </div>
 
-          <ol ref={listRef} className="relative grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          <ol ref={listRef} className={compact ? "relative grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5" : "relative grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"}>
             {visible.map((item, index) => (
               <MediaTile
                 key={item.id}
@@ -605,6 +671,7 @@ export function MediaGallery({
                 canReorder={canReorder}
                 instructionsId={reorderInstructionsId}
                 actions={actions}
+                compact={compact}
               />
             ))}
           </ol>
@@ -621,7 +688,7 @@ export function MediaGallery({
           aria-hidden="true"
           className="pointer-events-none fixed left-0 top-0 z-50 overflow-hidden rounded-xl border border-(--primary) bg-(--surface-raised) shadow-[0_24px_48px_-12px_color-mix(in_srgb,var(--shadow)_65%,transparent)] will-change-transform"
         >
-          {draggedItem.type === "IMAGE" ? (
+          {draggedItem.type === MediaKind.IMAGE ? (
             <Image src={draggedItem.url} alt="" fill draggable={false} sizes="320px" className="object-cover" />
           ) : (
             <div className="flex size-full items-center justify-center text-(--text-primary)">

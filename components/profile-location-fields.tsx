@@ -112,6 +112,7 @@ export function ProfileLocationFields({
                 icon={LuBuilding2}
                 disabled={disabled || !state || loading || failed}
                 loading={loading}
+                virtualized
                 invalid={Boolean(fieldState.error)}
                 describedBy={failed ? "profile-city-status" : fieldState.error ? "profile-city-error" : undefined}
               />

@@ -8,7 +8,7 @@ import { FormFeedback } from "@/components/form-feedback";
 import { StatusBadge } from "@/components/owner/status-badge";
 import { cardClassName, secondaryButtonClassName } from "@/components/owner/styles";
 import { sendApiRequest, toErrorMessage } from "@/lib/api";
-import { mediaSchema, type Media } from "@/lib/properties";
+import { MediaKind, mediaSchema, type Media } from "@/lib/properties";
 import { formatDateTime } from "@/lib/admin";
 import { MAX_STORY_MEDIA, storyStatusLabels, type StoryStatus } from "@/lib/stories";
 
@@ -118,7 +118,7 @@ export function RoomStoryEditor({
       <ul className="grid grid-cols-3 gap-3 sm:max-w-md">
         {media.map((item, index) => (
           <li key={item.id} className="relative aspect-9/16 overflow-hidden rounded-2xl bg-(--surface-raised) ring-1 ring-(--border)">
-            {item.type === "IMAGE" ? (
+            {item.type === MediaKind.IMAGE ? (
               <Image src={item.url} alt={`Mídia ${index + 1} do story`} fill sizes="(min-width: 640px) 140px, 30vw" className="object-cover" />
             ) : (
               <video src={`${item.url}#t=0.1`} muted playsInline preload="metadata" aria-label={`Mídia ${index + 1} do story`} className="size-full object-cover" />

@@ -35,7 +35,8 @@ const ownerProperty = {
   city: null,
   state: null,
   referencePoints: [],
-  sharedAreas: [{ id: "a1", type: "LIVING_ROOM", label: null, description: null }],
+  sharedBathroomCount: 0,
+  sharedAreas: [{ id: "a1", type: "LIVING_ROOM", label: null, description: null, media: [] }],
   media: [],
   rooms: [],
 };
@@ -215,7 +216,7 @@ test.beforeEach(async ({ context }) => {
 
 async function fillRequiredAddress(page: Page) {
   await page.getByRole("textbox", { name: "CEP" }).pressSequentially("01310100");
-  await expect(page.getByRole("textbox", { name: "Rua / avenida" })).toHaveValue("Avenida Paulista");
+  await expect(page.getByText("Avenida Paulista", { exact: true })).toBeVisible();
   await page.getByRole("textbox", { name: "Número" }).fill("1000");
 }
 
@@ -525,7 +526,7 @@ test("exige dados pessoais completos antes de cadastrar um imóvel", async ({ pa
   user = { ...user, state: "PE" };
   await page.reload();
 
-  await expect(page.getByRole("heading", { name: "Novo imóvel" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Vamos colocar seu imóvel no ar." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Complete seus dados pessoais" })).toHaveCount(0);
 });
 
@@ -645,54 +646,34 @@ test("filtra usuários da administração pelos seletores com busca", async ({ p
   await expect(page.getByRole("button", { name: /^Situação/ })).toContainText("Todos");
 });
 
-test("cadastra imóvel escolhendo o tipo no seletor com busca", async ({ page }) => {
-  user = { ...user, ...completePersonalData, roles: ["OWNER"] };
-  await page.goto("/meus-imoveis/novo");
-  await page.getByRole("textbox", { name: "Título do anúncio" }).fill("Casa Central");
-  await page.getByRole("textbox", { name: /^Descrição do imóvel/ }).fill("Casa ampla perto do centro.");
-  await page.getByRole("button", { name: /^Salvar/ }).click();
-  await expect(page.getByText("Selecione o tipo do imóvel.")).toBeVisible();
-  expect(ownerRequests).toEqual([]);
+for (const [label, type] of [
+  ["Casa", "HOUSE"],
+  ["Apartamento", "APARTMENT"],
+  ["Motel", "MOTEL"],
+] as const) {
+  test(`cadastra ${label.toLowerCase()} pelo fluxo guiado`, async ({ page }) => {
+    user = { ...user, ...completePersonalData, roles: ["OWNER"] };
+    await page.goto("/meus-imoveis/novo");
+    await page.getByRole("button", { name: "Começar" }).first().click();
 
-  await page.getByRole("button", { name: /^Tipo do imóvel/ }).click();
-  await page.getByRole("option", { name: "Casa" }).click();
-  await fillRequiredAddress(page);
-  await page.getByRole("button", { name: /^Salvar/ }).click();
+    await page.getByRole("button", { name: "Continuar" }).first().click();
+    await expect(page.getByText("Informe um CEP com 8 dígitos.")).toBeVisible();
+    await fillRequiredAddress(page);
+    await page.getByRole("button", { name: "Continuar" }).first().click();
 
-  await expect.poll(() => ownerRequests.length).toBe(1);
-  expect(ownerRequests[0]).toMatchObject({ method: "POST", url: "/owner/properties", body: { title: "Casa Central", type: "HOUSE" } });
-});
+    await page.getByRole("radio", { name: label }).click();
+    await page.getByRole("textbox", { name: "Nome do imóvel" }).fill(`${label} Central`);
+    expect(ownerRequests).toEqual([]);
+    await page.keyboard.press("Enter");
 
-test("cadastra motel como tipo do imóvel", async ({ page }) => {
-  user = { ...user, ...completePersonalData, roles: ["OWNER"] };
-  await page.goto("/meus-imoveis/novo");
-  await page.getByRole("textbox", { name: "Título do anúncio" }).fill("Motel Central");
-  await page.getByRole("textbox", { name: /^Descrição do imóvel/ }).fill("Suítes com hidromassagem.");
-  await page.getByRole("button", { name: /^Tipo do imóvel/ }).click();
-  await page.getByRole("option", { name: "Motel" }).click();
-  await fillRequiredAddress(page);
-  await page.getByRole("button", { name: /^Salvar/ }).click();
-
-  await expect.poll(() => ownerRequests.length).toBe(1);
-  expect(ownerRequests[0]).toMatchObject({ method: "POST", url: "/owner/properties", body: { title: "Motel Central", type: "MOTEL" } });
-});
-
-test("cadastra apartamento buscando o tipo do imóvel", async ({ page }) => {
-  user = { ...user, ...completePersonalData, roles: ["OWNER"] };
-  await page.goto("/meus-imoveis/novo");
-  await page.getByRole("textbox", { name: "Título do anúncio" }).fill("Apartamento Central");
-  await page.getByRole("textbox", { name: /^Descrição do imóvel/ }).fill("Quartos perto do metrô.");
-  await page.getByRole("button", { name: /^Tipo do imóvel/ }).click();
-  await page.getByRole("combobox", { name: "Buscar tipo" }).fill("apart");
-  await expect(page.getByRole("option")).toHaveText(["Apartamento"]);
-  await page.keyboard.press("Enter");
-  await expect(page.getByRole("button", { name: /^Tipo do imóvel/ })).toHaveAccessibleName("Tipo do imóvel Apartamento");
-  await fillRequiredAddress(page);
-  await page.getByRole("button", { name: /^Salvar/ }).click();
-
-  await expect.poll(() => ownerRequests.length).toBe(1);
-  expect(ownerRequests[0]).toMatchObject({ method: "POST", url: "/owner/properties", body: { title: "Apartamento Central", type: "APARTMENT" } });
-});
+    await expect.poll(() => ownerRequests.length).toBe(1);
+    expect(ownerRequests[0]).toMatchObject({
+      method: "POST",
+      url: "/owner/properties",
+      body: { title: `${label} Central`, type, postalCode: "01310100", street: "Avenida Paulista", number: "1000", city: "São Paulo", state: "SP" },
+    });
+  });
+}
 
 test("salva a UF do imóvel pelo seletor com busca", async ({ page }) => {
   user = { ...user, ...completePersonalData, roles: ["OWNER"] };

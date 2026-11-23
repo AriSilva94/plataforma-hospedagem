@@ -8,6 +8,7 @@ import { LuStar } from "react-icons/lu";
 import { StoryViewer } from "@/components/story-viewer";
 import { sendApiRequest } from "@/lib/api";
 import type { Story } from "@/lib/stories";
+import { MediaKind } from "@/lib/properties";
 
 const actionFocus = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)";
 
@@ -65,7 +66,7 @@ export function HomeStories({ stories }: { stories: Story[] }) {
               >
                 <span className="relative">
                   <span className={`relative block size-18 overflow-hidden rounded-full bg-(--surface-raised) ring-2 ${isViewed(story) ? "ring-(--border-strong)" : "ring-(--primary)"} ring-offset-2 ring-offset-(--background) transition-transform duration-200 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100`}>
-                    {first.type === "IMAGE" ? (
+                    {first.type === MediaKind.IMAGE ? (
                       <Image src={first.url} alt="" fill sizes="72px" className="object-cover" />
                     ) : (
                       <video src={`${first.url}#t=0.1`} muted playsInline preload="metadata" aria-hidden="true" className="size-full object-cover" />
