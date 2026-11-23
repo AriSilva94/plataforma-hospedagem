@@ -106,7 +106,7 @@ function HomeHero({ total }: { total: number }) {
         Encontre o quarto livre sem precisar perguntar.
       </h1>
       <p className="max-w-lg text-pretty text-sm leading-relaxed text-(--white)/85 short:max-sm:text-xs md:text-base">
-        A DOMUS X reúne espaços com quartos e suítes prontos para reserva. Veja o que está disponível, agende e renove em um só lugar.
+        O CliqueQuarto reúne espaços com quartos e suítes prontos para reserva. Veja o que está disponível, agende e renove em um só lugar.
       </p>
     </section>
   );

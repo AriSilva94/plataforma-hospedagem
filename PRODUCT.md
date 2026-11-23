@@ -12,7 +12,7 @@ Hóspedes que procuram estadias flexíveis e proprietários que anunciam quartos
 
 ## Product Purpose
 
-DOMUS X centraliza a descoberta de vagas, consulta de disponibilidade, reserva, pagamento, renovação e comunicação de hospedagens, reduzindo a dependência de mensagens privadas.
+CliqueQuarto centraliza a descoberta de vagas, consulta de disponibilidade, reserva, pagamento, renovação e comunicação de hospedagens, reduzindo a dependência de mensagens privadas.
 
 ## Positioning
 
@@ -31,7 +31,7 @@ Visitantes criam ou acessam uma conta antes de gerenciar seu perfil, anunciar es
 
 ## Brand Commitments
 
-- Nome: DOMUS X.
+- Nome: CliqueQuarto.
 - A identidade usa azul como cor de ação sobre superfícies Slate (Radix Colors) nos temas light e dark e a fonte Plus Jakarta Sans. Paleta em `docs/redesign/` e tokens documentados em `docs/development/coding-standards.md` (§ Cores, na raiz do projeto).
 - A imagem `frontend/public/assets/login-example.jpg` é referência vinculante de composição e atmosfera para o redesign da autenticação, não conteúdo a ser copiado literalmente.
 

@@ -130,11 +130,11 @@ function CheckList({ items }: { items: string[] }) {
 export async function generateMetadata({ params }: PageProps<"/imoveis/[propertyId]/quartos/[roomId]">): Promise<Metadata> {
   const { propertyId, roomId } = await params;
   const result = await getApiData(`/properties/${propertyId}`, publicPropertyDetailSchema);
-  if (result.status !== "ok") return { title: "Quarto não encontrado | DOMUS X" };
+  if (result.status !== "ok") return { title: "Quarto não encontrado | CliqueQuarto" };
   const room = result.data.rooms.find((item) => item.id === roomId);
-  if (!room) return { title: "Quarto não encontrado | DOMUS X" };
+  if (!room) return { title: "Quarto não encontrado | CliqueQuarto" };
   const place = [result.data.city, result.data.state].filter(Boolean).join(" · ");
-  return { title: `${room.title}${place ? ` · ${place}` : ""} | DOMUS X` };
+  return { title: `${room.title}${place ? ` · ${place}` : ""} | CliqueQuarto` };
 }
 
 export default async function PublicRoomPage({ params, searchParams }: PageProps<"/imoveis/[propertyId]/quartos/[roomId]">) {

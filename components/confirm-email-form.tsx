@@ -9,7 +9,7 @@ import { useLinkToken } from "@/lib/link-token";
 import { AuthShell, InvalidLinkShell } from "./auth-shell";
 
 const title = "Confirmar e-mail";
-const description = "Confirme que este e-mail é seu para ativar o acesso à DOMUS X.";
+const description = "Confirme que este e-mail é seu para ativar o acesso ao CliqueQuarto.";
 
 export function ConfirmEmailForm() {
   const router = useRouter();

@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "DOMUS X",
-    short_name: "DOMUS X",
+    name: "CliqueQuarto",
+    short_name: "CliqueQuarto",
     description: "Encontre estadias e gerencie seus anúncios com segurança.",
     lang: "pt-BR",
     start_url: "/",

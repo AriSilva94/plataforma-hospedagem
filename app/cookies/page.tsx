@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalPage } from "@/components/legal-page";
 
-export const metadata: Metadata = { title: "Política de Cookies | DOMUS X" };
+export const metadata: Metadata = { title: "Política de Cookies | CliqueQuarto" };
 
 const cookies = [
   { name: "access_token", purpose: "Mantém você conectado durante a navegação.", duration: "Alguns minutos, renovado automaticamente" },
@@ -21,7 +21,7 @@ export default function CookiesPolicyPage() {
 
       <section>
         <h2>Quais cookies usamos</h2>
-        <p>A DOMUS X usa apenas cookies necessários. Não usamos cookies de publicidade nem de rastreamento.</p>
+        <p>O CliqueQuarto usa apenas cookies necessários. Não usamos cookies de publicidade nem de rastreamento.</p>
         <dl className="mt-4 flex flex-col gap-3">
           {cookies.map((cookie) => (
             <div key={cookie.name} className="rounded-xl border border-(--border) bg-(--surface) p-4 text-sm">

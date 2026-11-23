@@ -10,8 +10,8 @@ import { getApiData } from "@/lib/server-api";
 export async function generateMetadata({ params }: PageProps<"/anfitriao/[ownerProfileId]">): Promise<Metadata> {
   const { ownerProfileId } = await params;
   const result = await getApiData(`/owners/${ownerProfileId}`, publicOwnerProfileSchema);
-  if (result.status !== "ok") return { title: "Anfitrião não encontrado | DOMUS X" };
-  return { title: `${result.data.name} | DOMUS X` };
+  if (result.status !== "ok") return { title: "Anfitrião não encontrado | CliqueQuarto" };
+  return { title: `${result.data.name} | CliqueQuarto` };
 }
 
 export default async function PublicHostProfilePage({ params }: PageProps<"/anfitriao/[ownerProfileId]">) {

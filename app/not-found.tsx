@@ -4,7 +4,7 @@ import { SiteHeader } from "@/components/site-header";
 import { getCurrentUser } from "@/lib/current-user";
 
 export const metadata: Metadata = {
-  title: "Página não encontrada | DOMUS X",
+  title: "Página não encontrada | CliqueQuarto",
 };
 
 const ctaBase =

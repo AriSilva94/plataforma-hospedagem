@@ -13,10 +13,10 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "DOMUS X | Hospedagens com segurança e discrição",
+  title: "CliqueQuarto | Hospedagens com segurança e discrição",
   description: "Encontre estadias e gerencie seus anúncios com segurança.",
-  applicationName: "DOMUS X",
-  appleWebApp: { capable: true, title: "DOMUS X", statusBarStyle: "default" },
+  applicationName: "CliqueQuarto",
+  appleWebApp: { capable: true, title: "CliqueQuarto", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {

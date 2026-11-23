@@ -29,7 +29,7 @@ export function HomeVideoBanner() {
           disableRemotePlayback
           onContextMenu={(event) => event.preventDefault()}
           onError={() => setState("error")}
-          aria-label="Vídeo de apresentação da DOMUS X"
+          aria-label="Vídeo de apresentação do CliqueQuarto"
           className="absolute inset-0 size-full object-cover object-[center_70%]"
         />
       ) : (

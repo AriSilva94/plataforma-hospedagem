@@ -7,7 +7,7 @@ import { favoriteListSchema } from "@/lib/favorites";
 import { loginHref } from "@/lib/return-path";
 import { getApiData } from "@/lib/server-api";
 
-export const metadata: Metadata = { title: "Favoritos | DOMUS X" };
+export const metadata: Metadata = { title: "Favoritos | CliqueQuarto" };
 
 export default async function FavoritesPage() {
   const { user, unavailable } = await getCurrentUser();

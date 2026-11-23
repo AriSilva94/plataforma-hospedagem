@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
 import { getCurrentUser } from "@/lib/current-user";
 
-export const metadata: Metadata = { title: "Contato | DOMUS X" };
+export const metadata: Metadata = { title: "Contato | CliqueQuarto" };
 
 export default async function ContactPage() {
   const { user } = await getCurrentUser();

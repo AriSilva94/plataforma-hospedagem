@@ -71,7 +71,7 @@ export function AuthShell({ title, description, links, children }: AuthShellProp
           </section>
         </section>
         <footer className="auth-footer">
-          <span>© 2026 DOMUS X. Todos os direitos reservados.</span>
+          <span>© 2026 CliqueQuarto. Todos os direitos reservados.</span>
           <span>Seu espaço, do seu jeito.</span>
         </footer>
       </main>

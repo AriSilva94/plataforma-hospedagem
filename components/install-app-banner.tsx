@@ -87,8 +87,8 @@ export function InstallAppBanner() {
     <div className="bg-(--primary) text-(--on-primary)">
       <div className="relative mx-auto flex min-h-10 w-full max-w-360 flex-wrap items-center justify-center gap-x-3 gap-y-1 py-1.5 pr-12 pl-4 md:px-12 lg:px-14">
         <p className="text-center text-[13px] font-semibold md:text-sm">
-          <span className="sm:hidden">Instale o app da DOMUS X</span>
-          <span className="hidden sm:inline">Seu próximo quarto a um toque: instale o app da DOMUS X.</span>
+          <span className="sm:hidden">Instale o app do CliqueQuarto</span>
+          <span className="hidden sm:inline">Seu próximo quarto a um toque: instale o app do CliqueQuarto.</span>
         </p>
         <button
           type="button"
