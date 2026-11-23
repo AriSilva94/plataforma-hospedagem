@@ -4,7 +4,7 @@ import Image from "next/image";
 import { memo, useEffect, useEffectEvent, useId, useLayoutEffect, useRef, useState, type DragEvent, type KeyboardEvent, type PointerEvent } from "react";
 import { flushSync } from "react-dom";
 import { z } from "@/lib/zod";
-import { LuCheck, LuGripVertical, LuImagePlus, LuImages, LuVideo, LuLoaderCircle, LuPlay, LuStar, LuTrash2 } from "react-icons/lu";
+import { LuCheck, LuGripVertical, LuImagePlus, LuImages, LuVideo, LuLoaderCircle, LuPause, LuPlay, LuStar, LuTrash2 } from "react-icons/lu";
 import { FormFeedback } from "@/components/form-feedback";
 import { ConfirmDialog } from "@/components/owner/confirm-dialog";
 import { secondaryButtonClassName } from "@/components/owner/styles";
@@ -72,6 +72,21 @@ function shiftedIndex(index: number, from: number, to: number): number {
   return index;
 }
 
+type GridLayout = { columns: string; aspect: string; sizes: string };
+
+const overlayButtonClassName =
+  "inline-flex h-11 items-center justify-center rounded-xl bg-(--black)/70 text-(--on-primary) transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) disabled:cursor-not-allowed disabled:opacity-60 sm:h-9";
+
+function gridLayout(count: number, compact: boolean): GridLayout {
+  if (count === 1) return { columns: "grid-cols-1", aspect: "aspect-video", sizes: "(min-width: 1024px) 60vw, 100vw" };
+  if (count === 2) return { columns: "grid-cols-2", aspect: "aspect-4/3", sizes: "(min-width: 1024px) 30vw, 50vw" };
+  if (count === 3) return { columns: "grid-cols-3", aspect: "aspect-square sm:aspect-4/3", sizes: "(min-width: 1024px) 20vw, 33vw" };
+  if (count === 4) return { columns: "grid-cols-2 sm:grid-cols-4", aspect: "aspect-4/3", sizes: "(min-width: 640px) 25vw, 50vw" };
+  return compact
+    ? { columns: "grid-cols-3 sm:grid-cols-4 lg:grid-cols-5", aspect: "aspect-square sm:aspect-4/3", sizes: "(min-width: 1024px) 20vw, (min-width: 640px) 25vw, 33vw" }
+    : { columns: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4", aspect: "aspect-4/3", sizes: "(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw" };
+}
+
 function mediaLabel(item: Media, index: number): string {
   return item.type === MediaKind.IMAGE ? `Foto ${index + 1}` : `Vídeo ${index + 1}`;
 }
@@ -86,7 +101,7 @@ const MediaTile = memo(function MediaTile({
   canReorder,
   instructionsId,
   actions,
-  compact,
+  layout,
 }: {
   item: Media;
   index: number;
@@ -97,18 +112,46 @@ const MediaTile = memo(function MediaTile({
   canReorder: boolean;
   instructionsId: string;
   actions: TileActions;
-  compact: boolean;
+  layout: GridLayout;
 }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
   const label = mediaLabel(item, index);
   const stateClassName = lifted ? "border-dashed border-(--primary) opacity-40" : grabbed ? "border-(--primary) ring-2 ring-(--focus-ring)" : "border-(--border)";
 
   return (
-    <li ref={(node) => actions.registerTile(item.id, node)} className={`overflow-hidden rounded-xl border bg-(--surface) ${stateClassName}`}>
-      <div className="relative aspect-4/3 bg-(--surface-raised)">
+    <li ref={(node) => actions.registerTile(item.id, node)} className={`@container overflow-hidden rounded-xl border bg-(--surface) ${stateClassName}`}>
+      <div className={`relative bg-(--surface-raised) ${layout.aspect}`}>
         {item.type === MediaKind.IMAGE ? (
-          <Image src={item.url} alt={label} fill draggable={false} sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw" className="object-cover" />
+          <Image src={item.url} alt={label} fill draggable={false} sizes={layout.sizes} className="object-cover" />
         ) : (
-          <video src={`${item.url}#t=0.1`} controls preload="metadata" aria-label={label} className="size-full object-cover" />
+          <>
+            <video
+              ref={videoRef}
+              src={`${item.url}#t=0.1`}
+              preload="metadata"
+              playsInline
+              aria-label={label}
+              onPlay={() => setPlaying(true)}
+              onPause={() => setPlaying(false)}
+              className="size-full object-cover"
+            />
+            <button
+              type="button"
+              aria-label={playing ? `Pausar ${label}` : `Reproduzir ${label}`}
+              onClick={() => {
+                const video = videoRef.current;
+                if (!video) return;
+                if (video.paused) void video.play();
+                else video.pause();
+              }}
+              className="group/play absolute inset-0 flex items-center justify-center focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--focus-ring)"
+            >
+              <span className={`flex size-10 items-center justify-center rounded-full bg-(--black)/70 text-(--on-primary) transition group-hover/play:bg-(--black)/85 ${playing ? "opacity-0 group-hover/play:opacity-100 group-focus-visible/play:opacity-100" : ""}`}>
+                {playing ? <LuPause aria-hidden="true" size={18} /> : <LuPlay aria-hidden="true" size={18} className="translate-x-px" />}
+              </span>
+            </button>
+          </>
         )}
         <span className={`absolute left-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold text-(--on-primary) ${isCover ? "bg-(--primary)" : "bg-(--black)/70"}`}>
           {isCover ? (
@@ -139,31 +182,25 @@ const MediaTile = memo(function MediaTile({
             <LuGripVertical aria-hidden="true" size={18} />
           </button>
         ) : null}
-      </div>
-      <div className="flex items-center justify-between gap-1.5 p-1.5">
-        {!isCover ? (
-          <button
-            type="button"
-            aria-label={`Tornar capa: ${label}`}
-            disabled={disabled}
-            onClick={() => actions.makeCover(item.id)}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 text-xs font-semibold text-(--primary-text) transition-colors hover:bg-(--primary-soft) focus-visible:outline-2 focus-visible:outline-(--focus-ring) disabled:opacity-60 sm:min-h-9"
-          >
-            <LuStar aria-hidden="true" size={14} />
-            <span className={compact ? "sr-only" : undefined}>Tornar capa</span>
+        <div className="absolute inset-x-2 bottom-2 flex items-end justify-between gap-1.5">
+          {!isCover ? (
+            <button
+              type="button"
+              aria-label={`Tornar capa: ${label}`}
+              disabled={disabled}
+              onClick={() => actions.makeCover(item.id)}
+              className={`${overlayButtonClassName} gap-1.5 px-3 text-xs font-semibold hover:bg-(--primary) @max-[11rem]:w-11 @max-[11rem]:px-0 sm:@max-[11rem]:w-9`}
+            >
+              <LuStar aria-hidden="true" size={14} className="shrink-0" />
+              <span className="@max-[11rem]:sr-only">Tornar capa</span>
+            </button>
+          ) : (
+            <span />
+          )}
+          <button type="button" aria-label={`Remover ${label}`} disabled={disabled} onClick={() => actions.remove(item)} className={`${overlayButtonClassName} w-11 hover:bg-(--error) sm:w-9`}>
+            <LuTrash2 aria-hidden="true" size={16} />
           </button>
-        ) : (
-          <span className={compact ? "sr-only" : "px-2 text-xs text-(--text-secondary)"}>{item.type === MediaKind.IMAGE ? "Foto de capa" : "Vídeo de capa"}</span>
-        )}
-        <button
-          type="button"
-          aria-label={`Remover ${label}`}
-          disabled={disabled}
-          onClick={() => actions.remove(item)}
-          className="flex size-11 items-center justify-center rounded-xl text-(--error) transition-colors hover:bg-(--primary-soft) focus-visible:outline-2 focus-visible:outline-(--focus-ring) disabled:opacity-60 sm:size-9"
-        >
-          <LuTrash2 aria-hidden="true" size={16} />
-        </button>
+        </div>
       </div>
     </li>
   );
@@ -216,6 +253,7 @@ export function MediaGallery({
   const accept = (kind === MediaKind.IMAGE ? imageTypes : videoTypes).join(",");
   const coverId = media[0]?.id;
   const visible = media.filter((item) => item.type === kind);
+  const layout = gridLayout(visible.length, compact);
   const videoCount = media.length - media.filter((item) => item.type === MediaKind.IMAGE).length;
   const photoCount = media.length - videoCount;
   const disabled = busy || Boolean(progress) || orderStatus === "saving";
@@ -658,7 +696,7 @@ export function MediaGallery({
             ) : null}
           </div>
 
-          <ol ref={listRef} className={compact ? "relative grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5" : "relative grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"}>
+          <ol ref={listRef} className={`relative grid ${compact ? "gap-2" : "gap-3"} ${layout.columns}`}>
             {visible.map((item, index) => (
               <MediaTile
                 key={item.id}
@@ -671,7 +709,7 @@ export function MediaGallery({
                 canReorder={canReorder}
                 instructionsId={reorderInstructionsId}
                 actions={actions}
-                compact={compact}
+                layout={layout}
               />
             ))}
           </ol>
